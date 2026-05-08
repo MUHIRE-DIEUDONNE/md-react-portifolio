@@ -37,7 +37,6 @@ const MainLayout = () => {
         transition={{ duration: 0.5 }}
         className="relative" // ensure cursor is above content
       >
-        <CustomCursor /> {/* <-- Add cursor here */}
         <Navbar />
         <main>
           <Hero />
