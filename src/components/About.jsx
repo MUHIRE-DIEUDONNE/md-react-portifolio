@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from 'framer-motion'
 import CountUp from 'react-countup'
 import { useInView } from 'react-intersection-observer'
+import { FiClock, FiTrendingUp, FiZap, FiAward, FiBriefcase, FiCalendar, FiTarget, FiMonitor, FiBook, FiHeadphones, FiActivity, FiMapPin, FiCamera } from 'react-icons/fi'
 const About = () => {
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0)
   const [isMobile, setIsMobile] = useState(false)
@@ -39,45 +40,38 @@ const About = () => {
   }
 
   const stats = [
-    { value: 5, label: 'Years Experience', suffix: '+', icon: '⏳', color: '#6366f1' },
-    { value: 50, label: 'Projects Completed', suffix: '+', icon: '🚀', color: '#8b5cf6' },
-    { value: 30, label: 'Happy Clients', suffix: '+', icon: '😊', color: '#ec4899' },
-    { value: 15, label: 'Awards Won', suffix: '', icon: '🏆', color: '#10b981' }
+    { value: 5, label: 'Years Experience', suffix: '+', icon: <FiClock />, color: '#6366f1' },
+    { value: 50, label: 'Projects Completed', suffix: '+', icon: <FiTrendingUp />, color: '#8b5cf6' },
+    { value: 30, label: 'Happy Clients', suffix: '+', icon: <FiActivity />, color: '#ec4899' },
+    { value: 15, label: 'Awards Won', suffix: '', icon: <FiAward />, color: '#10b981' }
   ]
 
   const timeline = [
-    { year: '2023', event: 'Lead Developer at Creative Agency', icon: '💼' },
-    { year: '2021', event: 'Senior Frontend Developer', icon: '📈' },
-    { year: '2019', event: 'Full Stack Developer', icon: '⚡' },
-    { year: '2017', event: 'Started Coding Journey', icon: '🚀' }
+    { year: '2023', event: 'Lead Developer at Creative Agency', icon: <FiBriefcase /> },
+    { year: '2021', event: 'Senior Frontend Developer', icon: <FiTrendingUp /> },
+    { year: '2019', event: 'Full Stack Developer', icon: <FiZap /> },
+    { year: '2017', event: 'Started Coding Journey', icon: <FiTrendingUp /> }
   ]
 
   const interests = [
-    { emoji: '🎮', name: 'Gaming', image: 'https://img.icons8.com/fluency/48/controller.png' },
-    { emoji: '📚', name: 'Reading', image: 'https://img.icons8.com/fluency/48/book.png' },
-    { emoji: '🎧', name: 'Music', image: 'https://img.icons8.com/fluency/48/headphones.png' },
-    { emoji: '🏋️', name: 'Fitness', image: 'https://img.icons8.com/fluency/48/gym.png' },
-    { emoji: '✈️', name: 'Travel', image: 'https://img.icons8.com/fluency/48/airplane-mode-on.png' },
-    { emoji: '📸', name: 'Photography', image: 'https://img.icons8.com/fluency/48/camera.png' }
+    { emoji: <FiMonitor />, name: 'Gaming', image: 'https://img.icons8.com/fluency/48/controller.png' },
+    { emoji: <FiBook />, name: 'Reading', image: 'https://img.icons8.com/fluency/48/book.png' },
+    { emoji: <FiHeadphones />, name: 'Music', image: 'https://img.icons8.com/fluency/48/headphones.png' },
+    { emoji: <FiActivity />, name: 'Fitness', image: 'https://img.icons8.com/fluency/48/gym.png' },
+    { emoji: <FiMapPin />, name: 'Travel', image: 'https://img.icons8.com/fluency/48/airplane-mode-on.png' },
+    { emoji: <FiCamera />, name: 'Photography', image: 'https://img.icons8.com/fluency/48/camera.png' }
   ]
 
-  const profileImages = [
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=774&q=80',
-    'https://images.unsplash.com/photo-1494790108777-2f3bdbce8c7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=774&q=80',
-    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=774&q=80'
-  ]
-
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % profileImages.length)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [])
+  const profileImage = '/src/images/muhire dieudonne.JPG'
 
   return (
-    <section id="about" className="py-16 sm:py-20 bg-gradient-to-b from-dark to-dark/95">
+    <>
+      <style>{`
+        .cursor-white {
+          cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="white" d="M16 0C7.2 0 0 7.2 0 16s7.2 16 16 16 16-7.2 16-16S24.8 0 16 0zm0 28c-6.6 0-12-5.4-12-12S9.4 4 16 4s12 5.4 12 12-5.4 12-12 12z"/></svg>'), auto;
+        }
+      `}</style>
+      <section id="about" className="py-16 sm:py-20 bg-gradient-to-b from-dark to-dark/95">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -102,35 +96,18 @@ const About = () => {
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className="relative group"
+            className="relative group cursor-white"
           >
-            <div className="relative h-64 sm:h-80 lg:h-96 rounded-2xl overflow-hidden shadow-2xl">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={currentImageIndex}
-                  src={profileImages[currentImageIndex]}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                  initial={{ opacity: 0, scale: 1.1 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.8 }}
-                />
-              </AnimatePresence>
+            <div className="relative h-64 sm:h-80 lg:h-96 rounded-2xl overflow-hidden shadow-2xl bg-dark/50">
+              <motion.img
+                src={profileImage}
+                alt="Muhire Dieudonne"
+                className="w-full h-full object-contain"
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8 }}
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-dark via-transparent to-transparent" />
-              
-              {/* Image navigation dots */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-                {profileImages.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentImageIndex(i)}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      i === currentImageIndex ? 'w-6 bg-primary' : 'bg-light/50'
-                    }`}
-                  />
-                ))}
-              </div>
             </div>
 
             {/* Decorative elements */}
@@ -148,9 +125,9 @@ const About = () => {
             {/* Tabs */}
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
               {[
-                { id: 'bio', label: 'Bio', icon: '👤' },
-                { id: 'timeline', label: 'Timeline', icon: '📅' },
-                { id: 'interests', label: 'Interests', icon: '🎯' }
+                { id: 'bio', label: 'Bio', icon: <FiActivity /> },
+                { id: 'timeline', label: 'Timeline', icon: <FiCalendar /> },
+                { id: 'interests', label: 'Interests', icon: <FiTarget /> }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -178,7 +155,7 @@ const About = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <h3 className="text-2xl sm:text-3xl font-bold mb-4">
-                    Hi, I'm <span className="text-primary">John Doe</span>
+                    Hi, I'm <span className="text-primary">Muhire Dieudonne</span>
                   </h3>
                   <p className="text-sm sm:text-base text-light/80 mb-4 leading-relaxed">
                     A passionate creative developer with 5+ years of experience in building immersive web experiences. 
@@ -297,6 +274,7 @@ const About = () => {
         </div>
       </div>
     </section>
+    </>
   )
 }
 

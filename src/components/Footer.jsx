@@ -1,6 +1,13 @@
 // src/components/Footer.jsx
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { 
+  FiGithub, FiLinkedin, FiTwitter, FiInstagram, FiHome, FiUser, 
+  FiCode, FiFolder, FiBriefcase, FiMail, FiBookOpen, FiMail as FiNewsletter,
+  FiGift, FiChevronUp, FiCheck, FiHeart, FiArrowRight
+} from 'react-icons/fi'
+import { FaReact, FaNodeJs, FaCss3Alt } from 'react-icons/fa'
+import { SiThreedotjs } from 'react-icons/si'
 
 const Footer = () => {
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0)
@@ -41,19 +48,19 @@ const Footer = () => {
   }
 
   const quickLinks = [
-    { name: 'Home', href: '#home', icon: 'https://img.icons8.com/fluency/48/home.png' },
-    { name: 'About', href: '#about', icon: 'https://img.icons8.com/fluency/48/about.png' },
-    { name: 'Skills', href: '#skills', icon: 'https://img.icons8.com/fluency/48/skills.png' },
-    { name: 'Projects', href: '#projects', icon: 'https://img.icons8.com/fluency/48/project.png' },
-    { name: 'Experience', href: '#experience', icon: 'https://img.icons8.com/fluency/48/experience.png' },
-    { name: 'Contact', href: '#contact', icon: 'https://img.icons8.com/fluency/48/contact.png' }
+    { name: 'Home', href: '#home', icon: FiHome },
+    { name: 'About', href: '#about', icon: FiUser },
+    { name: 'Skills', href: '#skills', icon: FiCode },
+    { name: 'Projects', href: '#projects', icon: FiFolder },
+    { name: 'Experience', href: '#experience', icon: FiBriefcase },
+    { name: 'Contact', href: '#contact', icon: FiMail }
   ]
 
   const resources = [
-    { name: 'Blog', href: '#', icon: 'https://img.icons8.com/fluency/48/blog.png' },
-    { name: 'Newsletter', href: '#', icon: 'https://img.icons8.com/fluency/48/newsletter.png' },
-    { name: 'Free Resources', href: '#', icon: 'https://img.icons8.com/fluency/48/gift.png' },
-    { name: 'GitHub', href: '#', icon: 'https://img.icons8.com/fluency/48/github.png' }
+    { name: 'Blog', href: '#', icon: FiBookOpen },
+    { name: 'Newsletter', href: '#', icon: FiNewsletter },
+    { name: 'Free Resources', href: '#', icon: FiGift },
+    { name: 'GitHub', href: '#', icon: FiGithub }
   ]
 
   const legal = [
@@ -63,10 +70,10 @@ const Footer = () => {
   ]
 
   const socialLinks = [
-    { icon: 'https://img.icons8.com/fluency/48/github.png', href: '#', name: 'GitHub' },
-    { icon: 'https://img.icons8.com/fluency/48/linkedin.png', href: '#', name: 'LinkedIn' },
-    { icon: 'https://img.icons8.com/fluency/48/twitter.png', href: '#', name: 'Twitter' },
-    { icon: 'https://img.icons8.com/fluency/48/instagram-new.png', href: '#', name: 'Instagram' }
+    { icon: FiGithub, href: '#', name: 'GitHub', color: '#ffffff' },
+    { icon: FiLinkedin, href: '#', name: 'LinkedIn', color: '#0A66C2' },
+    { icon: FiTwitter, href: '#', name: 'Twitter', color: '#1DA1F2' },
+    { icon: FiInstagram, href: '#', name: 'Instagram', color: '#E4405F' }
   ]
 
   return (
@@ -125,9 +132,15 @@ const Footer = () => {
               whileHover={{ scale: 1.05 }}
               className="inline-block mb-4"
             >
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                {'<DevPortfolio />'}
-              </h3>
+              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary/30">
+                <motion.img
+                  src="/src/images/muhire dieudonne.JPG"
+                  alt="Muhire Dieudonne"
+                  className="w-full h-full object-cover"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
             </motion.div>
             <p className="text-sm text-light/60 mb-4 leading-relaxed">
               Creating immersive digital experiences with cutting-edge web technologies. Let's build something amazing together.
@@ -139,9 +152,10 @@ const Footer = () => {
                   href={social.href}
                   whileHover={{ y: -5, scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center hover:bg-primary/20 transition-colors"
+                  className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center hover:bg-primary/20 transition-colors group"
+                  style={{ '--hover-color': social.color }}
                 >
-                  <img src={social.icon} alt={social.name} className="w-5 h-5" />
+                  <social.icon className="w-5 h-5 text-light/70 group-hover:text-primary transition-colors" />
                 </motion.a>
               ))}
             </div>
@@ -155,10 +169,10 @@ const Footer = () => {
                 <motion.li key={link.name} whileHover={{ x: 5 }}>
                   <a
                     href={link.href}
-                    className="flex items-center gap-2 text-sm text-light/60 hover:text-primary transition-colors"
+                    className="flex items-center gap-2 text-sm text-light/60 hover:text-primary transition-colors group"
                   >
-                    <img src={link.icon} alt={link.name} className="w-4 h-4" />
-                    {link.name}
+                    <link.icon className="w-4 h-4 group-hover:text-primary transition-colors" />
+                    <span>{link.name}</span>
                   </a>
                 </motion.li>
               ))}
@@ -173,10 +187,10 @@ const Footer = () => {
                 <motion.li key={link.name} whileHover={{ x: 5 }}>
                   <a
                     href={link.href}
-                    className="flex items-center gap-2 text-sm text-light/60 hover:text-primary transition-colors"
+                    className="flex items-center gap-2 text-sm text-light/60 hover:text-primary transition-colors group"
                   >
-                    <img src={link.icon} alt={link.name} className="w-4 h-4" />
-                    {link.name}
+                    <link.icon className="w-4 h-4 group-hover:text-primary transition-colors" />
+                    <span>{link.name}</span>
                   </a>
                 </motion.li>
               ))}
@@ -195,16 +209,17 @@ const Footer = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Your email"
-                className="w-full px-4 py-3 bg-dark border border-primary/30 rounded-lg text-sm focus:outline-none focus:border-primary pr-24"
+                className="w-full px-4 py-3 bg-dark border border-primary/30 rounded-lg text-sm focus:outline-none focus:border-primary pr-24 text-light"
                 required
               />
               <motion.button
                 type="submit"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="absolute right-1 top-1 px-4 py-2 bg-primary text-white text-xs rounded-lg hover:bg-primary/80 transition-colors"
+                className="absolute right-1 top-1 px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white text-xs rounded-lg hover:shadow-lg transition-all flex items-center gap-1"
               >
-                {subscribed ? 'Sent!' : 'Subscribe'}
+                {subscribed ? <FiCheck className="w-3 h-3" /> : <FiArrowRight className="w-3 h-3" />}
+                <span>{subscribed ? 'Sent!' : 'Subscribe'}</span>
               </motion.button>
             </form>
             {subscribed && (
@@ -213,7 +228,7 @@ const Footer = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-green-500 text-xs mt-2 flex items-center gap-1"
               >
-                <img src="https://img.icons8.com/fluency/48/checkmark.png" alt="Success" className="w-4 h-4" />
+                <FiCheck className="w-4 h-4" />
                 Thanks for subscribing!
               </motion.p>
             )}
@@ -223,7 +238,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-primary/20 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-light/60">
-            © {new Date().getFullYear()} John Doe. All rights reserved.
+            © {new Date().getFullYear()} Muhire Dieudonne. All rights reserved.
           </p>
           
           <div className="flex gap-6">
@@ -240,10 +255,10 @@ const Footer = () => {
 
           <p className="text-xs text-light/60 flex items-center gap-1">
             Built with
-            <img src="https://img.icons8.com/fluency/48/react.png" alt="React" className="w-4 h-4" />
-            <img src="https://img.icons8.com/fluency/48/threejs.png" alt="Three.js" className="w-4 h-4" />
+            <FaReact className="w-4 h-4 text-[#61DAFB]" />
+            <SiThreedotjs className="w-4 h-4 text-[#049EF4]" />
             and
-            <span className="text-primary">❤️</span>
+            <FiHeart className="w-3 h-3 text-primary animate-pulse" />
           </p>
         </div>
       </div>
@@ -255,7 +270,7 @@ const Footer = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-dark/80 backdrop-blur-sm rounded-full border-2 border-primary/30 flex items-center justify-center z-50"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-dark/80 backdrop-blur-sm rounded-full border-2 border-primary/30 flex items-center justify-center z-50 group hover:border-primary/60 transition-all"
       >
         <svg className="absolute w-12 h-12 -rotate-90">
           <circle
@@ -276,16 +291,13 @@ const Footer = () => {
             strokeDasharray={2 * Math.PI * 24}
             strokeDashoffset={2 * Math.PI * 24 * (1 - scrollProgress / 100)}
             strokeLinecap="round"
+            className="transition-all duration-300"
           />
         </svg>
-        <img 
-          src="https://img.icons8.com/fluency/48/up.png" 
-          alt="Back to top"
-          className="w-5 h-5"
-        />
+        <FiChevronUp className="w-5 h-5 text-light group-hover:text-primary transition-colors" />
       </motion.button>
     </footer>
   )
 }
 
-export default Footer
+export default Footer;

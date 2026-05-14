@@ -1,6 +1,7 @@
 // src/components/Projects.jsx
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { FiStar, FiMonitor, FiZap, FiCpu as FiBot } from 'react-icons/fi'
 
 const Projects = () => {
   const [selectedProject, setSelectedProject] = useState(null)
@@ -104,11 +105,11 @@ const Projects = () => {
   ]
 
   const filters = [
-    { id: 'all', label: 'All Projects', icon: '🔮', image: 'https://img.icons8.com/fluency/48/star.png' },
-    { id: 'threejs', label: 'Three.js', icon: '🎮', image: 'https://img.icons8.com/fluency/48/3d.png' },
-    { id: 'animation', label: 'Animation', icon: '✨', image: 'https://img.icons8.com/fluency/48/motion.png' },
-    { id: 'fullstack', label: 'Full Stack', icon: '⚡', image: 'https://img.icons8.com/fluency/48/code.png' },
-    { id: 'ai', label: 'AI/ML', icon: '🤖', image: 'https://img.icons8.com/fluency/48/artificial-intelligence.png' }
+    { id: 'all', label: 'All Projects', icon: <FiStar />, image: 'https://img.icons8.com/fluency/48/star.png' },
+    { id: 'threejs', label: 'Three.js', icon: <FiMonitor />, image: 'https://img.icons8.com/fluency/48/3d.png' },
+    { id: 'animation', label: 'Animation', icon: <FiZap />, image: 'https://img.icons8.com/fluency/48/motion.png' },
+    { id: 'fullstack', label: 'Full Stack', icon: <FiZap />, image: 'https://img.icons8.com/fluency/48/code.png' },
+    { id: 'ai', label: 'AI/ML', icon: <FiBot />, image: 'https://img.icons8.com/fluency/48/artificial-intelligence.png' }
   ]
 
   useEffect(() => {

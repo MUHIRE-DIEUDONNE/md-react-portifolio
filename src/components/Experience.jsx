@@ -1,12 +1,28 @@
 // src/components/Experience.jsx
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  FiBriefcase, FiUsers, FiAward, FiCalendar, FiMapPin, 
+  FiExternalLink, FiCode, FiTrendingUp, FiStar, FiTarget,
+  FiCheckCircle, FiClock, FiGlobe, FiSmile
+} from 'react-icons/fi'
 
 const Experience = () => {
   const [expandedId, setExpandedId] = useState(null)
   const [selectedFilter, setSelectedFilter] = useState('all')
+  const [hoveredExp, setHoveredExp] = useState(null)
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0)
   const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+      setIsMobile(window.innerWidth < 768)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const experiences = [
     {
@@ -24,8 +40,8 @@ const Experience = () => {
       technologies: ['React', 'Three.js', 'GSAP', 'TypeScript'],
       type: 'full-time',
       color: '#6366f1',
-      logo: 'https://img.icons8.com/fluency/48/creative-agency.png',
-      image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80'
+      gradient: 'from-indigo-500 to-purple-500',
+      icon: 'https://img.icons8.com/fluency/48/creative-agency.png'
     },
     {
       id: 2,
@@ -42,8 +58,8 @@ const Experience = () => {
       technologies: ['React', 'Framer Motion', 'Redux', 'Node.js'],
       type: 'full-time',
       color: '#8b5cf6',
-      logo: 'https://img.icons8.com/fluency/48/startup.png',
-      image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80'
+      gradient: 'from-purple-500 to-pink-500',
+      icon: 'https://img.icons8.com/fluency/48/startup.png'
     },
     {
       id: 3,
@@ -60,34 +76,75 @@ const Experience = () => {
       technologies: ['JavaScript', 'CSS3', 'GSAP', 'PHP'],
       type: 'full-time',
       color: '#ec4899',
-      logo: 'https://img.icons8.com/fluency/48/design.png',
-      image: 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80'
+      gradient: 'from-pink-500 to-rose-500',
+      icon: 'https://img.icons8.com/fluency/48/design.png'
+    },
+    {
+      id: 4,
+      company: 'Procedural Worlds Lab',
+      position: '3D Graphics Developer',
+      period: '2021 - Present',
+      location: 'Remote (Global)',
+      description: 'Specializing in procedural generation, terrain systems, and interactive 3D worlds.',
+      achievements: [
+        'Developed real-time terrain generation system using Perlin noise',
+        'Created interactive planet rendering with atmospheric effects',
+        'Built procedural world generator with biomes and ecosystems'
+      ],
+      technologies: ['Three.js', 'WebGL', 'GLSL Shaders', 'React'],
+      type: 'freelance',
+      color: '#10b981',
+      gradient: 'from-emerald-500 to-teal-500',
+      icon: 'https://img.icons8.com/fluency/48/globe.png'
+    },
+    {
+      id: 5,
+      company: 'Game Dev Studio',
+      position: 'WebGL Developer',
+      period: '2020 - 2021',
+      location: 'Remote',
+      description: 'Created browser-based 3D games and interactive experiences using WebGL.',
+      achievements: [
+        'Built multiplayer 3D game with real-time physics simulation',
+        'Developed particle system for visual effects and explosions',
+        'Created voxel-based terrain editor with live preview'
+      ],
+      technologies: ['WebGL', 'Three.js', 'TypeScript', 'Socket.io'],
+      type: 'freelance',
+      color: '#f59e0b',
+      gradient: 'from-amber-500 to-orange-500',
+      icon: 'https://img.icons8.com/fluency/48/3d-modeling.png'
     }
   ]
 
   const filters = [
-    { id: 'all', label: 'All Experience', icon: '📋', image: 'https://img.icons8.com/fluency/48/resume.png' },
-    { id: 'full-time', label: 'Full Time', icon: '💼', image: 'https://img.icons8.com/fluency/48/business.png' },
-    { id: 'freelance', label: 'Freelance', icon: '🤝', image: 'https://img.icons8.com/fluency/48/handshake.png' }
+    { id: 'all', label: 'All Experience', icon: FiBriefcase, image: 'https://img.icons8.com/fluency/48/resume.png' },
+    { id: 'full-time', label: 'Full Time', icon: FiTrendingUp, image: 'https://img.icons8.com/fluency/48/business.png' },
+    { id: 'freelance', label: 'Freelance', icon: FiUsers, image: 'https://img.icons8.com/fluency/48/handshake.png' }
   ]
 
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth)
-      setIsMobile(window.innerWidth < 768)
-    }
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  const stats = [
+    { value: '5+', label: 'Years Experience', icon: FiStar, color: '#6366f1' },
+    { value: '25+', label: 'Projects Completed', icon: FiCode, color: '#8b5cf6' },
+    { value: '15+', label: 'Happy Clients', icon: FiSmile, color: '#10b981' },
+    { value: '10+', label: 'Technologies', icon: FiTarget, color: '#f59e0b' }
+  ]
 
   const filteredExperiences = selectedFilter === 'all'
     ? experiences
     : experiences.filter(exp => exp.type === selectedFilter)
 
   return (
-    <section id="experience" className="py-16 sm:py-20 bg-dark">
-      <div className="container mx-auto px-4 sm:px-6">
+    <section id="experience" className="py-16 sm:py-20 bg-gradient-to-b from-dark via-dark/95 to-dark relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -95,188 +152,221 @@ const Experience = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="section-title text-3xl sm:text-4xl md:text-5xl">
-            Work Experience
+          <motion.div
+            initial={{ scale: 0 }}
+            whileInView={{ scale: 1 }}
+            transition={{ type: "spring", delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-4"
+          >
+            <FiBriefcase className="w-4 h-4 text-primary" />
+            <span className="text-sm text-primary">Career Journey</span>
+          </motion.div>
+          
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent mb-4">
+            Professional Experience
           </h2>
-          <p className="text-light/60 mt-4 max-w-2xl mx-auto">
-            My professional journey and career highlights
+          <p className="text-light/60 mt-4 max-w-2xl mx-auto text-lg">
+            Journey through my career in web development, 3D graphics, and interactive experiences
           </p>
         </motion.div>
 
-        {/* Filter Buttons */}
-        <div className="flex justify-center gap-4 mb-12">
-          {filters.map(filter => (
-            <motion.button
-              key={filter.id}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setSelectedFilter(filter.id)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all ${
-                selectedFilter === filter.id
-                  ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg'
-                  : 'bg-dark/50 text-light/70 hover:text-light border border-primary/20'
-              }`}
+        {/* Stats Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12"
+        >
+          {stats.map((stat, index) => (
+            <motion.div
+              key={index}
+              whileHover={{ y: -5, scale: 1.05 }}
+              className="bg-gradient-to-br from-dark/50 to-dark/30 backdrop-blur-sm rounded-xl p-4 text-center border border-primary/20"
             >
-              <img src={filter.image} alt={filter.label} className="w-5 h-5" />
-              <span>{filter.label}</span>
-            </motion.button>
+              <stat.icon className="w-8 h-8 mx-auto mb-2" style={{ color: stat.color }} />
+              <div className="text-2xl font-bold text-primary">{stat.value}</div>
+              <div className="text-xs text-light/60">{stat.label}</div>
+            </motion.div>
           ))}
+        </motion.div>
+
+        {/* Filter Buttons */}
+        <div className="mb-12 overflow-x-auto pb-4">
+          <div className="flex gap-3 min-w-max sm:flex-wrap sm:justify-center">
+            {filters.map((filter) => (
+              <motion.button
+                key={filter.id}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedFilter(filter.id)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all ${
+                  selectedFilter === filter.id
+                    ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg'
+                    : 'bg-dark/50 backdrop-blur-sm text-light/70 hover:text-light border border-primary/20'
+                }`}
+              >
+                <img src={filter.image} alt={filter.label} className="w-5 h-5" />
+                <span>{filter.label}</span>
+              </motion.button>
+            ))}
+          </div>
         </div>
 
-        {/* Timeline */}
+        {/* Experience Timeline */}
         <div className="relative">
-          {/* Timeline Line */}
-          {!isMobile && (
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-primary via-secondary to-accent" />
-          )}
+          {filteredExperiences.map((exp, index) => (
+            <motion.div
+              key={exp.id}
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              onHoverStart={() => setHoveredExp(exp.id)}
+              onHoverEnd={() => setHoveredExp(null)}
+              className="relative mb-8"
+            >
+              {/* Timeline connector */}
+              {index !== filteredExperiences.length - 1 && (
+                <div className="absolute left-8 top-24 bottom-0 w-0.5 bg-gradient-to-b from-primary to-transparent hidden md:block" />
+              )}
 
-          {filteredExperiences.map((exp, index) => {
-            const isEven = index % 2 === 0
-            return (
-              <motion.div
-                key={exp.id}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className={`relative flex flex-col ${!isMobile ? (isEven ? 'items-start' : 'items-end') : ''} mb-12 last:mb-0`}
-              >
-                {/* Timeline Dot */}
-                {!isMobile && (
-                  <div className="absolute left-1/2 transform -translate-x-1/2 w-5 h-5 rounded-full bg-primary z-10">
-                    <div className="absolute inset-0 rounded-full bg-primary animate-ping" />
-                    <img 
-                      src={exp.logo} 
-                      alt={exp.company}
-                      className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-dark rounded-full p-1"
-                    />
-                  </div>
-                )}
-
-                {/* Content Card */}
-                <div className={`w-full ${!isMobile ? 'md:w-5/12' : ''} ${isEven ? 'md:mr-auto' : 'md:ml-auto'}`}>
-                  <motion.div
-                    whileHover={{ y: -5 }}
-                    className="bg-gradient-to-b from-dark/50 to-dark/30 backdrop-blur-sm rounded-2xl overflow-hidden border border-primary/20 hover:border-primary/50 transition-all cursor-pointer"
-                    onClick={() => setExpandedId(expandedId === exp.id ? null : exp.id)}
-                  >
-                    {/* Company Image */}
-                    <div className="relative h-32 sm:h-40">
-                      <img 
-                        src={exp.image} 
-                        alt={exp.company}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-dark to-transparent" />
-                      
-                      {/* Mobile Logo */}
-                      {isMobile && (
-                        <img 
-                          src={exp.logo} 
-                          alt={exp.company}
-                          className="absolute bottom-2 left-4 w-10 h-10 bg-dark/80 rounded-full p-2"
-                        />
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-6">
-                      <div className="flex flex-wrap justify-between items-start gap-3 mb-3">
+              <div className={`relative bg-gradient-to-br from-dark/50 to-dark/30 backdrop-blur-sm rounded-2xl border transition-all duration-300 ${
+                hoveredExp === exp.id ? 'border-primary/50 shadow-xl scale-[1.02]' : 'border-primary/20'
+              }`}>
+                <div className="p-6 lg:p-8">
+                  <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+                    {/* Company Icon & Info */}
+                    <div className="lg:w-1/3">
+                      <div className="flex items-center gap-4 mb-4">
+                        <motion.div
+                          whileHover={{ rotate: 360, scale: 1.1 }}
+                          transition={{ duration: 0.6 }}
+                          className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${exp.gradient} p-3 shadow-lg flex-shrink-0`}
+                        >
+                          <img src={exp.icon} alt={exp.company} className="w-full h-full object-contain" />
+                        </motion.div>
                         <div>
-                          <h3 className="text-xl font-bold" style={{ color: exp.color }}>
-                            {exp.company}
-                          </h3>
-                          <p className="text-base font-semibold text-light">
-                            {exp.position}
-                          </p>
+                          <h3 className="text-xl font-bold text-light">{exp.company}</h3>
+                          <p className="text-primary font-medium">{exp.position}</p>
                         </div>
-                        <span className="px-3 py-1 bg-primary/20 rounded-full text-xs whitespace-nowrap">
-                          {exp.period}
-                        </span>
                       </div>
-
-                      {/* Location */}
-                      <div className="flex items-center gap-2 text-sm text-light/60 mb-3">
-                        <img src="https://img.icons8.com/fluency/48/marker.png" alt="Location" className="w-4 h-4" />
-                        <span>{exp.location}</span>
+                      
+                      <div className="space-y-2 text-sm text-light/60">
+                        <div className="flex items-center gap-2">
+                          <FiCalendar className="w-4 h-4" />
+                          <span>{exp.period}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FiMapPin className="w-4 h-4" />
+                          <span>{exp.location}</span>
+                        </div>
                       </div>
-
-                      <p className="text-sm text-light/80 mb-3">
-                        {exp.description}
-                      </p>
-
-                      {/* Tech Stack Preview */}
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {exp.technologies.slice(0, 3).map((tech, i) => (
-                          <span key={i} className="px-2 py-1 bg-primary/10 rounded-full text-xs">
+                      
+                      {/* Technologies */}
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {exp.technologies.map((tech, i) => (
+                          <motion.span
+                            key={tech}
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: i * 0.05 }}
+                            className="px-3 py-1 text-xs rounded-full border"
+                            style={{
+                              borderColor: exp.color + '40',
+                              color: exp.color,
+                              backgroundColor: exp.color + '10'
+                            }}
+                            whileHover={{ scale: 1.1 }}
+                          >
                             {tech}
-                          </span>
+                          </motion.span>
                         ))}
                       </div>
-
-                      {/* Expand Indicator */}
-                      <div className="flex justify-end">
-                        <motion.div
-                          animate={{ rotate: expandedId === exp.id ? 180 : 0 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <img 
-                            src="https://img.icons8.com/fluency/48/expand-arrow.png" 
-                            alt="Expand"
-                            className="w-5 h-5"
-                          />
-                        </motion.div>
-                      </div>
-
-                      {/* Expanded Details */}
-                      <AnimatePresence>
-                        {expandedId === exp.id && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="overflow-hidden"
-                          >
-                            <div className="pt-4 border-t border-primary/20 mt-4">
-                              <h4 className="text-sm font-semibold mb-3">Key Achievements:</h4>
-                              <ul className="space-y-2 mb-4">
-                                {exp.achievements.map((ach, i) => (
-                                  <li key={i} className="flex items-start gap-2 text-sm">
-                                    <span className="text-primary mt-1">•</span>
-                                    <span className="text-light/80">{ach}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                              
-                              <h4 className="text-sm font-semibold mb-3">Technologies:</h4>
-                              <div className="flex flex-wrap gap-2">
-                                {exp.technologies.map((tech, i) => (
-                                  <span
-                                    key={i}
-                                    className="px-3 py-1 bg-primary/20 rounded-full text-xs"
-                                    style={{ borderColor: exp.color }}
-                                  >
-                                    {tech}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
                     </div>
-                  </motion.div>
+                    
+                    {/* Description & Achievements */}
+                    <div className="lg:w-2/3">
+                      <p className="text-light/80 mb-4 leading-relaxed">
+                        {exp.description}
+                      </p>
+                      
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-light mb-3 flex items-center gap-2">
+                          <FiAward style={{ color: exp.color }} />
+                          Key Achievements
+                        </h4>
+                        <ul className="space-y-2">
+                          {exp.achievements.map((achievement, i) => (
+                            <motion.li
+                              key={i}
+                              initial={{ x: -20, opacity: 0 }}
+                              animate={{ x: 0, opacity: 1 }}
+                              transition={{ delay: i * 0.1 }}
+                              className="flex items-start gap-2 text-sm text-light/70"
+                            >
+                              <FiCheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: exp.color }} />
+                              <span>{achievement}</span>
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      {/* Expand/Collapse Button */}
+                      <motion.button
+                        onClick={() => setExpandedId(expandedId === exp.id ? null : exp.id)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="mt-4 flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-80"
+                        style={{ color: exp.color }}
+                      >
+                        <FiExternalLink className="w-4 h-4" />
+                        {expandedId === exp.id ? 'Show Less' : 'Show More Details'}
+                      </motion.button>
+                    </div>
+                  </div>
+                  
+                  {/* Expanded Content */}
+                  <AnimatePresence>
+                    {expandedId === exp.id && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="mt-6 pt-6 border-t border-primary/20"
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="md:col-span-2">
+                            <h5 className="font-semibold text-light mb-2 flex items-center gap-2">
+                              <FiGlobe className="w-4 h-4 text-primary" />
+                              Project Highlights
+                            </h5>
+                            <p className="text-sm text-light/60 leading-relaxed">
+                              During my tenure at {exp.company}, I successfully delivered multiple high-impact projects 
+                              that significantly improved user engagement and business metrics. My role involved 
+                              collaborating with cross-functional teams, implementing best practices, and mentoring 
+                              junior developers.
+                            </p>
+                          </div>
+                          <div className={`bg-gradient-to-r ${exp.gradient} rounded-xl p-4 text-center`}>
+                            <div className="text-2xl font-bold text-white mb-1">{exp.achievements.length}</div>
+                            <div className="text-xs text-white/80">Key Achievements</div>
+                            <FiClock className="w-6 h-6 mx-auto mt-2 text-white/60" />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              </motion.div>
-            )
-          })}
+              </div>
+            </motion.div>
+          ))}
         </div>
 
         {/* Download Resume Button */}
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
           className="text-center mt-12"
         >
@@ -284,10 +374,16 @@ const Experience = () => {
             href="#"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-full font-semibold shadow-lg"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-full font-semibold shadow-lg shadow-primary/30 hover:shadow-xl transition-all"
           >
-            <img src="https://img.icons8.com/fluency/48/download.png" alt="Download" className="w-5 h-5" />
-            Download Full Resume
+            <FiCode className="w-5 h-5" />
+            <span>Download Full Resume</span>
+            <motion.div
+              animate={{ x: [0, 5, 0] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            >
+              <FiExternalLink className="w-4 h-4" />
+            </motion.div>
           </motion.a>
         </motion.div>
       </div>

@@ -2,6 +2,62 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { useMagneticEffect } from '../hooks/useMagneticEffect'
+import { FiHome, FiUser, FiZap, FiBriefcase, FiTrendingUp, FiMail, FiVolume2, FiVolumeX } from 'react-icons/fi'
+
+// ─── 3D Floating Elements ──────────────────────────────────────────────
+const Floating3DElement = ({ delay, duration, size = 20, color = '#6366f1' }) => (
+  <motion.div
+    initial={{ opacity: 0, rotateY: 0 }}
+    animate={{ 
+      opacity: [0, 1, 0.8, 1],
+      rotateY: [0, 180, 360],
+      scale: [1, 1.2, 1]
+    }}
+    transition={{
+      duration,
+      repeat: Infinity,
+      ease: 'linear',
+      delay
+    }}
+    style={{
+      position: 'absolute',
+      width: size,
+      height: size,
+      borderRadius: '50%',
+      background: `linear-gradient(135deg, ${color}, transparent)`,
+      transform: 'translateZ(50px)',
+      transformStyle: 'preserve-3d',
+      boxShadow: `0 0 20px ${color}40`
+    }}
+  />
+)
+
+// ─── 3D Card Component ───────────────────────────────────────────────
+const Card3D = ({ children, className = '', delay = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, rotateX: -15, y: 30 }}
+    animate={{ opacity: 1, rotateX: 0, y: 0 }}
+    whileHover={{ rotateX: 15, scale: 1.05 }}
+    transition={{
+      delay,
+      duration: 0.6,
+      type: 'spring',
+      stiffness: 100
+    }}
+    className={`relative ${className}`}
+    style={{
+      transformStyle: 'preserve-3d',
+      perspective: '1000px'
+    }}
+  >
+    <div style={{
+      transform: 'translateZ(30px)',
+      backfaceVisibility: 'hidden'
+    }}>
+      {children}
+    </div>
+  </motion.div>
+)
 
 // ----------------------------------------------------------------------
 // Sound hook – defined locally (no import from hooks)
@@ -61,6 +117,7 @@ const Navbar = () => {
   const [scrollPercent, setScrollPercent] = useState(0)
   const [compact, setCompact] = useState(false)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0, activeIndex: -1 })
+  const [isMobile, setIsMobile] = useState(false)
 
   // Magnetic effect refs – we apply them to logo and utility buttons
   const magneticLogo = useMagneticEffect()
@@ -76,12 +133,12 @@ const Navbar = () => {
   const navBlur = useTransform(scrollYProgress, [0, 0.1], [0, 10])
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: '🏠' },
-    { id: 'about', label: 'About', icon: '👤' },
-    { id: 'skills', label: 'Skills', icon: '⚡' },
-    { id: 'projects', label: 'Projects', icon: '💼' },
-    { id: 'experience', label: 'Experience', icon: '📈' },
-    { id: 'contact', label: 'Contact', icon: '📧' }
+    { id: 'home', label: 'Home', icon: <FiHome /> },
+    { id: 'about', label: 'About', icon: <FiUser /> },
+    { id: 'skills', label: 'Skills', icon: <FiZap /> },
+    { id: 'projects', label: 'Projects', icon: <FiBriefcase /> },
+    { id: 'experience', label: 'Experience', icon: <FiTrendingUp /> },
+    { id: 'contact', label: 'Contact', icon: <FiMail /> }
   ]
 
   // Reduced motion preference
@@ -158,6 +215,17 @@ const Navbar = () => {
   }
 
   // Mouse move handler for underline follower
+  // Mouse move handler for 3D effects
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      activeIndex: index
+    })
+    playHover()
+  }
+
   const handleLinkMouseMove = (e, index) => {
     const rect = e.currentTarget.getBoundingClientRect()
     setMousePos({
@@ -181,6 +249,15 @@ const Navbar = () => {
 
   return (
     <>
+      {/* 3D Floating Elements Background */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <Floating3DElement delay={0} duration={8} size={15} color="#6366f1" style={{ top: '10%', left: '5%' }} />
+        <Floating3DElement delay={1} duration={10} size={20} color="#8b5cf6" style={{ top: '20%', right: '10%' }} />
+        <Floating3DElement delay={2} duration={12} size={12} color="#ec4899" style={{ bottom: '30%', left: '15%' }} />
+        <Floating3DElement delay={3} duration={9} size={18} color="#10b981" style={{ top: '50%', right: '20%' }} />
+        <Floating3DElement delay={4} duration={11} size={14} color="#f59e0b" style={{ bottom: '10%', right: '30%' }} />
+      </div>
+
       {/* Main Navbar */}
       <motion.nav
         ref={navRef}
@@ -198,50 +275,82 @@ const Navbar = () => {
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-3 sm:py-4">
-            {/* Logo with magnetic effect */}
-            <motion.div
-              ref={magneticLogo}
-              whileHover={!prefersReducedMotion ? { scale: 1.05 } : {}}
-              whileTap={{ scale: 0.95 }}
-              className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent cursor-pointer"
-              onClick={() => scrollToSection('home')}
-              onMouseEnter={playHover}
-            >
-              {'<DevPortfolio />'}
-            </motion.div>
+            {/* Logo with 3D magnetic effect - Profile Image */}
+            <Card3D delay={0.2} className="cursor-pointer" onClick={() => scrollToSection('home')} onMouseEnter={playHover}>
+              <motion.div
+                ref={magneticLogo}
+                whileHover={!prefersReducedMotion ? { scale: 1.05, rotateZ: 5 } : {}}
+                whileTap={{ scale: 0.95, rotateZ: -5 }}
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden"
+                style={{
+                  transformStyle: 'preserve-3d',
+                  boxShadow: '0 0 20px rgba(99, 102, 241, 0.5)'
+                }}
+              >
+                <motion.img
+                  src="/muhire-dieudonne.JPG"
+                  alt="Muhire Dieudonne"
+                  className="w-full h-full object-cover"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ transform: 'translateZ(10px)' }}
+                />
+              </motion.div>
+            </Card3D>
 
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
               {navItems.map((item, index) => (
                 <div key={item.id} className="relative">
-                  <motion.button
-                    ref={el => (linkRefs.current[index] = el)}
-                    onClick={() => scrollToSection(item.id)}
-                    onMouseMove={(e) => handleLinkMouseMove(e, index)}
-                    onMouseLeave={handleLinkMouseLeave}
-                    className={`relative px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium uppercase tracking-wider rounded-lg group transition-colors ${
-                      activeSection === item.id
-                        ? 'text-primary'
-                        : 'text-light/70 hover:text-light'
-                    }`}
-                    whileHover={!prefersReducedMotion ? { scale: 1.05 } : {}}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <span className="relative z-10 flex items-center gap-1 lg:gap-2">
-                      <span className="text-base lg:text-lg">{item.icon}</span>
-                      <span className="hidden lg:inline">{item.label}</span>
-                    </span>
-                    {activeSection === item.id && (
-                      <motion.div
-                        layoutId="activeSection"
-                        className="absolute inset-0 bg-primary/10 rounded-lg"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
+                  <Card3D delay={0.3 + index * 0.1} className="cursor-pointer">
+                    <motion.button
+                      ref={el => (linkRefs.current[index] = el)}
+                      onClick={() => scrollToSection(item.id)}
+                      onMouseMove={(e) => handleLinkMouseMove(e, index)}
+                      onMouseLeave={handleLinkMouseLeave}
+                      className={`relative px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium uppercase tracking-wider rounded-lg group transition-colors ${
+                        activeSection === item.id
+                          ? 'text-primary'
+                          : 'text-light/70 hover:text-light'
+                      }`}
+                      whileHover={!prefersReducedMotion ? { 
+                        scale: 1.05, 
+                        rotateX: 10,
+                        rotateY: 5,
+                        translateZ: 20
+                      } : {}}
+                      whileTap={{ scale: 0.95, rotateX: -5 }}
+                      style={{
+                        transformStyle: 'preserve-3d',
+                        transform: 'translateZ(10px)'
+                      }}
+                    >
+                      <span className="relative z-10 flex items-center gap-1 lg:gap-2" style={{ transform: 'translateZ(15px)' }}>
+                        <motion.span 
+                          className="text-base lg:text-lg"
+                          whileHover={{ rotateZ: 360 }}
+                          transition={{ duration: 0.6 }}
+                        >
+                          {item.icon}
+                        </motion.span>
+                        <span className="hidden lg:inline">{item.label}</span>
+                      </span>
+                      {activeSection === item.id && (
+                        <motion.div
+                          layoutId="activeSection"
+                          className="absolute inset-0 bg-primary/10 rounded-lg"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ transform: 'translateZ(-5px)' }}
+                        />
+                      )}
+                      <motion.div 
+                        className="absolute inset-0 bg-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" 
+                        style={{ transform: 'translateZ(-10px)' }}
                       />
-                    )}
-                    <div className="absolute inset-0 bg-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </motion.button>
+                    </motion.button>
+                  </Card3D>
 
                   {showUnderline && mousePos.activeIndex === index && (
                     <motion.div
@@ -254,70 +363,137 @@ const Navbar = () => {
                 </div>
               ))}
 
-              {/* Sound toggle with magnetic effect */}
-              <button
-                ref={magneticSound}
-                onClick={toggleSound}
-                onMouseEnter={playHover}
-                className="ml-2 p-2 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
-                aria-label="Toggle sound"
-              >
-                {soundEnabled ? '🔊' : '🔇'}
-              </button>
+              {/* Sound toggle with 3D magnetic effect */}
+              <Card3D delay={0.9}>
+                <motion.button
+                  ref={magneticSound}
+                  onClick={toggleSound}
+                  onMouseEnter={playHover}
+                  className="ml-2 p-2 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
+                  aria-label="Toggle sound"
+                  whileHover={{ 
+                    scale: 1.1, 
+                    rotateZ: 15,
+                    translateZ: 10
+                  }}
+                  whileTap={{ scale: 0.9, rotateZ: -15 }}
+                  style={{
+                    transformStyle: 'preserve-3d',
+                    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)'
+                  }}
+                >
+                  <motion.span
+                    animate={{ rotateY: soundEnabled ? 360 : 0 }}
+                    transition={{ duration: 0.6 }}
+                    style={{ transform: 'translateZ(5px)' }}
+                  >
+                    {soundEnabled ? <FiVolume2 /> : <FiVolumeX />}
+                  </motion.span>
+                </motion.button>
+              </Card3D>
 
-              {/* Theme toggle with magnetic effect */}
-              <button
-                ref={magneticTheme}
-                onClick={() => document.body.classList.toggle('light-theme')}
-                onMouseEnter={playHover}
-                className="ml-2 p-2 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
-                aria-label="Toggle theme"
-              >
-                <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                </svg>
-              </button>
+              {/* Theme toggle with 3D magnetic effect */}
+              <Card3D delay={1.0}>
+                <motion.button
+                  ref={magneticTheme}
+                  onClick={() => document.body.classList.toggle('light-theme')}
+                  onMouseEnter={playHover}
+                  className="ml-2 p-2 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
+                  aria-label="Toggle theme"
+                  whileHover={{ 
+                    scale: 1.1, 
+                    rotateZ: -15,
+                    translateZ: 10
+                  }}
+                  whileTap={{ scale: 0.9, rotateZ: 15 }}
+                  style={{
+                    transformStyle: 'preserve-3d',
+                    boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)'
+                  }}
+                >
+                  <motion.svg 
+                    className="w-4 h-4 lg:w-5 lg:h-5" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                    style={{ transform: 'translateZ(5px)' }}
+                  >
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                  </motion.svg>
+                </motion.button>
+              </Card3D>
             </div>
 
-            {/* Mobile Right Side */}
+            {/* Mobile Right Side with 3D effects */}
             <div className="flex items-center gap-2 md:hidden">
-              <button
-                onClick={toggleSound}
-                className="p-2 bg-primary/10 rounded-full"
-                aria-label="Toggle sound"
-              >
-                {soundEnabled ? '🔊' : '🔇'}
-              </button>
-              <button
-                onClick={() => document.body.classList.toggle('light-theme')}
-                className="p-2 bg-primary/10 rounded-full"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                </svg>
-              </button>
-              <motion.button
-                onClick={() => setIsOpen(!isOpen)}
-                className="relative w-10 h-10 focus:outline-none"
-                animate={isOpen ? 'open' : 'closed'}
-              >
-                <span className="sr-only">Open main menu</span>
-                <motion.span
-                  className="absolute h-0.5 w-6 bg-light rounded-full"
-                  style={{ top: '30%', left: '20%' }}
-                  animate={isOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
-                />
-                <motion.span
-                  className="absolute h-0.5 w-6 bg-light rounded-full"
-                  style={{ top: '50%', left: '20%' }}
-                  animate={isOpen ? { opacity: 0 } : { opacity: 1 }}
-                />
-                <motion.span
-                  className="absolute h-0.5 w-6 bg-light rounded-full"
-                  style={{ top: '70%', left: '20%' }}
-                  animate={isOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
-                />
-              </motion.button>
+              <Card3D delay={0.9}>
+                <motion.button
+                  onClick={toggleSound}
+                  className="p-2 bg-primary/10 rounded-full"
+                  aria-label="Toggle sound"
+                  whileHover={{ scale: 1.1, rotateZ: 15 }}
+                  whileTap={{ scale: 0.9, rotateZ: -15 }}
+                  style={{ transformStyle: 'preserve-3d' }}
+                >
+                  <motion.span
+                    animate={{ rotateY: soundEnabled ? 360 : 0 }}
+                    transition={{ duration: 0.6 }}
+                    style={{ transform: 'translateZ(5px)' }}
+                  >
+                    {soundEnabled ? <FiVolume2 /> : <FiVolumeX />}
+                  </motion.span>
+                </motion.button>
+              </Card3D>
+              <Card3D delay={1.0}>
+                <motion.button
+                  onClick={() => document.body.classList.toggle('light-theme')}
+                  className="p-2 bg-primary/10 rounded-full"
+                  whileHover={{ scale: 1.1, rotateZ: -15 }}
+                  whileTap={{ scale: 0.9, rotateZ: 15 }}
+                  style={{ transformStyle: 'preserve-3d' }}
+                >
+                  <motion.svg 
+                    className="w-4 h-4" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                    style={{ transform: 'translateZ(5px)' }}
+                  >
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                  </motion.svg>
+                </motion.button>
+              </Card3D>
+              <Card3D delay={1.1}>
+                <motion.button
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="relative w-10 h-10 focus:outline-none bg-primary/10 rounded-full"
+                  animate={isOpen ? 'open' : 'closed'}
+                  whileHover={{ scale: 1.1, rotateZ: 180 }}
+                  whileTap={{ scale: 0.9 }}
+                  style={{ transformStyle: 'preserve-3d' }}
+                >
+                  <span className="sr-only">Open main menu</span>
+                  <div style={{ transform: 'translateZ(5px)' }}>
+                    <motion.span
+                      className="absolute h-0.5 w-6 bg-light rounded-full"
+                      style={{ top: '30%', left: '20%' }}
+                      animate={isOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
+                    />
+                    <motion.span
+                      className="absolute h-0.5 w-6 bg-light rounded-full"
+                      style={{ top: '50%', left: '20%' }}
+                      animate={isOpen ? { opacity: 0 } : { opacity: 1 }}
+                    />
+                    <motion.span
+                      className="absolute h-0.5 w-6 bg-light rounded-full"
+                      style={{ top: '70%', left: '20%' }}
+                      animate={isOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
+                    />
+                  </div>
+                </motion.button>
+              </Card3D>
             </div>
           </div>
         </div>
@@ -335,22 +511,40 @@ const Navbar = () => {
               <div className="container mx-auto px-4 py-4">
                 <div className="grid grid-cols-2 gap-2">
                   {navItems.map((item, index) => (
-                    <motion.button
-                      key={item.id}
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: index * 0.05 }}
-                      onClick={() => scrollToSection(item.id)}
-                      onMouseEnter={playHover}
-                      className={`flex flex-col items-center p-4 rounded-xl transition-all ${
-                        activeSection === item.id
-                          ? 'bg-primary/20 text-primary'
-                          : 'bg-dark/50 text-light/70 hover:bg-primary/10'
-                      }`}
-                    >
-                      <span className="text-2xl mb-1">{item.icon}</span>
-                      <span className="text-xs font-medium">{item.label}</span>
-                    </motion.button>
+                    <Card3D key={item.id} delay={0.1 + index * 0.05}>
+                      <motion.button
+                        initial={{ x: -20, opacity: 0, rotateY: -90 }}
+                        animate={{ x: 0, opacity: 1, rotateY: 0 }}
+                        transition={{ delay: index * 0.05, duration: 0.6 }}
+                        onClick={() => scrollToSection(item.id)}
+                        onMouseEnter={playHover}
+                        whileHover={{ 
+                          scale: 1.05, 
+                          rotateX: 10,
+                          translateZ: 15
+                        }}
+                        whileTap={{ scale: 0.95, rotateX: -5 }}
+                        className={`flex flex-col items-center p-4 rounded-xl transition-all ${
+                          activeSection === item.id
+                            ? 'bg-primary/20 text-primary'
+                            : 'bg-dark/50 text-light/70 hover:bg-primary/10'
+                        }`}
+                        style={{
+                          transformStyle: 'preserve-3d',
+                          boxShadow: activeSection === item.id ? '0 8px 25px rgba(99, 102, 241, 0.4)' : '0 4px 15px rgba(0, 0, 0, 0.2)'
+                        }}
+                      >
+                        <motion.span 
+                          className="text-2xl mb-1" 
+                          style={{ transform: 'translateZ(10px)' }}
+                          whileHover={{ rotateZ: 360 }}
+                          transition={{ duration: 0.6 }}
+                        >
+                          {item.icon}
+                        </motion.span>
+                        <span className="text-xs font-medium" style={{ transform: 'translateZ(5px)' }}>{item.label}</span>
+                      </motion.button>
+                    </Card3D>
                   ))}
                 </div>
               </div>
@@ -383,20 +577,38 @@ const Navbar = () => {
             className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-dark/90 backdrop-blur-lg rounded-full px-4 py-2 shadow-lg border border-primary/30"
           >
             <div className="flex space-x-2">
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  onMouseEnter={playHover}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                    activeSection === item.id
-                      ? 'bg-primary text-white'
-                      : 'bg-primary/10 hover:bg-primary/30 text-light/80'
-                  }`}
-                  title={item.label}
-                >
-                  <span className="text-sm">{item.icon}</span>
-                </button>
+              {navItems.map((item, index) => (
+                <Card3D key={item.id} delay={0.1 + index * 0.05}>
+                  <motion.button
+                    onClick={() => scrollToSection(item.id)}
+                    onMouseEnter={playHover}
+                    whileHover={{ 
+                      scale: 1.1, 
+                      rotateZ: 15,
+                      translateZ: 10
+                    }}
+                    whileTap={{ scale: 0.9, rotateZ: -15 }}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      activeSection === item.id
+                        ? 'bg-primary text-white'
+                        : 'bg-primary/10 hover:bg-primary/30 text-light/80'
+                    }`}
+                    title={item.label}
+                    style={{
+                      transformStyle: 'preserve-3d',
+                      boxShadow: activeSection === item.id ? '0 6px 20px rgba(99, 102, 241, 0.5)' : '0 3px 10px rgba(0, 0, 0, 0.3)'
+                    }}
+                  >
+                    <motion.span 
+                      className="text-sm"
+                      style={{ transform: 'translateZ(5px)' }}
+                      whileHover={{ rotateZ: 360 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      {item.icon}
+                    </motion.span>
+                  </motion.button>
+                </Card3D>
               ))}
             </div>
           </motion.div>
