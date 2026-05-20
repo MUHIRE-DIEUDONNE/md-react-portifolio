@@ -3,9 +3,66 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiCode, FiCpu, FiGlobe, FiZap } from 'react-icons/fi'
 
+/* ─────────────────────────────────────────────
+   PREMIUM DARK THEME STYLES
+───────────────────────────────────────────── */
+const PREMIUM_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --ld-bg: #0c0b09;
+    --ld-surface: #131210;
+    --ld-card: rgba(22, 20, 16, 0.95);
+    --ld-border: rgba(255,245,220,0.07);
+    --ld-border-hi: rgba(212,175,85,0.35);
+    --ld-gold: #d4af55;
+    --ld-gold-dim: rgba(212,175,85,0.18);
+    --ld-cream: #f5eed8;
+    --ld-muted: rgba(245,238,216,0.42);
+    --ld-dim: rgba(245,238,216,0.18);
+    --ld-display: 'Playfair Display', Georgia, serif;
+    --ld-body: 'Instrument Sans', system-ui, sans-serif;
+  }
+
+  .ld-root *, .ld-root *::before, .ld-root *::after {
+    box-sizing: border-box; margin: 0; padding: 0;
+  }
+
+  .ld-root {
+    font-family: var(--ld-body);
+    background: var(--ld-bg);
+    color: var(--ld-cream);
+    -webkit-font-smoothing: antialiased;
+    position: relative; overflow: hidden;
+  }
+
+  .ld-root::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    opacity: 1;
+  }
+
+  .ld-root ::-webkit-scrollbar { width: 3px; }
+  .ld-root ::-webkit-scrollbar-track { background: transparent; }
+  .ld-root ::-webkit-scrollbar-thumb { background: var(--ld-border-hi); border-radius: 4px; }
+`
+
 const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
   const [loadingText, setLoadingText] = useState('Initializing...')
   const [progress, setProgress] = useState(0)
+  const [isDarkMode, setIsDarkMode] = useState(true)
+
+  useEffect(() => {
+    const checkTheme = () => {
+      const html = document.documentElement
+      setIsDarkMode(!html.classList.contains('light-mode'))
+    }
+    checkTheme()
+    const observer = new MutationObserver(checkTheme)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     if (!isLoading) return
@@ -38,6 +95,21 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
     return () => clearInterval(interval)
   }, [isLoading, onLoadingComplete])
 
+  const lightModeStyles = `
+    html.light-mode .ld-root {
+      --ld-bg: #ffffff;
+      --ld-surface: #f8fafc;
+      --ld-card: rgba(255, 255, 255, 0.95);
+      --ld-border: rgba(0, 0, 0, 0.1);
+      --ld-border-hi: rgba(99, 102, 241, 0.3);
+      --ld-gold: #6366f1;
+      --ld-gold-dim: rgba(99, 102, 241, 0.1);
+      --ld-cream: #0f172a;
+      --ld-muted: rgba(15, 23, 42, 0.7);
+      --ld-dim: rgba(15, 23, 42, 0.5);
+    }
+  `
+
   return (
     <AnimatePresence>
       {isLoading && (
@@ -46,8 +118,9 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="fixed inset-0 z-50 bg-gradient-to-br from-dark via-dark/95 to-dark flex items-center justify-center overflow-hidden"
+          className="ld-root fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
         >
+          <style>{PREMIUM_STYLES}{lightModeStyles}</style>
           {/* Animated Background Elements */}
           <div className="absolute inset-0 pointer-events-none">
             <motion.div
@@ -162,7 +235,15 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
               transition={{ delay: 0.5, duration: 0.8 }}
               className="mb-8"
             >
-              <h1 className="text-2xl sm:text-3xl font-bold text-light mb-4">
+              <h1 className="text-2xl sm:text-3xl font-bold text-light mb-4 flex items-center gap-3">
+                <img
+                  src="/src/images/muhire dieudonne.JPG"
+                  alt="Muhire Dieudonne"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-primary/50"
+                  onError={(e) => {
+                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 160 160'%3E%3Crect width='160' height='160' fill='%231a1a1a'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%236366f1' font-family='system-ui' font-size='14' font-weight='bold'%3EMD%3C/text%3E%3C/svg%3E"
+                  }}
+                />
                 <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                   Muhire Dieudonne
                 </span>
@@ -199,7 +280,7 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
             >
               {/* Progress Bar */}
               <div className="w-full max-w-md mx-auto">
-                <div className="h-2 bg-dark/50 rounded-full overflow-hidden border border-primary/30">
+                <div className={`h-2 rounded-full overflow-hidden border border-primary/30 ${isDarkMode ? 'bg-dark/50' : 'bg-white/50'}`}>
                   <motion.div
                     className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
                     initial={{ width: 0 }}
@@ -207,7 +288,7 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                   />
                 </div>
-                <p className="text-sm text-light/60 mt-2">{Math.round(progress)}%</p>
+                <p className={`text-sm mt-2 ${isDarkMode ? 'text-light/60' : 'text-dark/60'}`}>{Math.round(progress)}%</p>
               </div>
 
               {/* Loading Text */}

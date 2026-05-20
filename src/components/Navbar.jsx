@@ -2,7 +2,52 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { useMagneticEffect } from '../hooks/useMagneticEffect'
-import { FiHome, FiUser, FiZap, FiBriefcase, FiTrendingUp, FiMail, FiVolume2, FiVolumeX } from 'react-icons/fi'
+import { FiHome, FiUser, FiZap, FiBriefcase, FiTrendingUp, FiMail, FiVolume2, FiVolumeX, FiSun, FiMoon } from 'react-icons/fi'
+
+/* ─────────────────────────────────────────────
+   PREMIUM DARK THEME STYLES
+───────────────────────────────────────────── */
+const PREMIUM_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --nv-bg: #0c0b09;
+    --nv-surface: #131210;
+    --nv-card: rgba(22, 20, 16, 0.95);
+    --nv-border: rgba(255,245,220,0.07);
+    --nv-border-hi: rgba(212,175,85,0.35);
+    --nv-gold: #d4af55;
+    --nv-gold-dim: rgba(212,175,85,0.18);
+    --nv-cream: #f5eed8;
+    --nv-muted: rgba(245,238,216,0.42);
+    --nv-dim: rgba(245,238,216,0.18);
+    --nv-display: 'Playfair Display', Georgia, serif;
+    --nv-body: 'Instrument Sans', system-ui, sans-serif;
+  }
+
+  .nv-root *, .nv-root *::before, .nv-root *::after {
+    box-sizing: border-box; margin: 0; padding: 0;
+  }
+
+  .nv-root {
+    font-family: var(--nv-body);
+    background: var(--nv-bg);
+    color: var(--nv-cream);
+    -webkit-font-smoothing: antialiased;
+    position: relative; overflow: hidden;
+  }
+
+  .nv-root::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    opacity: 1;
+  }
+
+  .nv-root ::-webkit-scrollbar { width: 3px; }
+  .nv-root ::-webkit-scrollbar-track { background: transparent; }
+  .nv-root ::-webkit-scrollbar-thumb { background: var(--nv-border-hi); border-radius: 4px; }
+`
 
 // ─── 3D Floating Elements ──────────────────────────────────────────────
 const Floating3DElement = ({ delay, duration, size = 20, color = '#6366f1' }) => (
@@ -118,6 +163,7 @@ const Navbar = () => {
   const [compact, setCompact] = useState(false)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0, activeIndex: -1 })
   const [isMobile, setIsMobile] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(true)
 
   // Magnetic effect refs – we apply them to logo and utility buttons
   const magneticLogo = useMagneticEffect()
@@ -148,6 +194,14 @@ const Navbar = () => {
     const handler = () => setPrefersReducedMotion(mediaQuery.matches)
     mediaQuery.addEventListener('change', handler)
     return () => mediaQuery.removeEventListener('change', handler)
+  }, [])
+
+  // Initialize theme from localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'dark'
+    const isDark = savedTheme === 'dark'
+    setIsDarkMode(isDark)
+    applyTheme(isDark)
   }, [])
 
   // Resize handler
@@ -245,18 +299,57 @@ const Navbar = () => {
     if (!soundEnabled) playClick()
   }
 
+  const applyTheme = (isDark) => {
+    const htmlElement = document.documentElement
+    if (isDark) {
+      htmlElement.classList.remove('light-mode')
+      htmlElement.classList.add('dark-mode')
+    } else {
+      htmlElement.classList.remove('dark-mode')
+      htmlElement.classList.add('light-mode')
+    }
+    localStorage.setItem('theme', isDark ? 'dark' : 'light')
+  }
+
+  const toggleTheme = () => {
+    setIsDarkMode(prev => {
+      const newValue = !prev
+      applyTheme(newValue)
+      playClick()
+      return newValue
+    })
+  }
+
   const showUnderline = mousePos.activeIndex !== -1 && windowWidth >= 1024
+
+  const lightModeStyles = `
+    html.light-mode .nv-root {
+      --nv-bg: #ffffff;
+      --nv-surface: #f8fafc;
+      --nv-card: rgba(255, 255, 255, 0.95);
+      --nv-border: rgba(0, 0, 0, 0.1);
+      --nv-border-hi: rgba(99, 102, 241, 0.3);
+      --nv-gold: #6366f1;
+      --nv-gold-dim: rgba(99, 102, 241, 0.1);
+      --nv-cream: #0f172a;
+      --nv-muted: rgba(15, 23, 42, 0.7);
+      --nv-dim: rgba(15, 23, 42, 0.5);
+    }
+  `
 
   return (
     <>
-      {/* 3D Floating Elements Background */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <Floating3DElement delay={0} duration={8} size={15} color="#6366f1" style={{ top: '10%', left: '5%' }} />
-        <Floating3DElement delay={1} duration={10} size={20} color="#8b5cf6" style={{ top: '20%', right: '10%' }} />
-        <Floating3DElement delay={2} duration={12} size={12} color="#ec4899" style={{ bottom: '30%', left: '15%' }} />
-        <Floating3DElement delay={3} duration={9} size={18} color="#10b981" style={{ top: '50%', right: '20%' }} />
-        <Floating3DElement delay={4} duration={11} size={14} color="#f59e0b" style={{ bottom: '10%', right: '30%' }} />
-      </div>
+      <style>{PREMIUM_STYLES}{lightModeStyles}</style>
+      {/* 3D Floating Elements Background - Hidden in light mode */}
+      {isDarkMode && (
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <Floating3DElement delay={0} duration={8} size={15} color="#6366f1" style={{ top: '10%', left: '5%' }} />
+          <Floating3DElement delay={1} duration={10} size={20} color="#8b5cf6" style={{ top: '20%', right: '10%' }} />
+          <Floating3DElement delay={2} duration={12} size={12} color="#ec4899" style={{ bottom: '30%', left: '15%' }} />
+          <Floating3DElement delay={3} duration={9} size={18} color="#10b981" style={{ top: '50%', right: '20%' }} />
+          <Floating3DElement delay={4} duration={11} size={14} color="#f59e0b" style={{ bottom: '10%', right: '30%' }} />
+        </div>
+      )}
 
       {/* Main Navbar */}
       <motion.nav
@@ -268,7 +361,7 @@ const Navbar = () => {
         initial={{ y: -100 }}
         animate={{
           y: isVisible ? 0 : -100,
-          backgroundColor: scrolled ? 'rgba(15, 23, 42, 0.8)' : 'transparent'
+          backgroundColor: scrolled ? (isDarkMode ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.8)') : 'transparent'
         }}
         transition={{ duration: prefersReducedMotion ? 0 : 0.5, type: 'spring', stiffness: 100 }}
         className="fixed w-full z-40 transition-all duration-300 shadow-lg shadow-primary/5"
@@ -371,8 +464,8 @@ const Navbar = () => {
                   onMouseEnter={playHover}
                   className="ml-2 p-2 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
                   aria-label="Toggle sound"
-                  whileHover={{ 
-                    scale: 1.1, 
+                  whileHover={{
+                    scale: 1.1,
                     rotateZ: 15,
                     translateZ: 10
                   }}
@@ -387,7 +480,7 @@ const Navbar = () => {
                     transition={{ duration: 0.6 }}
                     style={{ transform: 'translateZ(5px)' }}
                   >
-                    {soundEnabled ? <FiVolume2 /> : <FiVolumeX />}
+                    {soundEnabled ? <FiVolume2 className="w-4 h-4 lg:w-5 lg:h-5 text-light" /> : <FiVolumeX className="w-4 h-4 lg:w-5 lg:h-5 text-light" />}
                   </motion.span>
                 </motion.button>
               </Card3D>
@@ -396,12 +489,12 @@ const Navbar = () => {
               <Card3D delay={1.0}>
                 <motion.button
                   ref={magneticTheme}
-                  onClick={() => document.body.classList.toggle('light-theme')}
+                  onClick={toggleTheme}
                   onMouseEnter={playHover}
                   className="ml-2 p-2 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
                   aria-label="Toggle theme"
-                  whileHover={{ 
-                    scale: 1.1, 
+                  whileHover={{
+                    scale: 1.1,
                     rotateZ: -15,
                     translateZ: 10
                   }}
@@ -411,16 +504,13 @@ const Navbar = () => {
                     boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)'
                   }}
                 >
-                  <motion.svg 
-                    className="w-4 h-4 lg:w-5 lg:h-5" 
-                    fill="currentColor" 
-                    viewBox="0 0 20 20"
+                  <motion.span
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                    style={{ transform: 'translateZ(5px)' }}
+                    transition={{ duration: 0.6 }}
+                    style={{ transform: 'translateZ(5px)', display: 'flex' }}
                   >
-                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                  </motion.svg>
+                    {isDarkMode ? <FiMoon className="w-4 h-4 lg:w-5 lg:h-5 text-light" /> : <FiSun className="w-4 h-4 lg:w-5 lg:h-5 text-light" />}
+                  </motion.span>
                 </motion.button>
               </Card3D>
             </div>
@@ -441,28 +531,26 @@ const Navbar = () => {
                     transition={{ duration: 0.6 }}
                     style={{ transform: 'translateZ(5px)' }}
                   >
-                    {soundEnabled ? <FiVolume2 /> : <FiVolumeX />}
+                    {soundEnabled ? <FiVolume2 className="w-4 h-4 text-light" /> : <FiVolumeX className="w-4 h-4 text-light" />}
                   </motion.span>
                 </motion.button>
               </Card3D>
               <Card3D delay={1.0}>
                 <motion.button
-                  onClick={() => document.body.classList.toggle('light-theme')}
+                  onClick={toggleTheme}
                   className="p-2 bg-primary/10 rounded-full"
+                  aria-label="Toggle theme"
                   whileHover={{ scale: 1.1, rotateZ: -15 }}
                   whileTap={{ scale: 0.9, rotateZ: 15 }}
                   style={{ transformStyle: 'preserve-3d' }}
                 >
-                  <motion.svg 
-                    className="w-4 h-4" 
-                    fill="currentColor" 
-                    viewBox="0 0 20 20"
+                  <motion.span
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                    style={{ transform: 'translateZ(5px)' }}
+                    transition={{ duration: 0.6 }}
+                    style={{ transform: 'translateZ(5px)', display: 'flex' }}
                   >
-                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                  </motion.svg>
+                    {isDarkMode ? <FiMoon className="w-4 h-4 text-light" /> : <FiSun className="w-4 h-4 text-light" />}
+                  </motion.span>
                 </motion.button>
               </Card3D>
               <Card3D delay={1.1}>
@@ -477,17 +565,17 @@ const Navbar = () => {
                   <span className="sr-only">Open main menu</span>
                   <div style={{ transform: 'translateZ(5px)' }}>
                     <motion.span
-                      className="absolute h-0.5 w-6 bg-light rounded-full"
+                      className={`absolute h-0.5 w-6 rounded-full ${isDarkMode ? 'bg-light' : 'bg-dark'}`}
                       style={{ top: '30%', left: '20%' }}
                       animate={isOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
                     />
                     <motion.span
-                      className="absolute h-0.5 w-6 bg-light rounded-full"
+                      className={`absolute h-0.5 w-6 rounded-full ${isDarkMode ? 'bg-light' : 'bg-dark'}`}
                       style={{ top: '50%', left: '20%' }}
                       animate={isOpen ? { opacity: 0 } : { opacity: 1 }}
                     />
                     <motion.span
-                      className="absolute h-0.5 w-6 bg-light rounded-full"
+                      className={`absolute h-0.5 w-6 rounded-full ${isDarkMode ? 'bg-light' : 'bg-dark'}`}
                       style={{ top: '70%', left: '20%' }}
                       animate={isOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
                     />
@@ -506,7 +594,7 @@ const Navbar = () => {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
-              className="md:hidden bg-dark/95 backdrop-blur-lg border-t border-primary/20"
+              className={`md:hidden backdrop-blur-lg border-t border-primary/20 ${isDarkMode ? 'bg-dark/95' : 'bg-white/95'}`}
             >
               <div className="container mx-auto px-4 py-4">
                 <div className="grid grid-cols-2 gap-2">
@@ -591,7 +679,7 @@ const Navbar = () => {
                     className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                       activeSection === item.id
                         ? 'bg-primary text-white'
-                        : 'bg-primary/10 hover:bg-primary/30 text-light/80'
+                        : isDarkMode ? 'bg-primary/10 hover:bg-primary/30 text-light/80' : 'bg-primary/10 hover:bg-primary/30 text-dark/80'
                     }`}
                     title={item.label}
                     style={{

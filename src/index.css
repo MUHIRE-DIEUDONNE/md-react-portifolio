@@ -13,6 +13,14 @@
   html {
     scroll-behavior: smooth;
     cursor: none;
+    background-color: #0f172a;
+    color: #f8fafc;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  html.light-mode {
+    background-color: #ffffff;
+    color: #0f172a;
   }
 /* src/index.css or src/App.css */
 
@@ -121,6 +129,7 @@ textarea,
     overflow-x: hidden;
     background-color: #0f172a;
     color: #f8fafc;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   ::-webkit-scrollbar {
@@ -137,6 +146,107 @@ textarea,
   }
 }
 
+/* Light mode styles */
+html.light-mode {
+  color-scheme: light;
+}
+
+html.light-mode body {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+html.light-mode ::-webkit-scrollbar-track {
+  background: #e2e8f0;
+}
+
+html.light-mode ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6366f1, #8b5cf6);
+}
+
+/* Light mode for sections and components */
+html.light-mode section {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+html.light-mode main {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+html.light-mode #root {
+  background-color: #ffffff;
+}
+
+html.light-mode nav {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
+}
+
+html.light-mode nav * {
+  color: #0f172a !important;
+}
+
+html.light-mode button {
+  color: #0f172a;
+}
+
+html.light-mode nav button {
+  color: #0f172a !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light-mode nav button:hover {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light-mode input,
+html.light-mode textarea,
+html.light-mode select {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border-color: #e2e8f0;
+}
+
+html.light-mode .dark {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+html.light-mode .text-light {
+  color: #0f172a;
+}
+
+html.light-mode nav .text-light,
+html.light-mode nav .text-light\/70 {
+  color: #0f172a !important;
+}
+
+/* Additional light mode optimizations */
+html.light-mode {
+  background: #ffffff;
+}
+
+html.light-mode * {
+  color-scheme: light;
+}
+
+html.light-mode h1,
+html.light-mode h2,
+html.light-mode h3,
+html.light-mode h4,
+html.light-mode h5,
+html.light-mode h6 {
+  color: #0f172a;
+}
+
+html.light-mode p,
+html.light-mode span,
+html.light-mode div {
+  color: inherit;
+}
+
 @layer components {
   .container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
@@ -147,6 +257,12 @@ textarea,
     background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  html.light-mode .section-title {
+    -webkit-text-fill-color: transparent;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
   }
 
   .gradient-bg {

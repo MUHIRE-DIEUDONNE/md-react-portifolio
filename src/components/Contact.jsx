@@ -1,505 +1,524 @@
 // src/components/Contact.jsx
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  FiMail, FiPhone, FiMapPin, FiSend, FiCheck, FiGithub, FiLinkedin, 
-  FiTwitter, FiInstagram, FiDribbble, FiChevronDown, 
-  FiUser, FiFileText, FiMessageCircle, FiAtSign, FiSmile, FiClock,
-  FiAward, FiHeart, FiGlobe, FiCode, FiZap
+import {
+  FiMail, FiPhone, FiMapPin, FiSend, FiCheck,
+  FiGithub, FiLinkedin, FiTwitter, FiInstagram,
+  FiChevronDown, FiUser, FiFileText, FiMessageCircle,
+  FiAtSign, FiArrowUpRight
 } from 'react-icons/fi'
-import { FaWhatsapp, FaDev, FaMedium } from 'react-icons/fa'
+import { FaWhatsapp, FaDev } from 'react-icons/fa'
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  })
-  const [focused, setFocused] = useState(null)
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
+  const [errors, setErrors] = useState({})
   const [submitted, setSubmitted] = useState(false)
-  const [error, setError] = useState('')
-  const [isValid, setIsValid] = useState({})
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0)
-  const [isMobile, setIsMobile] = useState(false)
+  const [globalErr, setGlobalErr] = useState('')
   const [activeFaq, setActiveFaq] = useState(null)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth)
-      setIsMobile(window.innerWidth < 768)
-    }
-    
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY })
-    }
-    
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    window.addEventListener('mousemove', handleMouseMove)
-    
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      window.removeEventListener('mousemove', handleMouseMove)
-    }
-  }, [])
 
   const validateField = (name, value) => {
     switch (name) {
       case 'name':
-        return value.length >= 2 ? '' : 'Name must be at least 2 characters'
+        return value.length >= 2 ? '' : 'At least 2 characters'
       case 'email':
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? '' : 'Invalid email address'
       case 'subject':
-        return value.length >= 3 ? '' : 'Subject must be at least 3 characters'
+        return value.length >= 3 ? '' : 'At least 3 characters'
       case 'message':
-        return value.length >= 10 ? '' : 'Message must be at least 10 characters'
+        return value.length >= 10 ? '' : 'At least 10 characters'
       default:
         return ''
     }
   }
 
-  const handleChange = (e) => {
+  const onChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-    const fieldError = validateField(name, value)
-    setIsValid(prev => ({ ...prev, [name]: !fieldError }))
-    setError('')
+    setForm(prev => ({ ...prev, [name]: value }))
+    const error = validateField(name, value)
+    setErrors(prev => ({ ...prev, [name]: error }))
+    if (globalErr) setGlobalErr('')
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const errors = {}
-    Object.keys(formData).forEach(key => {
-      const fieldError = validateField(key, formData[key])
-      if (fieldError) errors[key] = fieldError
+  const validateForm = () => {
+    const newErrors = {}
+    Object.keys(form).forEach(key => {
+      const error = validateField(key, form[key])
+      if (error) newErrors[key] = error
     })
+    return newErrors
+  }
 
-    if (Object.keys(errors).length > 0) {
-      setError('Please fill all fields correctly')
+  const onSubmit = (e) => {
+    e.preventDefault()
+    const newErrors = validateForm()
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      setGlobalErr('Please fix the errors above.')
       return
     }
-
+    
     setSubmitted(true)
+    // Simulate API call
     setTimeout(() => {
       setSubmitted(false)
-      setFormData({ name: '', email: '', subject: '', message: '' })
-      setIsValid({})
-    }, 3000)
+      setForm({ name: '', email: '', subject: '', message: '' })
+      setErrors({})
+      setGlobalErr('')
+      alert('Message sent successfully! I will get back to you soon.')
+    }, 2000)
   }
 
-  const socialLinks = [
-    { name: 'GitHub', icon: FiGithub, url: 'https://github.com/muhiredieu', color: '#ffffff' },
-    { name: 'LinkedIn', icon: FiLinkedin, url: 'https://linkedin.com/in/muhiredieu', color: '#0077B5' },
-    { name: 'Twitter', icon: FiTwitter, url: 'https://twitter.com/muhiredieu', color: '#1DA1F2' },
-    { name: 'Instagram', icon: FiInstagram, url: 'https://instagram.com/muhiredieu', color: '#E4405F' },
-    { name: 'WhatsApp', icon: FaWhatsapp, url: 'https://wa.me/250798728379', color: '#25D366' },
-    { name: 'Dev.to', icon: FaDev, url: 'https://dev.to/muhiredieu', color: '#0A0A0A' }
+  // Data
+  const CONTACT_INFO = [
+    { Icon: FiMail, label: 'Email', value: 'muhiredieu7@gmail.com', href: 'mailto:muhiredieu7@gmail.com', color: '#7ec8e3' },
+    { Icon: FiPhone, label: 'Phone', value: '+250 798 728 379', href: 'tel:+250798728379', color: '#2ecc9a' },
+    { Icon: FiMapPin, label: 'Location', value: 'Kigali, Rwanda', href: 'https://maps.google.com/?q=Kigali+Rwanda', color: '#e07070' },
   ]
 
-  const contactInfo = [
-    { 
-      icon: FiMail,
-      label: 'Email',
-      value: 'muhiredieu7@gmail.com',
-      link: 'mailto:muhiredieu7@gmail.com',
-      gradient: 'from-blue-500 to-cyan-500'
-    },
-    {
-      icon: FiPhone,
-      label: 'Phone',
-      value: '+250 798 728 379',
-      link: 'tel:+250798728379',
-      gradient: 'from-green-500 to-emerald-500'
-    },
-    {
-      icon: FiMapPin,
-      label: 'Location',
-      value: 'Kigali, Rwanda',
-      link: 'https://maps.google.com/?q=Kigali+Rwanda',
-      gradient: 'from-red-500 to-orange-500'
-    }
+  const SOCIALS = [
+    { Icon: FiGithub, href: 'https://github.com/muhiredieu', label: 'GitHub' },
+    { Icon: FiLinkedin, href: 'https://linkedin.com/in/muhiredieu', label: 'LinkedIn' },
+    { Icon: FiTwitter, href: 'https://twitter.com/muhiredieu', label: 'Twitter' },
+    { Icon: FiInstagram, href: 'https://instagram.com/muhiredieu', label: 'Instagram' },
+    { Icon: FaWhatsapp, href: 'https://wa.me/250798728379', label: 'WhatsApp' },
+    { Icon: FaDev, href: 'https://dev.to/muhiredieu', label: 'Dev.to' },
   ]
 
-  const stats = [
-    { value: '50+', label: 'Projects Completed', icon: FiCode, color: '#6366f1' },
-    { value: '30+', label: 'Happy Clients', icon: FiSmile, color: '#10b981' },
-    { value: '5+', label: 'Years Experience', icon: FiClock, color: '#f59e0b' },
-    { value: '15+', label: 'Technologies', icon: FiZap, color: '#ef4444' }
-  ]
-
-  const faqs = [
-    {
-      question: 'What is your availability?',
-      answer: 'I am currently available for freelance work and full-time opportunities. My typical response time is within 24 hours.'
-    },
-    {
-      question: 'What technologies do you specialize in?',
-      answer: 'I specialize in React, Next.js, Three.js, GSAP, Node.js, and modern frontend development with a focus on animations and 3D experiences.'
-    },
-    {
-      question: 'How do you handle project timelines?',
-      answer: 'I use agile methodology with clear milestones and regular updates. Projects are broken down into sprints for efficient delivery.'
-    },
-    {
-      question: 'What is your pricing structure?',
-      answer: 'I offer flexible pricing options including hourly rates, fixed project pricing, or retainer agreements for ongoing work.'
-    }
+  const FAQS = [
+    { q: 'What is your availability?', a: "Currently open for freelance and full-time roles — I respond within 24 hours." },
+    { q: 'What technologies do you specialise in?', a: "React, Next.js, Three.js, GSAP, Node.js — with a focus on animations and 3D experiences." },
+    { q: 'How do you handle project timelines?', a: "Agile sprints with clear milestones and transparent, regular progress updates." },
+    { q: 'What is your pricing structure?', a: "Flexible: hourly, fixed-project, or retainer — let's find the model that works for you." },
   ]
 
   return (
-    <section id="contact" className="relative py-20 sm:py-28 bg-gradient-to-br from-dark via-dark/95 to-dark overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/10 rounded-full blur-3xl" />
-        
-        {/* Floating particles */}
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-primary/30 rounded-full"
-            initial={{ 
-              x: Math.random() * windowWidth, 
-              y: Math.random() * 1000,
-              opacity: 0
-            }}
-            animate={{ 
-              y: [null, -100, -200],
-              opacity: [0, 1, 0]
-            }}
-            transition={{ 
-              duration: Math.random() * 5 + 3,
-              repeat: Infinity,
-              delay: Math.random() * 5
-            }}
-            style={{ left: `${Math.random() * 100}%` }}
-          />
-        ))}
+    <section id="contact" style={{ 
+      padding: 'clamp(60px, 8vw, 120px) 0',
+      background: '#0c0b09',
+      color: '#f5eed8',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background decorations */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        <div style={{ position: 'absolute', top: '10%', left: '-10%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(212,175,85,0.08) 0%, transparent 70%)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', bottom: '10%', right: '-10%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(46,204,154,0.05) 0%, transparent 70%)', borderRadius: '50%' }} />
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 2 }}>
+        
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          transition={{ duration: 0.6 }}
+          style={{ textAlign: 'center', marginBottom: 'clamp(48px, 6vw, 72px)' }}
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            transition={{ type: "spring", delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-4"
-          >
-            <FiMessageCircle className="w-4 h-4 text-primary" />
-            <span className="text-sm text-primary">Get in Touch</span>
-          </motion.div>
-          
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent mb-4">
-            Let's Work Together
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ width: 40, height: 1, background: '#d4af55' }} />
+            <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#d4af55' }}>
+              Get in Touch
+            </span>
+            <div style={{ width: 40, height: 1, background: '#d4af55' }} />
+          </div>
+          <h2 style={{ 
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontSize: 'clamp(36px, 7vw, 64px)',
+            fontWeight: 900,
+            marginBottom: 16,
+            letterSpacing: '-0.02em'
+          }}>
+            Let's Work <span style={{ color: '#d4af55', fontStyle: 'italic' }}>Together</span>
           </h2>
-          <p className="text-light/60 mt-4 max-w-2xl mx-auto text-lg">
-            Have a project in mind? I'd love to hear about it. Send me a message and let's create something amazing.
+          <p style={{ fontSize: 'clamp(16px, 2vw, 18px)', color: 'rgba(245,238,216,0.6)', maxWidth: 600, margin: '0 auto', lineHeight: 1.6 }}>
+            Have a project in mind? I'd love to hear about it. Send me a message and let's create something extraordinary.
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Contact Form */}
+        {/* Two column layout */}
+        <div style={{ 
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: 48,
+          alignItems: 'start'
+        }}>
+          
+          {/* Left Column - Form */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="relative"
+            transition={{ duration: 0.6 }}
           >
-            {/* Glowing border effect */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-accent rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000" />
-            
-            <div className="relative bg-gradient-to-br from-dark/80 to-dark/60 backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-primary/20 shadow-2xl">
-              <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                <FiSend className="w-6 h-6 text-primary" />
+            <div style={{
+              border: '1px solid rgba(255,245,220,0.1)',
+              borderRadius: 24,
+              padding: 'clamp(24px, 4vw, 40px)',
+              background: 'rgba(22, 20, 16, 0.8)',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <h3 style={{ fontSize: 24, fontWeight: 600, marginBottom: 24, fontFamily: "'Playfair Display', serif" }}>
                 Send a Message
               </h3>
-
-              <form onSubmit={handleSubmit} className="space-y-6">
+              
+              <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 {/* Name Field */}
-                <div className="relative group">
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    onFocus={() => setFocused('name')}
-                    onBlur={() => setFocused(null)}
-                    className={`w-full px-4 py-4 bg-dark/50 border-2 rounded-xl outline-none transition-all text-light ${
-                      isValid.name === false ? 'border-red-500' : 'border-primary/30 focus:border-primary group-hover:border-primary/50'
-                    }`}
-                    required
-                  />
-                  <label
-                    className={`absolute left-4 transition-all px-1 cursor-text ${
-                      focused === 'name' || formData.name
-                        ? '-top-2.5 text-xs bg-dark text-primary'
-                        : 'top-4 text-light/60 group-hover:text-light/80'
-                    }`}
-                  >
-                    Your Name *
-                  </label>
-                  <FiUser className="absolute right-4 top-4 text-light/40" />
+                <div>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      name="name"
+                      value={form.name}
+                      onChange={onChange}
+                      placeholder="Your Name *"
+                      style={{
+                        width: '100%',
+                        padding: '14px 44px 14px 16px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: `1px solid ${errors.name ? '#e07070' : 'rgba(255,245,220,0.1)'}`,
+                        borderRadius: 12,
+                        color: '#f5eed8',
+                        fontSize: 14,
+                        outline: 'none',
+                        transition: 'all 0.2s'
+                      }}
+                    />
+                    <FiUser style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(245,238,216,0.4)' }} />
+                  </div>
+                  {errors.name && <p style={{ fontSize: 11, color: '#e07070', marginTop: 6, marginLeft: 4 }}>{errors.name}</p>}
                 </div>
 
                 {/* Email Field */}
-                <div className="relative group">
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    onFocus={() => setFocused('email')}
-                    onBlur={() => setFocused(null)}
-                    className={`w-full px-4 py-4 bg-dark/50 border-2 rounded-xl outline-none transition-all text-light ${
-                      isValid.email === false ? 'border-red-500' : 'border-primary/30 focus:border-primary group-hover:border-primary/50'
-                    }`}
-                    required
-                  />
-                  <label
-                    className={`absolute left-4 transition-all px-1 cursor-text ${
-                      focused === 'email' || formData.email
-                        ? '-top-2.5 text-xs bg-dark text-primary'
-                        : 'top-4 text-light/60 group-hover:text-light/80'
-                    }`}
-                  >
-                    Your Email *
-                  </label>
-                  <FiAtSign className="absolute right-4 top-4 text-light/40" />
+                <div>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="email"
+                      name="email"
+                      value={form.email}
+                      onChange={onChange}
+                      placeholder="Your Email *"
+                      style={{
+                        width: '100%',
+                        padding: '14px 44px 14px 16px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: `1px solid ${errors.email ? '#e07070' : 'rgba(255,245,220,0.1)'}`,
+                        borderRadius: 12,
+                        color: '#f5eed8',
+                        fontSize: 14,
+                        outline: 'none'
+                      }}
+                    />
+                    <FiAtSign style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(245,238,216,0.4)' }} />
+                  </div>
+                  {errors.email && <p style={{ fontSize: 11, color: '#e07070', marginTop: 6, marginLeft: 4 }}>{errors.email}</p>}
                 </div>
 
                 {/* Subject Field */}
-                <div className="relative group">
-                  <input
-                    type="text"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    onFocus={() => setFocused('subject')}
-                    onBlur={() => setFocused(null)}
-                    className={`w-full px-4 py-4 bg-dark/50 border-2 rounded-xl outline-none transition-all text-light ${
-                      isValid.subject === false ? 'border-red-500' : 'border-primary/30 focus:border-primary group-hover:border-primary/50'
-                    }`}
-                    required
-                  />
-                  <label
-                    className={`absolute left-4 transition-all px-1 cursor-text ${
-                      focused === 'subject' || formData.subject
-                        ? '-top-2.5 text-xs bg-dark text-primary'
-                        : 'top-4 text-light/60 group-hover:text-light/80'
-                    }`}
-                  >
-                    Subject *
-                  </label>
-                  <FiFileText className="absolute right-4 top-4 text-light/40" />
+                <div>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      name="subject"
+                      value={form.subject}
+                      onChange={onChange}
+                      placeholder="Subject *"
+                      style={{
+                        width: '100%',
+                        padding: '14px 44px 14px 16px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: `1px solid ${errors.subject ? '#e07070' : 'rgba(255,245,220,0.1)'}`,
+                        borderRadius: 12,
+                        color: '#f5eed8',
+                        fontSize: 14,
+                        outline: 'none'
+                      }}
+                    />
+                    <FiFileText style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(245,238,216,0.4)' }} />
+                  </div>
+                  {errors.subject && <p style={{ fontSize: 11, color: '#e07070', marginTop: 6, marginLeft: 4 }}>{errors.subject}</p>}
                 </div>
 
                 {/* Message Field */}
-                <div className="relative group">
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    onFocus={() => setFocused('message')}
-                    onBlur={() => setFocused(null)}
-                    rows={5}
-                    className={`w-full px-4 py-4 bg-dark/50 border-2 rounded-xl outline-none transition-all resize-none text-light ${
-                      isValid.message === false ? 'border-red-500' : 'border-primary/30 focus:border-primary group-hover:border-primary/50'
-                    }`}
-                    required
-                  />
-                  <label
-                    className={`absolute left-4 transition-all px-1 cursor-text ${
-                      focused === 'message' || formData.message
-                        ? '-top-2.5 text-xs bg-dark text-primary'
-                        : 'top-4 text-light/60 group-hover:text-light/80'
-                    }`}
-                  >
-                    Your Message *
-                  </label>
-                  <FiMessageCircle className="absolute right-4 top-4 text-light/40" />
+                <div>
+                  <div style={{ position: 'relative' }}>
+                    <textarea
+                      name="message"
+                      value={form.message}
+                      onChange={onChange}
+                      placeholder="Your Message *"
+                      rows={5}
+                      style={{
+                        width: '100%',
+                        padding: '14px 44px 14px 16px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: `1px solid ${errors.message ? '#e07070' : 'rgba(255,245,220,0.1)'}`,
+                        borderRadius: 12,
+                        color: '#f5eed8',
+                        fontSize: 14,
+                        outline: 'none',
+                        resize: 'vertical',
+                        fontFamily: 'inherit'
+                      }}
+                    />
+                    <FiMessageCircle style={{ position: 'absolute', right: 14, top: 14, color: 'rgba(245,238,216,0.4)' }} />
+                  </div>
+                  {errors.message && <p style={{ fontSize: 11, color: '#e07070', marginTop: 6, marginLeft: 4 }}>{errors.message}</p>}
                 </div>
 
-                {/* Error Message */}
+                {/* Global Error */}
                 <AnimatePresence>
-                  {error && (
-                    <motion.div
+                  {globalErr && (
+                    <motion.p
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="p-3 bg-red-500/20 border border-red-500 rounded-xl"
+                      exit={{ opacity: 0 }}
+                      style={{ fontSize: 12, color: '#e07070', padding: '8px 12px', background: 'rgba(224,112,112,0.1)', borderRadius: 8, border: '1px solid rgba(224,112,112,0.3)' }}
                     >
-                      <p className="text-red-500 text-sm text-center">{error}</p>
-                    </motion.div>
+                      {globalErr}
+                    </motion.p>
                   )}
                 </AnimatePresence>
 
                 {/* Submit Button */}
-                <motion.button
+                <button
                   type="submit"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full py-4 bg-gradient-to-r from-primary via-secondary to-accent text-white rounded-xl font-semibold text-lg relative overflow-hidden group shadow-lg"
                   disabled={submitted}
+                  style={{
+                    width: '100%',
+                    padding: '16px 24px',
+                    background: '#d4af55',
+                    color: '#0c0b09',
+                    border: 'none',
+                    borderRadius: 100,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    cursor: submitted ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 10,
+                    transition: 'all 0.2s',
+                    opacity: submitted ? 0.7 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!submitted) {
+                      e.currentTarget.style.transform = 'translateY(-2px)'
+                      e.currentTarget.style.boxShadow = '0 10px 30px rgba(212,175,85,0.4)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = 'none'
+                  }}
                 >
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
-                  />
                   {submitted ? (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="flex items-center justify-center gap-2"
-                    >
-                      <FiCheck className="w-5 h-5 animate-bounce" />
-                      Message Sent Successfully!
-                    </motion.div>
+                    <><FiCheck size={16} /> Message Sent!</>
                   ) : (
-                    <span className="flex items-center justify-center gap-2">
-                      Send Message
-                      <FiSend className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </span>
+                    <><FiSend size={14} /> Send Message <FiArrowUpRight size={14} /></>
                   )}
-                </motion.button>
+                </button>
               </form>
             </div>
           </motion.div>
 
-          {/* Contact Info & Social */}
+          {/* Right Column - Info & Social */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="space-y-6"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
           >
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 gap-4">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  whileHover={{ y: -5, scale: 1.05 }}
-                  className="bg-gradient-to-br from-dark/50 to-dark/30 backdrop-blur-sm rounded-xl p-4 border border-primary/20 text-center relative overflow-hidden group"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <stat.icon className="w-8 h-8 mx-auto mb-2" style={{ color: stat.color }} />
-                  <div className="text-2xl font-bold text-primary">{stat.value}</div>
-                  <div className="text-xs text-light/60">{stat.label}</div>
-                </motion.div>
-              ))}
+            {/* Availability Badge */}
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '10px 20px',
+              background: 'rgba(46,204,154,0.1)',
+              border: '1px solid rgba(46,204,154,0.3)',
+              borderRadius: 100,
+              width: 'fit-content'
+            }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#2ecc9a' }} />
+              <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2ecc9a' }}>
+                Available for Work
+              </span>
             </div>
 
             {/* Contact Info Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {contactInfo.map((info, index) => (
-                <motion.a
-                  key={index}
-                  href={info.link}
-                  target={info.link ? "_blank" : "_self"}
-                  rel="noopener noreferrer"
-                  whileHover={{ y: -5 }}
-                  className="bg-gradient-to-br from-dark/50 to-dark/30 backdrop-blur-sm rounded-xl p-4 text-center border border-primary/20 group cursor-pointer block"
-                >
-                  <div className={`w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-r ${info.gradient} p-2.5 shadow-lg group-hover:scale-110 transition-transform`}>
-                    <info.icon className="w-full h-full text-white" />
-                  </div>
-                  <h4 className="text-xs font-semibold text-primary mb-1">{info.label}</h4>
-                  <p className="text-xs text-light/80 group-hover:text-light transition-colors">{info.value}</p>
-                </motion.a>
-              ))}
+            <div style={{
+              border: '1px solid rgba(255,245,220,0.1)',
+              borderRadius: 20,
+              padding: 24,
+              background: 'rgba(22, 20, 16, 0.8)',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <h4 style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#d4af55', marginBottom: 20 }}>
+                Direct Contact
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {CONTACT_INFO.map((info, idx) => (
+                  <a
+                    key={idx}
+                    href={info.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 16,
+                      padding: '12px 16px',
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,245,220,0.05)',
+                      borderRadius: 14,
+                      textDecoration: 'none',
+                      color: '#f5eed8',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(212,175,85,0.3)'
+                      e.currentTarget.style.background = 'rgba(212,175,85,0.05)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(255,245,220,0.05)'
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.02)'
+                    }}
+                  >
+                    <div style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      background: `${info.color}15`,
+                      border: `1px solid ${info.color}30`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <info.Icon size={18} color={info.color} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: info.color, marginBottom: 4 }}>
+                        {info.label}
+                      </div>
+                      <div style={{ fontSize: 13, color: 'rgba(245,238,216,0.7)' }}>{info.value}</div>
+                    </div>
+                    <FiArrowUpRight size={14} style={{ marginLeft: 'auto', color: 'rgba(245,238,216,0.3)' }} />
+                  </a>
+                ))}
+              </div>
             </div>
 
             {/* Social Links */}
-            <div className="bg-gradient-to-br from-dark/50 to-dark/30 backdrop-blur-sm rounded-2xl p-6 border border-primary/20">
-              <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <FiGlobe className="w-5 h-5 text-primary" />
-                Connect With Me
+            <div style={{
+              border: '1px solid rgba(255,245,220,0.1)',
+              borderRadius: 20,
+              padding: 24,
+              background: 'rgba(22, 20, 16, 0.8)',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <h4 style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#d4af55', marginBottom: 20 }}>
+                Connect Online
               </h4>
-              <div className="flex flex-wrap gap-3">
-                {socialLinks.map((social, index) => (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {SOCIALS.map((social, idx) => (
                   <motion.a
-                    key={index}
-                    href={social.url}
+                    key={idx}
+                    href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    whileHover={{ y: -5, scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="group relative"
+                    whileHover={{ y: -3 }}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 12,
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,245,220,0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'rgba(245,238,216,0.6)',
+                      transition: 'all 0.2s',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#d4af55'
+                      e.currentTarget.style.background = 'rgba(212,175,85,0.1)'
+                      e.currentTarget.style.color = '#d4af55'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(255,245,220,0.08)'
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.02)'
+                      e.currentTarget.style.color = 'rgba(245,238,216,0.6)'
+                    }}
                   >
-                    <div 
-                      className="w-12 h-12 rounded-full flex items-center justify-center transition-all bg-dark/50 border border-primary/30 hover:border-primary"
-                      style={{ '--hover-color': social.color }}
-                    >
-                      <social.icon className="w-5 h-5 text-light/70 group-hover:text-primary transition-colors" />
-                    </div>
-                    <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-dark/80 px-2 py-1 rounded">
-                      {social.name}
-                    </span>
+                    <social.Icon size={18} />
                   </motion.a>
                 ))}
               </div>
             </div>
 
             {/* FAQ Section */}
-            <div className="bg-gradient-to-br from-dark/50 to-dark/30 backdrop-blur-sm rounded-2xl p-6 border border-primary/20">
-              <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <FiHeart className="w-5 h-5 text-primary" />
-                Frequently Asked Questions
-              </h4>
-              <div className="space-y-3">
-                {faqs.map((faq, index) => (
-                  <div key={index} className="border border-primary/20 rounded-xl overflow-hidden">
-                    <button
-                      onClick={() => setActiveFaq(activeFaq === index ? null : index)}
-                      className="w-full px-4 py-3 flex justify-between items-center text-left hover:bg-primary/5 transition-colors"
-                    >
-                      <span className="text-sm font-medium text-light/80">{faq.question}</span>
-                      <FiChevronDown
-                        className={`w-4 h-4 text-primary transition-transform ${
-                          activeFaq === index ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </button>
-                    
-                    <AnimatePresence>
-                      {activeFaq === index && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className="px-4 pb-3"
-                        >
-                          <p className="text-sm text-light/60 leading-relaxed">{faq.answer}</p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ))}
+            <div style={{
+              border: '1px solid rgba(255,245,220,0.1)',
+              borderRadius: 20,
+              overflow: 'hidden',
+              background: 'rgba(22, 20, 16, 0.8)',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <div style={{ padding: '20px 24px' }}>
+                <h4 style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#d4af55' }}>
+                  Quick Answers
+                </h4>
               </div>
+              {FAQS.map((faq, idx) => (
+                <div key={idx} style={{ borderTop: '1px solid rgba(255,245,220,0.08)' }}>
+                  <button
+                    onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
+                    style={{
+                      width: '100%',
+                      padding: '16px 24px',
+                      background: 'none',
+                      border: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                      color: activeFaq === idx ? '#d4af55' : 'rgba(245,238,216,0.7)',
+                      transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#f5eed8'}
+                    onMouseLeave={(e) => {
+                      if (activeFaq !== idx) e.currentTarget.style.color = 'rgba(245,238,216,0.7)'
+                    }}
+                  >
+                    <span style={{ fontSize: 14, fontWeight: 500 }}>{faq.q}</span>
+                    <motion.span animate={{ rotate: activeFaq === idx ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                      <FiChevronDown size={16} />
+                    </motion.span>
+                  </button>
+                  <AnimatePresence>
+                    {activeFaq === idx && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ overflow: 'hidden' }}
+                      >
+                        <p style={{ padding: '0 24px 20px 24px', fontSize: 13, color: 'rgba(245,238,216,0.6)', lineHeight: 1.6 }}>
+                          {faq.a}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
             </div>
-
-            {/* Availability Badge */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              className="text-center bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl p-3 border border-green-500/30"
-            >
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-sm text-green-400">Available for Work</span>
-                <FiSmile className="w-4 h-4 text-green-400" />
-              </div>
-            </motion.div>
           </motion.div>
         </div>
       </div>

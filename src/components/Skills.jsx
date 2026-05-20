@@ -3,6 +3,81 @@ import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion'
 import { FiTarget, FiMonitor, FiZap, FiEdit3, FiSettings, FiTrendingUp, FiAward, FiCode, FiCpu } from 'react-icons/fi'
 
+/* ─────────────────────────────────────────────
+   PREMIUM DARK THEME STYLES
+───────────────────────────────────────────── */
+const PREMIUM_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --sk-bg: #0c0b09;
+    --sk-surface: #131210;
+    --sk-card: rgba(22, 20, 16, 0.95);
+    --sk-border: rgba(255,245,220,0.07);
+    --sk-border-hi: rgba(212,175,85,0.35);
+    --sk-gold: #d4af55;
+    --sk-gold-dim: rgba(212,175,85,0.18);
+    --sk-cream: #f5eed8;
+    --sk-muted: rgba(245,238,216,0.42);
+    --sk-dim: rgba(245,238,216,0.18);
+    --sk-display: 'Playfair Display', Georgia, serif;
+    --sk-body: 'Instrument Sans', system-ui, sans-serif;
+  }
+
+  .sk-root *, .sk-root *::before, .sk-root *::after {
+    box-sizing: border-box; margin: 0; padding: 0;
+  }
+
+  .sk-root {
+    font-family: var(--sk-body);
+    background: var(--sk-bg);
+    color: var(--sk-cream);
+    -webkit-font-smoothing: antialiased;
+    position: relative; overflow: hidden;
+  }
+
+  .sk-root::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    opacity: 1;
+  }
+
+  .sk-root ::-webkit-scrollbar { width: 3px; }
+  .sk-root ::-webkit-scrollbar-track { background: transparent; }
+  .sk-root ::-webkit-scrollbar-thumb { background: var(--sk-border-hi); border-radius: 4px; }
+
+  .sk-pill {
+    padding: 8px 22px; border-radius: 100px; font-size: 12px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+    border: 1px solid var(--sk-border); background: transparent;
+    color: var(--sk-muted); font-family: var(--sk-body);
+    transition: all 0.22s ease;
+  }
+  .sk-pill:hover { border-color: var(--sk-border-hi); color: var(--sk-cream); }
+  .sk-pill.active {
+    background: var(--sk-gold); border-color: var(--sk-gold);
+    color: #0c0b09; font-weight: 600;
+    box-shadow: 0 4px 20px rgba(212,175,85,0.35);
+  }
+`
+
+// Theme hook for Skills component
+const useTheme = () => {
+  const [isDarkMode, setIsDarkMode] = useState(true)
+  useEffect(() => {
+    const checkTheme = () => {
+      const html = document.documentElement
+      setIsDarkMode(!html.classList.contains('light-mode'))
+    }
+    checkTheme()
+    const observer = new MutationObserver(checkTheme)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+  return isDarkMode
+}
+
 // ─── 3D Floating Elements ──────────────────────────────────────────────
 const Floating3DElement = ({ delay, duration, size = 20, color = '#6366f1', style = {} }) => (
   <motion.div
@@ -151,9 +226,9 @@ const SkillOrb3D = ({ skill, index, hoveredSkill, setHoveredSkill, isMobile }) =
             >
               <div className="flex items-center gap-3">
                 <div style={{ color: skill.color }} className="font-bold">{skill.level}%</div>
-                <div className="text-light/60">•</div>
+                <div className={isDarkMode ? 'text-light/60' : 'text-dark/60'}>•</div>
                 <div>{skill.years} years</div>
-                <div className="text-light/60">•</div>
+                <div className={isDarkMode ? 'text-light/60' : 'text-dark/60'}>•</div>
                 <div>{skill.projects} projects</div>
               </div>
             </motion.div>
@@ -170,6 +245,7 @@ const Skills = () => {
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0)
   const [isMobile, setIsMobile] = useState(false)
   const [viewMode, setViewMode] = useState('grid') // 'grid' or 'cloud'
+  const isDarkMode = useTheme()
 
   const skillsData = {
     frontend: [
@@ -237,8 +313,24 @@ const Skills = () => {
     return skillsData[selectedCategory] || []
   }
 
+  const lightModeStyles = `
+    html.light-mode .sk-root {
+      --sk-bg: #ffffff;
+      --sk-surface: #f8fafc;
+      --sk-card: rgba(255, 255, 255, 0.95);
+      --sk-border: rgba(0, 0, 0, 0.1);
+      --sk-border-hi: rgba(99, 102, 241, 0.3);
+      --sk-gold: #6366f1;
+      --sk-gold-dim: rgba(99, 102, 241, 0.1);
+      --sk-cream: #0f172a;
+      --sk-muted: rgba(15, 23, 42, 0.7);
+      --sk-dim: rgba(15, 23, 42, 0.5);
+    }
+  `
+
   return (
-    <section id="skills" className="py-16 sm:py-20 bg-gradient-to-b from-dark via-dark/95 to-dark relative overflow-hidden">
+    <section id="skills" className="sk-root py-16 sm:py-20 relative overflow-hidden">
+      <style>{PREMIUM_STYLES}{lightModeStyles}</style>
       {/* 3D Floating Elements Background */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <Floating3DElement delay={0} duration={8} size={15} color="#6366f1" style={{ top: '10%', left: '5%' }} />
@@ -268,7 +360,7 @@ const Skills = () => {
               Skills & Expertise
             </h2>
           </div>
-          <p className="text-light/60 mt-4 max-w-2xl mx-auto text-lg">
+          <p className={`mt-4 max-w-2xl mx-auto text-lg ${isDarkMode ? 'text-light/60' : 'text-dark/60'}`}>
             Technologies and tools I work with to bring ideas to life
           </p>
         </motion.div>
@@ -283,7 +375,7 @@ const Skills = () => {
               className={`flex items-center gap-3 px-6 py-3 rounded-full text-sm font-medium transition-all ${
                 viewMode === 'grid' 
                   ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30' 
-                  : 'bg-dark/50 backdrop-blur-sm text-light/70 hover:text-light border border-primary/20'
+                  : isDarkMode ? 'bg-dark/50 backdrop-blur-sm text-light/70 hover:text-light border border-primary/20' : 'bg-white/50 backdrop-blur-sm text-dark/70 hover:text-dark border border-primary/20'
               }`}
               style={{
                 transformStyle: 'preserve-3d',
@@ -303,7 +395,7 @@ const Skills = () => {
               className={`flex items-center gap-3 px-6 py-3 rounded-full text-sm font-medium transition-all ${
                 viewMode === 'cloud' 
                   ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30' 
-                  : 'bg-dark/50 backdrop-blur-sm text-light/70 hover:text-light border border-primary/20'
+                  : isDarkMode ? 'bg-dark/50 backdrop-blur-sm text-light/70 hover:text-light border border-primary/20' : 'bg-white/50 backdrop-blur-sm text-dark/70 hover:text-dark border border-primary/20'
               }`}
               style={{
                 transformStyle: 'preserve-3d',
@@ -328,7 +420,7 @@ const Skills = () => {
                   className={`flex items-center gap-3 px-6 py-3 rounded-full text-sm font-medium transition-all ${
                     selectedCategory === category.id
                       ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30'
-                      : 'bg-dark/50 backdrop-blur-sm text-light/70 hover:text-light border border-primary/20'
+                      : isDarkMode ? 'bg-dark/50 backdrop-blur-sm text-light/70 hover:text-light border border-primary/20' : 'bg-white/50 backdrop-blur-sm text-dark/70 hover:text-dark border border-primary/20'
                   }`}
                   style={{
                     transformStyle: 'preserve-3d',
@@ -426,7 +518,7 @@ const Skills = () => {
                   </motion.h3>
 
                   {/* 3D Progress Bar */}
-                  <div className="relative h-3 bg-dark/50 rounded-full overflow-hidden mb-3">
+                  <div className={`relative h-3 rounded-full overflow-hidden mb-3 ${isDarkMode ? 'bg-dark/50' : 'bg-white/50'}`}>
                     <motion.div
                       initial={{ width: 0 }}
                       whileInView={{ width: `${skill.level}%` }}
@@ -441,7 +533,7 @@ const Skills = () => {
 
                   {/* Level Percentage */}
                   <div className="flex justify-between text-sm">
-                    <span className="text-light/60">Proficiency</span>
+                    <span className={isDarkMode ? 'text-light/60' : 'text-dark/60'}>Proficiency</span>
                     <motion.span 
                       style={{ color: skill.color }}
                       whileHover={{ scale: 1.2 }}
@@ -458,7 +550,7 @@ const Skills = () => {
                         initial={{ opacity: 0, y: 20, scale: 0.8 }}
                         animate={{ opacity: 1, y: -10, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.8 }}
-                        className="absolute inset-x-0 -top-20 mx-auto w-max bg-dark/95 backdrop-blur-lg px-4 py-3 rounded-xl border border-primary/30"
+                        className={`absolute inset-x-0 -top-20 mx-auto w-max backdrop-blur-lg px-4 py-3 rounded-xl border border-primary/30 ${isDarkMode ? 'bg-dark/95' : 'bg-white/95'}`}
                         style={{
                           boxShadow: `0 10px 30px ${skill.color}40`,
                           transform: 'translateZ(40px)'
@@ -466,7 +558,7 @@ const Skills = () => {
                       >
                         <div className="flex items-center gap-3 text-sm">
                           <div style={{ color: skill.color }} className="font-bold">{skill.years} years</div>
-                          <div className="text-light/60">•</div>
+                          <div className={isDarkMode ? 'text-light/60' : 'text-dark/60'}>•</div>
                           <div>{skill.projects}+ projects</div>
                         </div>
                       </motion.div>
@@ -536,7 +628,7 @@ const Skills = () => {
                 >
                   {stat.value}
                 </motion.div>
-                <div className="text-sm text-light/60" style={{ transform: 'translateZ(10px)' }}>{stat.label}</div>
+                <div className={`text-sm ${isDarkMode ? 'text-light/60' : 'text-dark/60'}`} style={{ transform: 'translateZ(10px)' }}>{stat.label}</div>
               </motion.div>
             </Card3D>
           ))}

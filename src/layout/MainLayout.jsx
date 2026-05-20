@@ -8,7 +8,7 @@ import Projects from '../components/Projects'
 import Experience from '../components/Experience'
 import Contact from '../components/Contact'
 import Footer from '../components/Footer'
-const MainLayout = () => {
+const MainLayout = ({ playClick, playHover, soundEnabled, setSoundEnabled }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
