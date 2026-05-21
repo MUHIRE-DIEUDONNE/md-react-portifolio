@@ -179,7 +179,7 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
                 {/* Profile Image Container */}
                 <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-primary/50 shadow-2xl">
                   <img
-                    src="/src/images/muhire dieudonne.jpg"
+                    src="/images/muhire-dieudonne.jpg"
                     alt="Muhire Dieudonne"
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -237,7 +237,7 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
             >
               <h1 className="text-2xl sm:text-3xl font-bold text-light mb-4 flex items-center gap-3">
                 <img
-                  src="/src/images/muhire dieudonne.JPG"
+                  src="/images/muhire-dieudonne.jpg"
                   alt="Muhire Dieudonne"
                   className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-primary/50"
                   onError={(e) => {

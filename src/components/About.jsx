@@ -370,7 +370,7 @@ const About = () => {
               position: 'relative', zIndex: 1,
             }}>
               <img
-                src="/src/images/muhire dieudonne.JPG"
+                src="/images/muhire-dieudonne.jpg"
                 alt="Muhire Dieudonne"
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               />

@@ -381,7 +381,7 @@ const Navbar = () => {
                 }}
               >
                 <motion.img
-                  src="/muhire-dieudonne.JPG"
+                  src="/images/muhire-dieudonne.jpg"
                   alt="Muhire Dieudonne"
                   className="w-full h-full object-cover"
                   whileHover={{ scale: 1.1 }}

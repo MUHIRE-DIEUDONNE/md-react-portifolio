@@ -810,7 +810,7 @@ const VoiceAssistant = () => {
                             : 'linear-gradient(135deg, rgba(129,90,255,0.3), rgba(255,90,205,0.2))',
                           boxShadow: isListening ? '0 0 20px rgba(255,79,114,0.5)' : '0 2px 10px rgba(0,0,0,0.3)',
                           cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          flexShrink: 0, border: isListening ? '1px solid transparent' : '1px solid var(--nova-border-accent)',
+                          flexShrink: 0,
                           transition: 'all 0.25s',
                         }}
                       >
@@ -989,10 +989,32 @@ const VoiceAssistant = () => {
                       }}>{unreadCount}</span>
                     )}
                   </div>
-                  <button onClick={() => setIsMinimized(false)}
-                    style={{ background: 'none', border: 'none', color: 'var(--nova-muted)', cursor: 'pointer' }}>
-                    <FiMaximize2 size={14} />
-                  </button>
+<button
+  onClick={() => setIsMinimized(false)}
+  style={{
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    border: '1px solid var(--nova-border)',
+    background: 'rgba(255,255,255,0.04)',
+    color: 'var(--nova-text)',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease',
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.background = 'rgba(129,90,255,0.15)'
+    e.currentTarget.style.transform = 'scale(1.05)'
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+    e.currentTarget.style.transform = 'scale(1)'
+  }}
+>
+  <FiMaximize2 size={14} />
+</button>
                 </div>
                 {conversation.length > 0 && (
                   <p style={{ fontSize: 11, color: 'var(--nova-muted)', marginTop: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

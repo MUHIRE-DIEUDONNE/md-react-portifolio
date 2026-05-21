@@ -378,7 +378,7 @@ const Footer = () => {
             >
               <div className="ft-avatar-inner">
                 <img
-                  src="/src/images/muhire dieudonne.JPG"
+                  src="/images/muhire-dieudonne.jpg"
                   alt="Muhire Dieudonne"
                 />
               </div>
