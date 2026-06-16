@@ -5,24 +5,189 @@ import {
   FiTarget, FiMonitor, FiZap, FiEdit3,
   FiSettings, FiTrendingUp, FiAward, FiCode, FiCpu,
 } from 'react-icons/fi'
-import ThreeHero from './ThreeHero'   // 👈 use the main ThreeHero component
+import ThreeHero from './ThreeHero'
 import { useTheme } from '../hooks/useTheme'
 
 // ─── Premium Styles ────────────────────────────
 const PREMIUM_STYLES = `
-  /* ... same as before ... */
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --sk-bg: #0c0b09;
+    --sk-surface: #131210;
+    --sk-card: rgba(22,20,16,0.95);
+    --sk-border: rgba(255,245,220,0.07);
+    --sk-border-hi: rgba(212,175,85,0.35);
+    --sk-gold: #d4af55;
+    --sk-gold-dim: rgba(212,175,85,0.18);
+    --sk-cream: #f5eed8;
+    --sk-muted: rgba(245,238,216,0.42);
+    --sk-dim: rgba(245,238,216,0.18);
+    --sk-display: 'Playfair Display', Georgia, serif;
+    --sk-body: 'Instrument Sans', system-ui, sans-serif;
+  }
+
+  .sk-root *, .sk-root *::before, .sk-root *::after {
+    box-sizing: border-box; margin: 0; padding: 0;
+  }
+
+  .sk-root {
+    font-family: var(--sk-body);
+    background: var(--sk-bg);
+    color: var(--sk-cream);
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sk-root::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    opacity: 1;
+  }
 `
 
 // ─── 3D Card ────────────────────────────────────
-const Card3D = ({ children, className = '', delay = 0, color = '#d4af55' }) => ( /* ... same */ )
+const Card3D = ({ children, className = '', delay = 0, color = '#d4af55' }) => (
+  <motion.div
+    initial={{ opacity: 0, rotateX: -15, y: 30 }}
+    animate={{ opacity: 1, rotateX: 0, y: 0 }}
+    whileHover={{ rotateX: 15, scale: 1.05, translateZ: 20 }}
+    transition={{ delay, duration: 0.6, type: 'spring', stiffness: 100 }}
+    className={`relative ${className}`}
+    style={{ transformStyle: 'preserve-3d', perspective: '1000px', boxShadow: `0 10px 30px ${color}20` }}
+  >
+    <div style={{ transform: 'translateZ(30px)', backfaceVisibility: 'hidden' }}>
+      {children}
+    </div>
+  </motion.div>
+)
 
 // ─── Skill Orb ──────────────────────────────────
-const SkillOrb3D = ({ skill, index, hoveredSkill, setHoveredSkill, isMobile }) => ( /* ... same */ )
+const SkillOrb3D = ({ skill, index, hoveredSkill, setHoveredSkill, isMobile }) => {
+  const [isHovered, setIsHovered] = useState(false)
+
+  return (
+    <motion.div
+      initial={{ scale: 0, rotate: -180, opacity: 0 }}
+      whileInView={{ scale: 1, rotate: 0, opacity: 1 }}
+      transition={{ type: 'spring', delay: index * 0.05, stiffness: 50, damping: 20 }}
+      whileHover={{ scale: 1.3, rotate: 15, translateZ: 30, transition: { type: 'spring', stiffness: 300 } }}
+      className="relative group cursor-pointer"
+      style={{
+        fontSize: `${Math.max(1.2, skill.level / 12)}rem`,
+        zIndex: hoveredSkill === skill.name ? 10 : 1,
+        transformStyle: 'preserve-3d',
+      }}
+      onHoverStart={() => { setHoveredSkill(skill.name); setIsHovered(true) }}
+      onHoverEnd={() => { setHoveredSkill(null); setIsHovered(false) }}
+    >
+      <div className="relative">
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{ background: `radial-gradient(circle at 30% 30%, ${skill.color}40, transparent)`, transform: 'translateZ(-10px)', filter: 'blur(10px)' }}
+          animate={{ scale: isHovered ? [1, 1.2, 1] : 1, opacity: isHovered ? [0.5, 0.8, 0.5] : 0.3 }}
+          transition={{ duration: 2, repeat: isHovered ? Infinity : 0 }}
+        />
+        <div
+          className="relative px-6 py-3 rounded-full border-2 inline-flex items-center gap-3 backdrop-blur-sm"
+          style={{
+            borderColor: skill.color,
+            background: `linear-gradient(135deg, rgba(212,175,85,0.08), rgba(46,204,154,0.06))`,
+            boxShadow: isHovered ? `0 0 30px ${skill.color}60, 0 0 60px ${skill.color}30` : `0 0 15px ${skill.color}40`,
+            transform: 'translateZ(20px)',
+          }}
+        >
+          <motion.img
+            src={skill.icon}
+            alt={skill.name}
+            className="w-6 h-6 object-contain"
+            animate={{ rotate: isHovered ? 360 : 0 }}
+            transition={{ duration: 0.6 }}
+            style={{ transform: 'translateZ(10px)' }}
+          />
+          <span className="font-semibold" style={{ color: 'var(--sk-cream)' }}>{skill.name}</span>
+        </div>
+        <AnimatePresence>
+          {hoveredSkill === skill.name && !isMobile && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+              animate={{ opacity: 1, y: -10, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.8 }}
+              className="absolute -top-16 left-1/2 transform -translate-x-1/2 backdrop-blur-lg px-4 py-2 rounded-xl text-sm whitespace-nowrap"
+              style={{
+                background: 'rgba(13,12,9,0.95)',
+                border: `1px solid ${skill.color}50`,
+                boxShadow: `0 10px 30px rgba(0,0,0,0.5)`,
+                transform: 'translateZ(40px)',
+                color: 'var(--sk-cream)',
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div style={{ color: skill.color }} className="font-bold">{skill.level}%</div>
+                <div style={{ color: 'var(--sk-dim)' }}>•</div>
+                <div>{skill.years} years</div>
+                <div style={{ color: 'var(--sk-dim)' }}>•</div>
+                <div>{skill.projects} projects</div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  )
+}
 
 // ─── Data ──────────────────────────────────────
-const SKILLS_DATA = { /* ... same as before ... */ }
+const SKILLS_DATA = {
+  frontend: [
+    { name: 'React',      level: 95, color: '#61DAFB', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',           years: 4, projects: 25 },
+    { name: 'JavaScript', level: 98, color: '#F7DF1E', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',   years: 5, projects: 40 },
+    { name: 'TypeScript', level: 88, color: '#3178C6', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',   years: 3, projects: 15 },
+    { name: 'Next.js',    level: 85, color: '#aaaaaa', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg',           years: 2, projects: 8  },
+    { name: 'Vue',        level: 75, color: '#4FC08D', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg',             years: 2, projects: 5  },
+  ],
+  animation: [
+    { name: 'Framer Motion',  level: 92, color: '#0055FF', icon: 'https://img.icons8.com/fluency/48/motion.png',        years: 3, projects: 18 },
+    { name: 'GSAP',           level: 90, color: '#88CE02', icon: 'https://img.icons8.com/fluency/48/lightning-bolt.png', years: 3, projects: 15 },
+    { name: 'Three.js',       level: 88, color: '#049EF4', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/threejs/threejs-original.svg', years: 2, projects: 6 },
+    { name: 'CSS Animations', level: 95, color: '#264DE4', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg',       years: 5, projects: 35 },
+  ],
+  styling: [
+    { name: 'Tailwind CSS',      level: 96, color: '#06B6D4', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-plain.svg', years: 3, projects: 28 },
+    { name: 'SCSS',              level: 90, color: '#CC6699', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sass/sass-original.svg',             years: 4, projects: 22 },
+    { name: 'Styled Components', level: 85, color: '#DB7093', icon: 'https://img.icons8.com/fluency/48/css3.png',                                           years: 2, projects: 12 },
+  ],
+  backend: [
+    { name: 'Node.js', level: 85, color: '#339933', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',   years: 3, projects: 15 },
+    { name: 'Python',  level: 70, color: '#3776AB', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',   years: 2, projects: 8  },
+    { name: 'GraphQL', level: 75, color: '#E10098', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg',    years: 1, projects: 4  },
+  ],
+  procedural: [
+    { name: 'Terrain Generation', level: 85, color: '#10B981', icon: 'https://img.icons8.com/fluency/48/mountain.png',  years: 3, projects: 12 },
+    { name: 'Planet Rendering',   level: 80, color: '#F59E0B', icon: 'https://img.icons8.com/fluency/48/globe.png',     years: 2, projects: 8  },
+    { name: 'Procedural Worlds',  level: 88, color: '#8B5CF6', icon: 'https://img.icons8.com/fluency/48/infinity.png', years: 3, projects: 15 },
+    { name: 'Noise Algorithms',   level: 82, color: '#EC4899', icon: 'https://img.icons8.com/fluency/48/waves.png',    years: 2, projects: 10 },
+    { name: 'Voxel Systems',      level: 75, color: '#EF4444', icon: 'https://img.icons8.com/fluency/48/cube.png',     years: 2, projects: 6  },
+  ],
+  graphics: [
+    { name: 'WebGL',             level: 78, color: '#9333EA', icon: 'https://img.icons8.com/fluency/48/webgl.png',        years: 2, projects: 7 },
+    { name: 'Shader Programming',level: 72, color: '#F97316', icon: 'https://img.icons8.com/fluency/48/code.png',         years: 2, projects: 5 },
+    { name: '3D Modeling',       level: 68, color: '#0EA5E9', icon: 'https://img.icons8.com/fluency/48/3d-modeling.png',  years: 1, projects: 4 },
+    { name: 'Particle Systems',  level: 85, color: '#84CC16', icon: 'https://img.icons8.com/fluency/48/particles.png',    years: 3, projects: 9 },
+  ],
+}
 
-const CATEGORIES = [ /* ... same as before ... */ ]
+const CATEGORIES = [
+  { id: 'all',        label: 'All Skills',  icon: <FiTarget />    },
+  { id: 'frontend',   label: 'Frontend',    icon: <FiMonitor />   },
+  { id: 'animation',  label: 'Animation',   icon: <FiZap />       },
+  { id: 'styling',    label: 'Styling',     icon: <FiEdit3 />     },
+  { id: 'backend',    label: 'Backend',     icon: <FiSettings />  },
+  { id: 'procedural', label: 'Procedural',  icon: <FiTrendingUp /> },
+  { id: 'graphics',   label: 'Graphics',    icon: <FiAward />     },
+]
 
 // ─── Main Component ────────────────────────────
 const Skills = () => {
@@ -55,7 +220,6 @@ const Skills = () => {
       ? Object.values(SKILLS_DATA).flat()
       : SKILLS_DATA[selectedCategory] || []
 
-  // ─── Custom tech stack for the 3D background ───
   const customTechStack = [
     { label: 'React',          color: '#61dafb', radius: 3.1, speed: 0.38, phase: 0,   tiltX: 0.3 },
     { label: 'Three.js',       color: '#049EF4', radius: 3.4, speed: 0.30, phase: 1.2, tiltX: 0.2 },
@@ -69,19 +233,16 @@ const Skills = () => {
     { label: 'Next.js',        color: '#ffffff', radius: 3.5, speed: 0.32, phase: 6.0, tiltX: 0.28},
     { label: 'Python',         color: '#3776AB', radius: 3.8, speed: 0.22, phase: 2.2, tiltX: 0.38},
     { label: 'WebGL',          color: '#990000', radius: 3.4, speed: 0.35, phase: 4.2, tiltX: 0.22},
-    // 👇 NEW badges added:
     { label: 'Svelte',         color: '#FF3E00', radius: 3.9, speed: 0.20, phase: 1.0, tiltX: 0.45 },
     { label: 'Docker',         color: '#2496ED', radius: 3.0, speed: 0.44, phase: 3.2, tiltX: 0.18 },
     { label: 'AWS',            color: '#FF9900', radius: 3.3, speed: 0.33, phase: 5.0, tiltX: 0.40 },
     { label: 'Figma',          color: '#F24E1E', radius: 3.6, speed: 0.27, phase: 2.8, tiltX: 0.30 },
   ]
 
-  // We use a slower orbit speed (0.8) for a more relaxed motion, and custom colors
   const orbitSpeed = 0.8
   const ringColor = '#d4af55'
   const accentColor = '#2ecc9a'
 
-  // ─── Button style helper ─────────────────────
   const btnBase = (active) => ({
     display: 'flex', alignItems: 'center', gap: 10,
     padding: '10px 22px', borderRadius: 999,
@@ -98,7 +259,6 @@ const Skills = () => {
     <section id="skills" className="sk-root" style={{ padding: '80px 0', minHeight: '100vh', position: 'relative' }}>
       <style>{PREMIUM_STYLES}</style>
 
-      {/* ── 3D Background ── */}
       {threeReady && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
           <ThreeHero
@@ -111,7 +271,6 @@ const Skills = () => {
         </div>
       )}
 
-      {/* Glow accents */}
       <div style={{
         position: 'absolute', top: '10%', right: '-5%',
         width: 600, height: 600, borderRadius: '50%', pointerEvents: 'none', zIndex: 1,
@@ -125,9 +284,7 @@ const Skills = () => {
         filter: 'blur(80px)',
       }} />
 
-      {/* Content */}
       <div style={{ position: 'relative', zIndex: 10, maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
-        {/* Header – same as before */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -148,7 +305,6 @@ const Skills = () => {
           </p>
         </motion.div>
 
-        {/* View toggle */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 40 }}>
           <button onClick={() => setViewMode('grid')}  style={btnBase(viewMode === 'grid')}>
             <FiCode /> Grid View
@@ -158,7 +314,6 @@ const Skills = () => {
           </button>
         </div>
 
-        {/* Category filter */}
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
           {CATEGORIES.map((cat) => (
             <motion.button
@@ -174,10 +329,6 @@ const Skills = () => {
           ))}
         </div>
 
-        {/* Grid / Cloud views – unchanged from previous version */}
-        {/* ... (the grid and cloud rendering code remains exactly as you had it) ... */}
-
-        {/* We'll include the grid/cloud code quickly – but you can keep your existing one */}
         {viewMode === 'grid' ? (
           <motion.div
             key={selectedCategory + 'grid'}
@@ -272,7 +423,6 @@ const Skills = () => {
           </motion.div>
         )}
 
-        {/* Stats row – unchanged */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
