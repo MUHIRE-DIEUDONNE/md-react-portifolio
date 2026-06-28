@@ -9,6 +9,9 @@ import {
 import { FaReact } from 'react-icons/fa'
 import { SiThreedotjs } from 'react-icons/si'
 
+/* ─────────────────────────────────────────────
+   PREMIUM DARK THEME STYLES
+───────────────────────────────────────────── */
 const PREMIUM_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
 
@@ -36,7 +39,8 @@ const PREMIUM_STYLES = `
     background: var(--ft-bg);
     color: var(--ft-cream);
     -webkit-font-smoothing: antialiased;
-    position: relative; overflow: hidden;
+    position: relative;
+    overflow: hidden;
   }
 
   .ft-root::before {
@@ -81,7 +85,8 @@ const PREMIUM_STYLES = `
     border-radius: 16px;
     padding: 24px 24px 26px;
     transition: border-color 0.3s, box-shadow 0.3s;
-    position: relative; overflow: hidden;
+    position: relative;
+    overflow: hidden;
   }
   .ft-newsletter-card::before {
     content: '';
@@ -185,6 +190,8 @@ const PREMIUM_STYLES = `
     overflow: hidden;
     transition: transform 0.15s, box-shadow 0.25s, background 0.2s;
     box-shadow: 0 4px 20px rgba(212,175,85,0.35);
+    min-height: 48px;
+    white-space: nowrap;
   }
   .ft-subscribe-btn:hover {
     transform: translateY(-2px);
@@ -310,7 +317,6 @@ const Footer = () => {
       </div>
 
       <div className="container-responsive relative z-10">
-        {/* Main Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[clamp(32px,4vw,56px)] mb-[clamp(40px,5vw,64px)]">
           {/* Brand */}
           <motion.div
@@ -329,7 +335,7 @@ const Footer = () => {
             <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--ft-muted)' }}>
               Creating immersive digital experiences with cutting-edge web technologies. Let's build something amazing together.
             </p>
-            <div className="flex gap-2.5">
+            <div className="flex gap-2.5 flex-wrap">
               {socialLinks.map((social, index) => (
                 <motion.a
                   key={index}
@@ -448,15 +454,13 @@ const Footer = () => {
           </motion.div>
         </div>
 
-        {/* Rule */}
         <div className="ft-rule mb-[clamp(28px,4vw,40px)]" />
 
-        {/* Bottom Bar */}
         <div className="flex flex-wrap justify-between items-center gap-4">
           <p className="text-[11px]" style={{ color: 'var(--ft-dim)' }}>
             © {new Date().getFullYear()} Muhire Dieudonne. All rights reserved.
           </p>
-          <div className="flex gap-5">
+          <div className="flex gap-5 flex-wrap">
             {legal.map((link) => (
               <a key={link.name} href={link.href} className="text-[10px] transition-colors hover:text-[var(--ft-cream)]" style={{ color: 'var(--ft-dim)' }}>
                 {link.name}
@@ -473,7 +477,6 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Scroll to Top */}
       <motion.button
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
