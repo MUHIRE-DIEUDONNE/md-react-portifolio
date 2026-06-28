@@ -415,3 +415,29 @@ html.light-mode .text-light,
 html.light-mode .text-light\/70 {
   color: #0f172a !important;
 }
+/* ─── CURSOR FIX – prevent shrinking ─── */
+.cursor-dot,
+.cursor-outline {
+  transform: none !important;
+  transition: none !important;
+}
+
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: #d4af55;
+}
+
+.cursor-outline {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #d4af55;
+  opacity: 0.8;
+}
+
+/* Remove hover scaling */
+a:hover ~ .cursor-outline,
+button:hover ~ .cursor-outline,
+.clickable:hover ~ .cursor-outline {
+  transform: none !important;
+}
