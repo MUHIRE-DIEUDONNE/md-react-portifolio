@@ -8,6 +8,210 @@ import {
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
+const STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --exp-bg: #0c0b09;
+    --exp-surface: #131210;
+    --exp-card: rgba(22,20,16,0.95);
+    --exp-border: rgba(255,245,220,0.07);
+    --exp-border-hi: rgba(212,175,85,0.35);
+    --exp-gold: #d4af55;
+    --exp-gold-dim: rgba(212,175,85,0.18);
+    --exp-cream: #f5eed8;
+    --exp-muted: rgba(245,238,216,0.5);
+    --exp-dim: rgba(245,238,216,0.2);
+    --exp-display: 'Playfair Display', serif;
+    --exp-body: 'Instrument Sans', sans-serif;
+  }
+
+  .exp-root *, .exp-root *::before, .exp-root *::after {
+    box-sizing: border-box;
+  }
+
+  .exp-root {
+    position: relative;
+    overflow: hidden;
+    background: var(--exp-bg);
+    color: var(--exp-cream);
+    font-family: var(--exp-body);
+    padding: clamp(80px, 10vw, 160px) 0;
+    min-height: 100vh;
+  }
+
+  .exp-root::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.5;
+  }
+
+  .exp-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 clamp(24px, 5vw, 60px);
+    position: relative;
+    z-index: 10;
+  }
+
+  .exp-pill {
+    padding: 8px 22px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid var(--exp-border);
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    color: var(--exp-muted);
+    font-family: var(--exp-body);
+    transition: all 0.22s ease;
+    white-space: nowrap;
+  }
+  .exp-pill:hover {
+    border-color: var(--exp-border-hi);
+    color: var(--exp-cream);
+    background: rgba(0,0,0,0.7);
+  }
+  .exp-pill.active {
+    background: var(--exp-gold);
+    border-color: var(--exp-gold);
+    color: #0c0b09;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(212,175,85,0.35);
+  }
+
+  .exp-card {
+    border: 1px solid var(--exp-border);
+    background: var(--exp-card);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    will-change: transform;
+    position: relative;
+    overflow: hidden;
+  }
+  .exp-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--exp-gold-dim), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .exp-card:hover {
+    border-color: var(--exp-border-hi);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    transform: translateY(-2px);
+  }
+  .exp-card:hover::before { opacity: 1; }
+
+  .exp-badge {
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid var(--exp-border-hi);
+    background: var(--exp-gold-dim);
+    color: var(--exp-gold);
+    font-family: var(--exp-body);
+    transition: transform 0.15s, background 0.15s;
+    white-space: nowrap;
+  }
+  .exp-badge:hover {
+    transform: scale(1.05);
+    background: rgba(212,175,85,0.25);
+  }
+
+  .exp-stat {
+    padding: 20px;
+    min-width: 140px;
+    border-radius: 18px;
+    border: 1px solid var(--exp-border);
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(20px);
+    transition: border-color 0.25s, background 0.25s, transform 0.2s;
+    text-align: center;
+  }
+  .exp-stat:hover {
+    border-color: var(--exp-border-hi);
+    background: rgba(212,175,85,0.08);
+    transform: translateY(-4px);
+  }
+
+  .exp-type {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-family: var(--exp-body);
+    white-space: nowrap;
+  }
+
+  .exp-index {
+    font-family: var(--exp-display);
+    font-size: clamp(80px, 12vw, 140px);
+    font-weight: 900;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(212,175,85,0.2);
+    user-select: none;
+    pointer-events: none;
+    position: absolute;
+    top: -10px;
+    right: 12px;
+    transition: -webkit-text-stroke-color 0.3s;
+  }
+  .exp-card:hover .exp-index {
+    -webkit-text-stroke-color: rgba(212,175,85,0.35);
+  }
+
+  .exp-rule {
+    height: 1px;
+    background: linear-gradient(90deg, var(--exp-gold) 0%, rgba(212,175,85,0.15) 60%, transparent 100%);
+  }
+
+  .exp-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--exp-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 0;
+    transition: opacity 0.2s;
+    color: var(--exp-gold);
+    white-space: nowrap;
+  }
+  .exp-toggle:hover { opacity: 0.7; }
+
+  .exp-glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  @media (max-width: 640px) {
+    .exp-index { font-size: 80px; right: 8px; }
+  }
+`
+
 const Experience = () => {
   const [filter, setFilter] = useState('all')
   const [autoRotate, setAutoRotate] = useState(true)
@@ -157,111 +361,139 @@ const Experience = () => {
         initial={{ opacity: 0, y: 40 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
-        className={`relative ${index < total - 1 ? 'mb-5' : ''}`}
+        style={{ position: 'relative', marginBottom: index < total - 1 ? 20 : 0 }}
       >
-        <div className="glass-card p-[clamp(20px,3vw,28px)] relative">
-          <div
-            className="absolute -top-2.5 right-3 text-[clamp(80px,12vw,140px)] font-black leading-none select-none pointer-events-none"
-            style={{ fontFamily: "'Playfair Display', serif", color: 'transparent', WebkitTextStroke: '1px rgba(212,175,85,0.2)' }}
-          >
-            {String(index + 1).padStart(2, '0')}
-          </div>
+        <div className="exp-card" style={{ padding: 'clamp(20px, 3vw, 28px)' }}>
+          <div className="exp-index">{String(index + 1).padStart(2, '0')}</div>
 
-          <div className="flex items-start gap-4 flex-wrap relative z-10">
-            <div className="flex-shrink-0 pt-1.5">
-              <div
-                className="w-3.5 h-3.5 rounded-full border-2 border-[#0c0b09]"
-                style={{ background: exp.color, boxShadow: `0 0 16px ${exp.color}60` }}
-              />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2.5 mb-1">
-                <h3
-                  className="text-[clamp(18px,3vw,22px)] font-bold leading-tight"
-                  style={{ fontFamily: "'Playfair Display', serif", color: '#f5eed8' }}
-                >
-                  {exp.company}
-                </h3>
-                <span
-                  className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border"
-                  style={{ background: exp.typeColor.bg, color: exp.typeColor.text, borderColor: exp.typeColor.border }}
-                >
-                  {exp.type}
-                </span>
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+              <div style={{ flexShrink: 0, paddingTop: 6 }}>
+                <div style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: exp.color,
+                  boxShadow: `0 0 16px ${exp.color}60`,
+                  border: '3px solid rgba(0,0,0,0.5)',
+                }} />
               </div>
 
-              <p className="text-sm font-semibold tracking-[0.04em] mb-2.5" style={{ color: exp.color }}>
-                {exp.position}
-              </p>
-
-              <div className="flex flex-wrap gap-4 mb-3.5">
-                {[
-                  { icon: FiCalendar, text: exp.period },
-                  { icon: FiMapPin, text: exp.location },
-                ].map(({ icon: Icon, text }) => (
-                  <div key={text} className="flex items-center gap-1.5 text-xs" style={{ color: 'rgba(245,238,216,0.42)' }}>
-                    <Icon size={11} />
-                    <span>{text}</span>
-                  </div>
-                ))}
-              </div>
-
-              <p className="text-sm leading-relaxed max-w-[640px] mb-4" style={{ color: 'rgba(245,238,216,0.42)' }}>
-                {exp.description}
-              </p>
-
-              <div className="flex flex-wrap gap-1.5 mb-4.5">
-                {exp.technologies.map(tech => (
-                  <span key={tech} className="badge-gold">{tech}</span>
-                ))}
-              </div>
-
-              <button
-                className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider bg-none border-none cursor-pointer transition-opacity hover:opacity-70"
-                style={{ color: exp.color }}
-                onClick={() => setExpanded(e => !e)}
-              >
-                <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.25 }}>
-                  <FiChevronDown size={13} />
-                </motion.span>
-                {expanded ? 'Hide details' : 'View achievements'}
-              </button>
-            </div>
-          </div>
-
-          <AnimatePresence initial={false}>
-            {expanded && (
-              <motion.div
-                key="details"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-                className="overflow-hidden"
-              >
-                <div className="mt-5 pt-5 border-t" style={{ borderColor: 'rgba(255,245,220,0.07)' }}>
-                  <p className="text-[9px] font-bold tracking-[0.14em] uppercase mb-3.5" style={{ color: '#d4af55' }}>
-                    Key Achievements
-                  </p>
-                  <ul className="list-none flex flex-col gap-2.5">
-                    {exp.achievements.map((a, i) => (
-                      <motion.li
-                        key={i}
-                        initial={{ x: -16, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: i * 0.08, duration: 0.3 }}
-                        className="flex items-start gap-2.5"
-                      >
-                        <FiCheckCircle size={13} color={exp.color} className="flex-shrink-0 mt-0.5" />
-                        <span className="text-sm leading-relaxed" style={{ color: 'rgba(245,238,216,0.42)' }}>{a}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                  <h3 style={{
+                    fontFamily: 'var(--exp-display)',
+                    fontSize: 'clamp(18px, 3vw, 22px)',
+                    fontWeight: 700,
+                    color: 'var(--exp-cream)',
+                    lineHeight: 1.2,
+                  }}>
+                    {exp.company}
+                  </h3>
+                  <span className="exp-type" style={{
+                    background: exp.typeColor.bg,
+                    color: exp.typeColor.text,
+                    border: `1px solid ${exp.typeColor.border}`,
+                  }}>
+                    {exp.type}
+                  </span>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+
+                <p style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: '0.04em',
+                  color: exp.color,
+                  marginBottom: 10,
+                }}>
+                  {exp.position}
+                </p>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 14 }}>
+                  {[
+                    { icon: FiCalendar, text: exp.period },
+                    { icon: FiMapPin, text: exp.location },
+                  ].map(({ icon: Icon, text }) => (
+                    <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--exp-muted)', fontSize: 12 }}>
+                      <Icon size={11} />
+                      <span>{text}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--exp-muted)', maxWidth: 640, marginBottom: 16 }}>
+                  {exp.description}
+                </p>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 18 }}>
+                  {exp.technologies.map(tech => (
+                    <span key={tech} className="exp-badge" style={{
+                      background: `${exp.color}20`,
+                      color: exp.color,
+                      borderColor: `${exp.color}60`,
+                    }}>
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+
+                <button
+                  className="exp-toggle"
+                  style={{ color: exp.color }}
+                  onClick={() => setExpanded(e => !e)}
+                >
+                  <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.25 }}>
+                    <FiChevronDown size={13} />
+                  </motion.span>
+                  {expanded ? 'Hide details' : 'View achievements'}
+                </button>
+              </div>
+            </div>
+
+            <AnimatePresence initial={false}>
+              {expanded && (
+                <motion.div
+                  key="details"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ overflow: 'hidden' }}
+                >
+                  <div style={{
+                    marginTop: 20,
+                    paddingTop: 20,
+                    borderTop: '1px solid var(--exp-border)',
+                  }}>
+                    <p style={{
+                      fontSize: 9,
+                      fontWeight: 700,
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      color: 'var(--exp-gold)',
+                      marginBottom: 14,
+                    }}>
+                      Key Achievements
+                    </p>
+                    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {exp.achievements.map((a, i) => (
+                        <motion.li
+                          key={i}
+                          initial={{ x: -16, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: i * 0.08, duration: 0.3 }}
+                          style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}
+                        >
+                          <FiCheckCircle size={13} color={exp.color} style={{ flexShrink: 0, marginTop: 2 }} />
+                          <span style={{ fontSize: 13, color: 'var(--exp-muted)', lineHeight: 1.65 }}>{a}</span>
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </motion.div>
     )
@@ -420,80 +652,157 @@ const Experience = () => {
       if (citiesGroupRef.current) citiesGroupRef.current.visible = showCities
     }, [showCities])
 
-    return <div ref={containerRef} className="absolute inset-0 z-1" />
+    return <div ref={containerRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }} />
   }
+
+  const lightModeStyles = `
+    html.light-mode .exp-root {
+      --exp-bg: #ffffff;
+      --exp-surface: #f8fafc;
+      --exp-card: rgba(255, 255, 255, 0.95);
+      --exp-border: rgba(0, 0, 0, 0.1);
+      --exp-border-hi: rgba(99, 102, 241, 0.3);
+      --exp-gold: #6366f1;
+      --exp-gold-dim: rgba(99, 102, 241, 0.1);
+      --exp-cream: #0f172a;
+      --exp-muted: rgba(15, 23, 42, 0.5);
+      --exp-dim: rgba(15, 23, 42, 0.2);
+    }
+    html.light-mode .exp-root::before {
+      opacity: 0.1;
+    }
+  `
 
   const filtered = filter === 'all' ? EXPERIENCES : EXPERIENCES.filter(e => e.type === filter)
 
   return (
-    <section id="experience" className="py-[clamp(60px,8vw,120px)] relative overflow-hidden min-h-screen" style={{ background: '#0c0b09' }}>
+    <section id="experience" className="exp-root">
+      <style>{STYLES}{lightModeStyles}</style>
+
+      <div className="exp-glow-orb" style={{
+        width: 700, height: 700,
+        background: 'radial-gradient(circle, rgba(212,175,85,0.08), transparent)',
+        top: '-20%', left: '-10%',
+        zIndex: 1,
+      }} />
+      <div className="exp-glow-orb" style={{
+        width: 500, height: 500,
+        background: 'radial-gradient(circle, rgba(46,204,154,0.05), transparent)',
+        bottom: '-10%', right: '-10%',
+        zIndex: 1,
+      }} />
+
       <GlobeBackground autoRotate={autoRotate} showCities={showCities} />
 
-      <div
-        className="absolute inset-0 z-2 pointer-events-none"
-        style={{ background: 'radial-gradient(circle at center, rgba(12,11,9,0.2) 0%, rgba(12,11,9,0.85) 85%)' }}
-      />
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'radial-gradient(circle at center, rgba(12,11,9,0.2) 0%, rgba(12,11,9,0.85) 85%)',
+        pointerEvents: 'none',
+        zIndex: 2,
+      }} />
 
-      <div className="container-responsive relative z-10">
-        {/* ── HEADER ── */}
+      <div className="exp-container">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-[clamp(48px,7vw,80px)]"
+          style={{ marginBottom: 'clamp(48px, 7vw, 80px)' }}
         >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-7 h-px" style={{ background: '#d4af55' }} />
-            <span className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: '#d4af55', fontFamily: "'Instrument Sans', system-ui" }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ width: 28, height: 1, background: 'var(--exp-gold)' }} />
+            <span style={{
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+              color: 'var(--exp-gold)',
+              fontFamily: 'var(--exp-body)',
+            }}>
               Career Timeline
             </span>
           </div>
-          <h2 className="section-title">
+          <h2 style={{
+            fontFamily: 'var(--exp-display)',
+            fontSize: 'clamp(38px, 7vw, 72px)',
+            fontWeight: 900,
+            lineHeight: 1.02,
+            color: 'var(--exp-cream)',
+            letterSpacing: '-0.02em',
+            marginBottom: 18,
+          }}>
             Professional<br />
-            <em style={{ color: '#d4af55', fontStyle: 'italic' }}>Experience</em>
+            <em style={{ color: 'var(--exp-gold)', fontStyle: 'italic' }}>Experience</em>
           </h2>
-          <p className="section-sub">
+          <p style={{
+            fontSize: 15,
+            color: 'var(--exp-muted)',
+            maxWidth: 480,
+            lineHeight: 1.7,
+          }}>
             Five years across agencies, startups, and independent labs — building interfaces that move and worlds that breathe.
           </p>
         </motion.div>
 
-        {/* ── STATS ── */}
+        {/* Stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-[clamp(36px,5vw,56px)]"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+            gap: 12,
+            marginBottom: 'clamp(36px, 5vw, 56px)',
+          }}
         >
           {STATS.map((s, i) => (
-            <motion.div key={i} className="glass-card p-5 text-center transition-all hover:-translate-y-1">
-              <div className="text-[clamp(26px,4vw,36px)] font-black leading-none mb-1.5" style={{ fontFamily: "'Playfair Display', serif", color: '#f5eed8' }}>
+            <motion.div key={i} className="exp-stat" whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+              <div style={{
+                fontSize: 'clamp(28px, 4vw, 42px)',
+                fontWeight: 900,
+                fontFamily: 'var(--exp-display)',
+                color: 'var(--exp-cream)',
+                lineHeight: 1,
+                marginBottom: 6,
+              }}>
                 <Counter value={s.value} />
               </div>
-              <div className="text-[10px] font-semibold tracking-[0.1em] uppercase" style={{ color: 'rgba(245,238,216,0.3)' }}>
+              <div style={{
+                fontSize: 11,
+                color: 'var(--exp-dim)',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+              }}>
                 {s.label}
               </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* ── FILTERS ── */}
+        {/* Filters */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="flex flex-wrap gap-2 mb-[clamp(28px,4vw,44px)]"
+          style={{
+            display: 'flex',
+            gap: 8,
+            marginBottom: 'clamp(28px, 4vw, 44px)',
+            flexWrap: 'wrap',
+          }}
         >
           {FILTERS.map(f => (
             <button
               key={f.id}
-              className={`px-5 py-2 rounded-full text-xs font-medium uppercase tracking-wider border transition-all ${
-                filter === f.id
-                  ? 'bg-[#d4af55] border-[#d4af55] text-[#0c0b09] font-semibold shadow-lg shadow-[#d4af55]/35'
-                  : 'border-[rgba(255,245,220,0.07)] bg-transparent text-[rgba(245,238,216,0.42)] hover:border-[rgba(212,175,85,0.35)] hover:text-[#f5eed8]'
-              }`}
+              className={`exp-pill ${filter === f.id ? 'active' : ''}`}
               onClick={() => setFilter(f.id)}
             >
               {f.label}
@@ -501,39 +810,82 @@ const Experience = () => {
           ))}
         </motion.div>
 
-        {/* ── RULE ── */}
-        <div className="rule-gold mb-[clamp(28px,4vw,40px)]" />
+        {/* Rule */}
+        <div className="exp-rule" style={{ marginBottom: 'clamp(28px, 4vw, 40px)' }} />
 
-        {/* ── CARDS ── */}
+        {/* Cards */}
         <AnimatePresence mode="wait">
-          <motion.div key={filter} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
+          <motion.div
+            key={filter}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
             {filtered.map((exp, i) => (
               <ExpCard key={exp.id} exp={exp} index={i} total={filtered.length} />
             ))}
           </motion.div>
         </AnimatePresence>
 
-        {/* ── RULE ── */}
-        <div className="rule-gold mt-[clamp(32px,5vw,52px)]" />
+        <div className="exp-rule" style={{ margin: 'clamp(32px, 5vw, 52px) 0' }} />
       </div>
 
-      {/* ── GLOBE CONTROLS ── */}
-      <div
-        className="absolute bottom-6 right-6 z-30 flex flex-wrap gap-3 px-5 py-2 rounded-full border border-[rgba(212,175,85,0.25)] backdrop-blur-lg"
-        style={{ background: 'rgba(12,11,9,0.7)' }}
-      >
+      {/* Controls */}
+      <div style={{
+        position: 'absolute',
+        bottom: '24px',
+        right: '24px',
+        zIndex: 30,
+        display: 'flex',
+        gap: '12px',
+        background: 'rgba(12,11,9,0.7)',
+        backdropFilter: 'blur(12px)',
+        padding: '8px 20px',
+        borderRadius: '60px',
+        border: '1px solid rgba(212,175,85,0.25)',
+        fontFamily: 'var(--exp-body)',
+      }}>
         <button
           onClick={() => setAutoRotate(!autoRotate)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide border-none transition-all"
-          style={{ color: autoRotate ? '#d4af55' : '#f5eed8', fontFamily: "'Instrument Sans', system-ui" }}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: autoRotate ? '#d4af55' : '#f5eed8',
+            fontSize: '11px',
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+            padding: '6px 12px',
+            borderRadius: '40px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.2s',
+            fontFamily: 'inherit',
+          }}
         >
           <FiRotateCw size={12} />
           ROTATION
         </button>
         <button
           onClick={() => setShowCities(!showCities)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide border-none transition-all"
-          style={{ color: showCities ? '#d4af55' : '#f5eed8', fontFamily: "'Instrument Sans', system-ui" }}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: showCities ? '#d4af55' : '#f5eed8',
+            fontSize: '11px',
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+            padding: '6px 12px',
+            borderRadius: '40px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.2s',
+            fontFamily: 'inherit',
+          }}
         >
           <FiGlobe size={12} />
           MARKERS
