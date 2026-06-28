@@ -8,6 +8,9 @@ import {
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
+/* ─────────────────────────────────────────────
+   INJECTED STYLES
+───────────────────────────────────────────── */
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
 
@@ -58,6 +61,7 @@ const STYLES = `
     backdrop-filter: blur(4px);
     color: var(--exp-muted); font-family: var(--exp-body);
     transition: all 0.22s ease;
+    white-space: nowrap;
   }
   .exp-pill:hover { border-color: var(--exp-border-hi); color: var(--exp-cream); background: rgba(0,0,0,0.7); }
   .exp-pill.active {
@@ -94,6 +98,7 @@ const STYLES = `
     border: 1px solid; font-family: var(--exp-body);
     transition: transform 0.15s;
     background: rgba(0,0,0,0.4);
+    white-space: nowrap;
   }
   .exp-badge:hover { transform: scale(1.05); }
 
@@ -121,6 +126,7 @@ const STYLES = `
     font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
     padding: 8px 0; transition: opacity 0.2s;
     color: var(--exp-gold);
+    white-space: nowrap;
   }
   .exp-toggle:hover { opacity: 0.7; }
 
@@ -142,6 +148,7 @@ const STYLES = `
     display: inline-block; padding: 3px 10px; border-radius: 100px;
     font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
     font-family: var(--exp-body);
+    white-space: nowrap;
   }
 
   @media (max-width: 640px) {
@@ -149,6 +156,9 @@ const STYLES = `
   }
 `
 
+/* ─────────────────────────────────────────────
+   DATA
+───────────────────────────────────────────── */
 const EXPERIENCES = [
   {
     id: 1,
@@ -250,6 +260,9 @@ const FILTERS = [
   { id: 'freelance', label: 'Freelance' },
 ]
 
+/* ─────────────────────────────────────────────
+   ANIMATED COUNTER
+───────────────────────────────────────────── */
 const Counter = ({ value }) => {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true })
@@ -274,6 +287,9 @@ const Counter = ({ value }) => {
   return <span ref={ref}>{inView ? display : 0}{suffix}</span>
 }
 
+/* ─────────────────────────────────────────────
+   EXPERIENCE CARD
+───────────────────────────────────────────── */
 const ExpCard = ({ exp, index, total }) => {
   const [expanded, setExpanded] = useState(false)
   const ref = useRef(null)
@@ -380,6 +396,9 @@ const ExpCard = ({ exp, index, total }) => {
   )
 }
 
+/* ─────────────────────────────────────────────
+   GLOBE BACKGROUND COMPONENT (FASTER ROTATION)
+───────────────────────────────────────────── */
 const GlobeBackground = ({ autoRotate, showCities }) => {
   const containerRef = useRef(null)
   const sceneRef = useRef(null)
@@ -413,7 +432,7 @@ const GlobeBackground = ({ autoRotate, showCities }) => {
     controls.enableDamping = true
     controls.dampingFactor = 0.05
     controls.autoRotate = autoRotate
-    controls.autoRotateSpeed = 2.5
+    controls.autoRotateSpeed = 2.5  // FAST ROTATION
     controls.enableZoom = false
     controls.enablePan = false
     controls.rotateSpeed = 1.0
@@ -539,6 +558,9 @@ const GlobeBackground = ({ autoRotate, showCities }) => {
   return <div ref={containerRef} className="absolute inset-0 z-1" />
 }
 
+/* ─────────────────────────────────────────────
+   LIGHT MODE STYLES
+───────────────────────────────────────────── */
 const lightModeStyles = `
   html.light-mode .exp-root {
     --exp-bg: #ffffff;
@@ -557,6 +579,9 @@ const lightModeStyles = `
   }
 `
 
+/* ─────────────────────────────────────────────
+   MAIN SECTION
+───────────────────────────────────────────── */
 const Experience = () => {
   const [filter, setFilter] = useState('all')
   const [autoRotate, setAutoRotate] = useState(true)
@@ -664,7 +689,7 @@ const Experience = () => {
       </div>
 
       {/* Controls */}
-      <div className="absolute bottom-6 right-6 z-30 flex gap-3 px-5 py-2 rounded-full border border-[rgba(212,175,85,0.25)] backdrop-blur-lg" style={{ background: 'rgba(12,11,9,0.7)' }}>
+      <div className="absolute bottom-6 right-6 z-30 flex flex-wrap gap-3 px-5 py-2 rounded-full border border-[rgba(212,175,85,0.25)] backdrop-blur-lg" style={{ background: 'rgba(12,11,9,0.7)' }}>
         <button
           onClick={() => setAutoRotate(!autoRotate)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide border-none transition-all"
