@@ -3,35 +3,31 @@ import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import {
   FiBriefcase, FiMapPin, FiCalendar, FiChevronDown,
-  FiArrowUpRight, FiDownload, FiCheckCircle, FiRotateCw, FiGlobe
+  FiCheckCircle, FiRotateCw, FiGlobe
 } from 'react-icons/fi'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
-/* ─────────────────────────────────────────────
-   INJECTED STYLES
-───────────────────────────────────────────── */
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
 
   :root {
-    --exp-bg:        transparent;
-    --exp-surface:   #131210;
-    --exp-card:      rgba(22, 20, 16, 0.88);
-    --exp-border:    rgba(255,245,220,0.12);
+    --exp-bg: transparent;
+    --exp-surface: #131210;
+    --exp-card: rgba(22, 20, 16, 0.88);
+    --exp-border: rgba(255,245,220,0.12);
     --exp-border-hi: rgba(212,175,85,0.45);
-    --exp-gold:      #d4af55;
-    --exp-gold-dim:  rgba(212,175,85,0.2);
-    --exp-cream:     #f5eed8;
-    --exp-muted:     rgba(245,238,216,0.7);
-    --exp-dim:       rgba(245,238,216,0.3);
-    --exp-display:   'Playfair Display', Georgia, serif;
-    --exp-body:      'Instrument Sans', system-ui, sans-serif;
+    --exp-gold: #d4af55;
+    --exp-gold-dim: rgba(212,175,85,0.2);
+    --exp-cream: #f5eed8;
+    --exp-muted: rgba(245,238,216,0.7);
+    --exp-dim: rgba(245,238,216,0.3);
+    --exp-display: 'Playfair Display', Georgia, serif;
+    --exp-body: 'Instrument Sans', system-ui, sans-serif;
   }
 
   .exp-root *, .exp-root *::before, .exp-root *::after {
-    box-sizing: border-box;
-    margin: 0; padding: 0;
+    box-sizing: border-box; margin: 0; padding: 0;
   }
 
   .exp-root {
@@ -43,7 +39,6 @@ const STYLES = `
     overflow: hidden;
   }
 
-  /* Grain overlay */
   .exp-root::before {
     content: '';
     position: absolute; inset: 0; z-index: 2; pointer-events: none;
@@ -51,12 +46,10 @@ const STYLES = `
     opacity: 0.5;
   }
 
-  /* Scrollbar */
   .exp-root ::-webkit-scrollbar { width: 3px; }
   .exp-root ::-webkit-scrollbar-track { background: transparent; }
   .exp-root ::-webkit-scrollbar-thumb { background: var(--exp-border-hi); border-radius: 4px; }
 
-  /* Filter pill */
   .exp-pill {
     padding: 8px 22px; border-radius: 100px; font-size: 12px; font-weight: 500;
     letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
@@ -73,7 +66,6 @@ const STYLES = `
     box-shadow: 0 4px 20px rgba(212,175,85,0.35);
   }
 
-  /* Card hover */
   .exp-card {
     border: 1px solid var(--exp-border);
     background: var(--exp-card);
@@ -96,7 +88,6 @@ const STYLES = `
   }
   .exp-card:hover::before { opacity: 1; }
 
-  /* Tech badge */
   .exp-badge {
     padding: 4px 12px; border-radius: 100px; font-size: 10px;
     font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
@@ -106,7 +97,6 @@ const STYLES = `
   }
   .exp-badge:hover { transform: scale(1.05); }
 
-  /* Index number */
   .exp-index {
     font-family: var(--exp-display);
     font-size: clamp(80px, 12vw, 140px);
@@ -119,13 +109,11 @@ const STYLES = `
   }
   .exp-card:hover .exp-index { -webkit-text-stroke-color: rgba(212,175,85,0.35); }
 
-  /* Section rule */
   .exp-rule {
     height: 1px;
     background: linear-gradient(90deg, var(--exp-gold) 0%, rgba(212,175,85,0.15) 60%, transparent 100%);
   }
 
-  /* Expand toggle */
   .exp-toggle {
     display: inline-flex; align-items: center; gap: 6px;
     background: none; border: none; cursor: pointer;
@@ -136,7 +124,6 @@ const STYLES = `
   }
   .exp-toggle:hover { opacity: 0.7; }
 
-  /* Stat card */
   .exp-stat {
     border: 1px solid var(--exp-border);
     border-radius: 16px; padding: 20px 16px;
@@ -151,7 +138,6 @@ const STYLES = `
     background: rgba(212,175,85,0.12);
   }
 
-  /* Type badge */
   .exp-type {
     display: inline-block; padding: 3px 10px; border-radius: 100px;
     font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
@@ -163,9 +149,6 @@ const STYLES = `
   }
 `
 
-/* ─────────────────────────────────────────────
-   DATA
-───────────────────────────────────────────── */
 const EXPERIENCES = [
   {
     id: 1,
@@ -267,9 +250,6 @@ const FILTERS = [
   { id: 'freelance', label: 'Freelance' },
 ]
 
-/* ─────────────────────────────────────────────
-   ANIMATED COUNTER
-───────────────────────────────────────────── */
 const Counter = ({ value }) => {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true })
@@ -294,9 +274,6 @@ const Counter = ({ value }) => {
   return <span ref={ref}>{inView ? display : 0}{suffix}</span>
 }
 
-/* ─────────────────────────────────────────────
-   EXPERIENCE CARD
-───────────────────────────────────────────── */
 const ExpCard = ({ exp, index, total }) => {
   const [expanded, setExpanded] = useState(false)
   const ref = useRef(null)
@@ -308,69 +285,50 @@ const ExpCard = ({ exp, index, total }) => {
       initial={{ opacity: 0, y: 40 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
-      style={{ position: 'relative', marginBottom: index < total - 1 ? 20 : 0 }}
+      className={`relative ${index < total - 1 ? 'mb-5' : ''}`}
     >
       <div className="exp-card">
         <div className="exp-index">{String(index + 1).padStart(2, '0')}</div>
 
-        <div style={{ padding: '28px 28px 24px', position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
-            <div style={{ flexShrink: 0, paddingTop: 6 }}>
-              <div style={{
-                width: 14, height: 14, borderRadius: '50%',
-                background: exp.color,
-                boxShadow: `0 0 16px ${exp.color}60`,
-                border: '3px solid rgba(0,0,0,0.5)',
-                flexShrink: 0,
-              }} />
+        <div className="p-[clamp(20px,3vw,28px)] relative z-10">
+          <div className="flex items-start gap-4 flex-wrap">
+            <div className="flex-shrink-0 pt-1.5">
+              <div className="w-3.5 h-3.5 rounded-full border-[3px] border-black/50" style={{ background: exp.color, boxShadow: `0 0 16px ${exp.color}60` }} />
             </div>
 
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                <h3 style={{
-                  fontFamily: 'var(--exp-display)', fontSize: 'clamp(18px, 3vw, 22px)',
-                  fontWeight: 700, color: 'var(--exp-cream)', lineHeight: 1.2,
-                }}>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2.5 mb-1">
+                <h3 className="text-[clamp(18px,3vw,22px)] font-bold leading-tight" style={{ fontFamily: 'var(--exp-display)', color: 'var(--exp-cream)' }}>
                   {exp.company}
                 </h3>
-                <span className="exp-type" style={{
-                  background: exp.typeColor.bg, color: exp.typeColor.text,
-                  border: `1px solid ${exp.typeColor.border}`,
-                }}>
+                <span className="exp-type" style={{ background: exp.typeColor.bg, color: exp.typeColor.text, border: `1px solid ${exp.typeColor.border}` }}>
                   {exp.type}
                 </span>
               </div>
 
-              <p style={{
-                fontSize: 13, fontWeight: 600, letterSpacing: '0.04em',
-                color: exp.color, marginBottom: 10,
-              }}>
+              <p className="text-sm font-semibold tracking-[0.04em] mb-2.5" style={{ color: exp.color }}>
                 {exp.position}
               </p>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 14 }}>
+              <div className="flex flex-wrap gap-4 mb-3.5">
                 {[
                   { icon: FiCalendar, text: exp.period },
                   { icon: FiMapPin, text: exp.location },
                 ].map(({ icon: Icon, text }) => (
-                  <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--exp-muted)', fontSize: 12 }}>
+                  <div key={text} className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--exp-muted)' }}>
                     <Icon size={11} />
                     <span>{text}</span>
                   </div>
                 ))}
               </div>
 
-              <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--exp-muted)', maxWidth: 640, marginBottom: 16 }}>
+              <p className="text-sm leading-relaxed max-w-[640px] mb-4" style={{ color: 'var(--exp-muted)' }}>
                 {exp.description}
               </p>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 18 }}>
+              <div className="flex flex-wrap gap-1.5 mb-4.5">
                 {exp.technologies.map(tech => (
-                  <span key={tech} className="exp-badge" style={{
-                    background: `${exp.color}20`,
-                    color: exp.color,
-                    borderColor: `${exp.color}60`,
-                  }}>
+                  <span key={tech} className="exp-badge" style={{ background: `${exp.color}20`, color: exp.color, borderColor: `${exp.color}60` }}>
                     {tech}
                   </span>
                 ))}
@@ -393,29 +351,22 @@ const ExpCard = ({ exp, index, total }) => {
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-                style={{ overflow: 'hidden' }}
+                className="overflow-hidden"
               >
-                <div style={{
-                  marginTop: 20, paddingTop: 20,
-                  borderTop: '1px solid var(--exp-border)',
-                }}>
-                  <p style={{
-                    fontSize: 9, fontWeight: 700, letterSpacing: '0.14em',
-                    textTransform: 'uppercase', color: 'var(--exp-gold)',
-                    marginBottom: 14,
-                  }}>
+                <div className="mt-5 pt-5 border-t" style={{ borderColor: 'var(--exp-border)' }}>
+                  <p className="text-[9px] font-bold tracking-[0.14em] uppercase mb-3.5" style={{ color: 'var(--exp-gold)' }}>
                     Key Achievements
                   </p>
-                  <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <ul className="list-none flex flex-col gap-2.5">
                     {exp.achievements.map((a, i) => (
                       <motion.li key={i}
                         initial={{ x: -16, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ delay: i * 0.08, duration: 0.3 }}
-                        style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}
+                        className="flex items-start gap-2.5"
                       >
-                        <FiCheckCircle size={13} color={exp.color} style={{ flexShrink: 0, marginTop: 2 }} />
-                        <span style={{ fontSize: 13, color: 'var(--exp-muted)', lineHeight: 1.65 }}>{a}</span>
+                        <FiCheckCircle size={13} color={exp.color} className="flex-shrink-0 mt-0.5" />
+                        <span className="text-sm leading-relaxed" style={{ color: 'var(--exp-muted)' }}>{a}</span>
                       </motion.li>
                     ))}
                   </ul>
@@ -429,9 +380,6 @@ const ExpCard = ({ exp, index, total }) => {
   )
 }
 
-/* ─────────────────────────────────────────────
-   GLOBE BACKGROUND COMPONENT (UPDATED - FASTER ROTATION)
-───────────────────────────────────────────── */
 const GlobeBackground = ({ autoRotate, showCities }) => {
   const containerRef = useRef(null)
   const sceneRef = useRef(null)
@@ -447,42 +395,36 @@ const GlobeBackground = ({ autoRotate, showCities }) => {
     const width = containerRef.current.clientWidth
     const height = containerRef.current.clientHeight
     
-    // Scene
     const scene = new THREE.Scene()
     scene.background = null 
     sceneRef.current = scene
     
-    // Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000)
     camera.position.set(0, 0, 3.2)
     cameraRef.current = camera
     
-    // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(width, height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     containerRef.current.appendChild(renderer.domElement)
     rendererRef.current = renderer
     
-    // Controls — UPDATED for faster rotation
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
     controls.dampingFactor = 0.05
     controls.autoRotate = autoRotate
-    controls.autoRotateSpeed = 2.5  // ← INCREASED from 0.8 to 2.5 for faster rotation
+    controls.autoRotateSpeed = 2.5
     controls.enableZoom = false
     controls.enablePan = false
     controls.rotateSpeed = 1.0
     controlsRef.current = controls
     
-    // Earth textures
     const textureLoader = new THREE.TextureLoader()
     const earthMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg')
     const earthSpecularMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg')
     const earthNormalMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg')
     const cloudMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png')
     
-    // Earth sphere
     const earthGeometry = new THREE.SphereGeometry(1, 64, 64)
     const earthMaterial = new THREE.MeshPhongMaterial({
       map: earthMap,
@@ -495,7 +437,6 @@ const GlobeBackground = ({ autoRotate, showCities }) => {
     const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial)
     scene.add(earthMesh)
     
-    // Clouds layer
     const cloudGeometry = new THREE.SphereGeometry(1.015, 64, 64)
     const cloudMaterial = new THREE.MeshPhongMaterial({
       map: cloudMap,
@@ -506,7 +447,6 @@ const GlobeBackground = ({ autoRotate, showCities }) => {
     const clouds = new THREE.Mesh(cloudGeometry, cloudMaterial)
     scene.add(clouds)
     
-    // Stars background
     const starGeometry = new THREE.BufferGeometry()
     const starCount = 1500
     const starPositions = new Float32Array(starCount * 3)
@@ -520,7 +460,6 @@ const GlobeBackground = ({ autoRotate, showCities }) => {
     const stars = new THREE.Points(starGeometry, starMaterial)
     scene.add(stars)
     
-    // Lighting
     const ambientLight = new THREE.AmbientLight(0x555555)
     scene.add(ambientLight)
     const dirLight = new THREE.DirectionalLight(0xffffff, 1.2)
@@ -530,7 +469,6 @@ const GlobeBackground = ({ autoRotate, showCities }) => {
     backLight.position.set(-4, 2, -3)
     scene.add(backLight)
     
-    // Cities group
     const citiesGroup = new THREE.Group()
     scene.add(citiesGroup)
     citiesGroupRef.current = citiesGroup
@@ -561,19 +499,15 @@ const GlobeBackground = ({ autoRotate, showCities }) => {
     
     citiesData.forEach(city => addCityMarker(city.lat, city.lon))
     
-    // Animation loop
     const animate = () => {
       if (controlsRef.current) controlsRef.current.update()
-      
       clouds.rotation.y += 0.0003
       earthMesh.rotation.y += 0.0001
-      
       renderer.render(scene, camera)
       rafId.current = requestAnimationFrame(animate)
     }
     animate()
     
-    // Handle resize
     const handleResize = () => {
       if (!containerRef.current || !cameraRef.current || !rendererRef.current) return
       const w = containerRef.current.clientWidth
@@ -602,12 +536,9 @@ const GlobeBackground = ({ autoRotate, showCities }) => {
     if (citiesGroupRef.current) citiesGroupRef.current.visible = showCities
   }, [showCities])
   
-  return <div ref={containerRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }} />
+  return <div ref={containerRef} className="absolute inset-0 z-1" />
 }
 
-/* ─────────────────────────────────────────────
-   LIGHT MODE STYLES
-───────────────────────────────────────────── */
 const lightModeStyles = `
   html.light-mode .exp-root {
     --exp-bg: #ffffff;
@@ -626,9 +557,6 @@ const lightModeStyles = `
   }
 `
 
-/* ─────────────────────────────────────────────
-   MAIN SECTION
-───────────────────────────────────────────── */
 const Experience = () => {
   const [filter, setFilter] = useState('all')
   const [autoRotate, setAutoRotate] = useState(true)
@@ -646,98 +574,67 @@ const Experience = () => {
     return () => observer.disconnect()
   }, [])
 
-  const filtered = filter === 'all'
-    ? EXPERIENCES
-    : EXPERIENCES.filter(e => e.type === filter)
+  const filtered = filter === 'all' ? EXPERIENCES : EXPERIENCES.filter(e => e.type === filter)
 
   return (
-    <section id="experience" className="exp-root" style={{ position: 'relative', padding: 'clamp(60px, 8vw, 120px) 0', minHeight: '100vh' }}>
+    <section id="experience" className="exp-root relative min-h-screen py-[clamp(60px,8vw,120px)]">
       <style>{STYLES}{lightModeStyles}</style>
       
-      {/* 3D Globe Background */}
       <GlobeBackground autoRotate={autoRotate} showCities={showCities} />
       
-      {/* Radial overlay to improve content contrast */}
-      <div style={{
-        position: 'absolute',
-        top: 0, left: 0, width: '100%', height: '100%',
-        background: 'radial-gradient(circle at center, rgba(3,3,3,0.2) 0%, rgba(3,3,3,0.85) 85%)',
-        pointerEvents: 'none',
-        zIndex: 2,
-      }} />
+      <div className="absolute inset-0 z-2 pointer-events-none" style={{ background: 'radial-gradient(circle at center, rgba(3,3,3,0.2) 0%, rgba(3,3,3,0.85) 85%)' }} />
       
-      {/* Foreground Content Stack */}
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 clamp(20px, 5vw, 48px)', position: 'relative', zIndex: 10 }}>
-
-        {/* ── HEADER ── */}
+      <div className="container-responsive relative z-10">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          style={{ marginBottom: 'clamp(48px, 7vw, 80px)' }}
+          className="mb-[clamp(48px,7vw,80px)]"
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <div style={{ width: 28, height: 1, background: 'var(--exp-gold)' }} />
-            <span style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase',
-              color: 'var(--exp-gold)', fontFamily: 'var(--exp-body)',
-            }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-7 h-px" style={{ background: 'var(--exp-gold)' }} />
+            <span className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: 'var(--exp-gold)', fontFamily: 'var(--exp-body)' }}>
               Career Timeline
             </span>
           </div>
-
-          <h2 style={{
-            fontFamily: 'var(--exp-display)',
-            fontSize: 'clamp(38px, 7vw, 72px)',
-            fontWeight: 900, lineHeight: 1.02,
-            color: 'var(--exp-cream)', letterSpacing: '-0.02em',
-            marginBottom: 18,
-          }}>
+          <h2 className="section-title">
             Professional<br />
             <em style={{ color: 'var(--exp-gold)', fontStyle: 'italic' }}>Experience</em>
           </h2>
-
-          <p style={{ fontSize: 15, color: 'var(--exp-muted)', maxWidth: 480, lineHeight: 1.7 }}>
+          <p className="section-sub">
             Five years across agencies, startups, and independent labs — building interfaces that move and worlds that breathe.
           </p>
         </motion.div>
 
-        {/* ── STATS ── */}
+        {/* Stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          style={{
-            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: 12, marginBottom: 'clamp(36px, 5vw, 56px)',
-          }}
+          className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-[clamp(36px,5vw,56px)]"
         >
           {STATS.map((s, i) => (
-            <motion.div key={i} className="exp-stat"
-              whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-              <div style={{
-                fontFamily: 'var(--exp-display)', fontSize: 'clamp(26px, 4vw, 36px)',
-                fontWeight: 900, color: 'var(--exp-cream)', lineHeight: 1,
-                marginBottom: 6,
-              }}>
+            <motion.div key={i} className="exp-stat" whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+              <div className="text-[clamp(26px,4vw,36px)] font-black leading-none mb-1.5" style={{ fontFamily: 'var(--exp-display)', color: 'var(--exp-cream)' }}>
                 <Counter value={s.value} />
               </div>
-              <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--exp-dim)' }}>
+              <div className="text-[10px] font-semibold tracking-[0.1em] uppercase" style={{ color: 'var(--exp-dim)' }}>
                 {s.label}
               </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* ── FILTER ── */}
+        {/* Filters */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          style={{ display: 'flex', gap: 8, marginBottom: 'clamp(28px, 4vw, 44px)', flexWrap: 'wrap' }}
+          className="flex flex-wrap gap-2 mb-[clamp(28px,4vw,44px)]"
         >
           {FILTERS.map(f => (
             <button key={f.id} className={`exp-pill ${filter === f.id ? 'active' : ''}`}
@@ -747,10 +644,10 @@ const Experience = () => {
           ))}
         </motion.div>
 
-        {/* ── RULE ── */}
-        <div className="exp-rule" style={{ marginBottom: 'clamp(28px, 4vw, 40px)' }} />
+        {/* Rule */}
+        <div className="exp-rule mb-[clamp(28px,4vw,40px)]" />
 
-        {/* ── CARDS ── */}
+        {/* Cards */}
         <AnimatePresence mode="wait">
           <motion.div key={filter}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -762,50 +659,24 @@ const Experience = () => {
           </motion.div>
         </AnimatePresence>
 
-        {/* ── RULE ── */}
-        <div className="exp-rule" style={{ margin: 'clamp(32px, 5vw, 52px) 0' }} />
-
+        {/* Rule */}
+        <div className="exp-rule mt-[clamp(32px,5vw,52px)]" />
       </div>
 
-      {/* Globe Floating Controls Dashboard */}
-      <div style={{
-        position: 'absolute',
-        bottom: '24px',
-        right: '24px',
-        zIndex: 30,
-        display: 'flex',
-        gap: '12px',
-        background: 'rgba(12,11,9,0.7)',
-        backdropFilter: 'blur(12px)',
-        padding: '8px 20px',
-        borderRadius: '60px',
-        border: '1px solid rgba(212,175,85,0.25)',
-        fontFamily: 'var(--exp-body)',
-      }}>
+      {/* Controls */}
+      <div className="absolute bottom-6 right-6 z-30 flex gap-3 px-5 py-2 rounded-full border border-[rgba(212,175,85,0.25)] backdrop-blur-lg" style={{ background: 'rgba(12,11,9,0.7)' }}>
         <button
           onClick={() => setAutoRotate(!autoRotate)}
-          style={{
-            background: 'transparent', border: 'none',
-            color: autoRotate ? '#d4af55' : '#f5eed8',
-            fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em',
-            padding: '6px 12px', borderRadius: '40px', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: '6px',
-            transition: 'all 0.2s', fontFamily: 'inherit',
-          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide border-none transition-all"
+          style={{ color: autoRotate ? '#d4af55' : '#f5eed8', fontFamily: 'var(--exp-body)' }}
         >
           <FiRotateCw size={12} />
           ROTATION
         </button>
         <button
           onClick={() => setShowCities(!showCities)}
-          style={{
-            background: 'transparent', border: 'none',
-            color: showCities ? '#d4af55' : '#f5eed8',
-            fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em',
-            padding: '6px 12px', borderRadius: '40px', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: '6px',
-            transition: 'all 0.2s', fontFamily: 'inherit',
-          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide border-none transition-all"
+          style={{ color: showCities ? '#d4af55' : '#f5eed8', fontFamily: 'var(--exp-body)' }}
         >
           <FiGlobe size={12} />
           MARKERS
