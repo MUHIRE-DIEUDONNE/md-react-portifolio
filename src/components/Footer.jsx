@@ -9,6 +9,205 @@ import {
 import { FaReact } from 'react-icons/fa'
 import { SiThreedotjs } from 'react-icons/si'
 
+const STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --footer-bg: #0c0b09;
+    --footer-surface: #131210;
+    --footer-card: rgba(22,20,16,0.95);
+    --footer-border: rgba(255,245,220,0.07);
+    --footer-border-hi: rgba(212,175,85,0.35);
+    --footer-gold: #d4af55;
+    --footer-gold-dim: rgba(212,175,85,0.18);
+    --footer-cream: #f5eed8;
+    --footer-muted: rgba(245,238,216,0.5);
+    --footer-dim: rgba(245,238,216,0.2);
+    --footer-display: 'Playfair Display', serif;
+    --footer-body: 'Instrument Sans', sans-serif;
+  }
+
+  .footer-root *, .footer-root *::before, .footer-root *::after {
+    box-sizing: border-box;
+  }
+
+  .footer-root {
+    position: relative;
+    overflow: hidden;
+    background: var(--footer-bg);
+    color: var(--footer-cream);
+    font-family: var(--footer-body);
+    padding: clamp(80px, 10vw, 120px) 0 clamp(40px, 5vw, 60px);
+  }
+
+  .footer-root::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.5;
+  }
+
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 clamp(24px, 5vw, 60px);
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-avatar {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    margin-bottom: 16px;
+  }
+  .footer-avatar-inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  .footer-avatar-inner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .footer-avatar:hover .footer-avatar-inner img {
+    transform: scale(1.08);
+  }
+
+  .footer-card {
+    border: 1px solid var(--footer-border);
+    background: var(--footer-card);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 24px 24px 26px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .footer-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--footer-gold-dim), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .footer-card:hover {
+    border-color: var(--footer-border-hi);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+  .footer-card:hover::before { opacity: 1; }
+
+  .footer-input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--footer-border);
+    border-radius: 14px;
+    padding: 13px 16px;
+    font-size: 13px;
+    color: var(--footer-cream);
+    outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+    font-family: var(--footer-body);
+  }
+  .footer-input::placeholder {
+    color: var(--footer-dim);
+  }
+  .footer-input:focus {
+    border-color: var(--footer-border-hi);
+    box-shadow: 0 0 0 3px rgba(212,175,85,0.12);
+    background: rgba(255,255,255,0.07);
+  }
+
+  .footer-btn-primary {
+    width: 100%;
+    padding: 13px 20px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--footer-body);
+    letter-spacing: 0.03em;
+    background: var(--footer-gold);
+    color: #0c0b09;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.25s, background 0.2s;
+    box-shadow: 0 4px 20px rgba(212,175,85,0.35);
+    min-height: 48px;
+    white-space: nowrap;
+  }
+  .footer-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(212,175,85,0.5);
+    background: #e0be6a;
+  }
+
+  .footer-btn-success {
+    background: #10b981;
+    box-shadow: 0 4px 20px rgba(16,185,129,0.35);
+  }
+
+  .footer-rule {
+    height: 1px;
+    background: linear-gradient(90deg, var(--footer-gold) 0%, rgba(212,175,85,0.15) 60%, transparent 100%);
+  }
+
+  .footer-glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  .footer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--footer-gold);
+    background: var(--footer-gold-dim);
+    border: 1px solid var(--footer-border-hi);
+    margin-bottom: 12px;
+  }
+  .footer-badge span.dot {
+    width: 6px; height: 6px;
+    background: var(--footer-gold);
+    border-radius: 50%;
+    animation: footer-pulse-dot 1.6s ease-in-out infinite;
+  }
+  @keyframes footer-pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .footer-perk {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--footer-dim);
+  }
+  .footer-perk svg { color: var(--footer-gold); flex-shrink: 0; }
+`
+
 const Footer = () => {
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
@@ -76,46 +275,98 @@ const Footer = () => {
 
   const perks = ['Weekly insights', 'No spam, ever', 'Unsubscribe anytime']
 
-  return (
-    <footer className="py-[clamp(60px,8vw,100px)] pb-[clamp(40px,5vw,60px)] relative overflow-hidden" style={{ background: '#0c0b09' }}>
-      {/* Ambient blobs */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[5%] left-[-10%] w-[400px] h-[400px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(212,175,85,0.06) 0%, transparent 70%)' }} />
-        <div className="absolute bottom-[10%] right-[-8%] w-[500px] h-[500px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(46,204,154,0.04) 0%, transparent 70%)' }} />
-      </div>
+  const lightModeStyles = `
+    html.light-mode .footer-root {
+      --footer-bg: #ffffff;
+      --footer-surface: #f8fafc;
+      --footer-card: rgba(255, 255, 255, 0.95);
+      --footer-border: rgba(0, 0, 0, 0.1);
+      --footer-border-hi: rgba(99, 102, 241, 0.3);
+      --footer-gold: #6366f1;
+      --footer-gold-dim: rgba(99, 102, 241, 0.1);
+      --footer-cream: #0f172a;
+      --footer-muted: rgba(15, 23, 42, 0.5);
+      --footer-dim: rgba(15, 23, 42, 0.2);
+    }
+    html.light-mode .footer-root::before {
+      opacity: 0.1;
+    }
+  `
 
-      <div className="container-responsive relative z-10">
-        {/* ── MAIN GRID ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[clamp(32px,4vw,56px)] mb-[clamp(40px,5vw,64px)]">
-          {/* BRAND */}
+  return (
+    <footer className="footer-root">
+      <style>{STYLES}{lightModeStyles}</style>
+
+      <div className="footer-glow-orb" style={{
+        width: 400, height: 400,
+        background: 'radial-gradient(circle, rgba(212,175,85,0.06), transparent)',
+        top: '5%', left: '-10%',
+        zIndex: 0,
+      }} />
+      <div className="footer-glow-orb" style={{
+        width: 500, height: 500,
+        background: 'radial-gradient(circle, rgba(46,204,154,0.04), transparent)',
+        bottom: '10%', right: '-8%',
+        zIndex: 0,
+      }} />
+
+      <div className="footer-container">
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: 'clamp(32px, 4vw, 56px)',
+          marginBottom: 'clamp(40px, 5vw, 64px)',
+        }}>
+          {/* Brand */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <div className="relative w-24 h-24 mb-4">
-              <div className="relative z-10 w-full h-full rounded-full overflow-hidden transition-transform duration-400 hover:scale-105">
-                <img
-                  src="/images/muhire-dieudonne.jpg"
-                  alt="Muhire Dieudonne"
-                  className="w-full h-full object-cover"
-                />
+            <div className="footer-avatar">
+              <div className="footer-avatar-inner">
+                <img src="/images/muhire-dieudonne.jpg" alt="Muhire Dieudonne" />
               </div>
             </div>
-            <p className="text-sm font-bold" style={{ color: '#f5eed8' }}>Muhire Dieudonne</p>
-            <p className="text-xs font-medium mb-2.5" style={{ color: '#d4af55' }}>Full-Stack Developer</p>
-            <p className="text-xs leading-relaxed mb-4" style={{ color: 'rgba(245,238,216,0.42)' }}>
+            <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--footer-cream)', marginBottom: 2 }}>
+              Muhire Dieudonne
+            </p>
+            <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--footer-gold)', marginBottom: 10 }}>
+              Full-Stack Developer
+            </p>
+            <p style={{ fontSize: 12, color: 'var(--footer-muted)', lineHeight: 1.7, marginBottom: 16 }}>
               Creating immersive digital experiences with cutting-edge web technologies. Let's build something amazing together.
             </p>
-            <div className="flex gap-2.5 flex-wrap">
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               {socialLinks.map((social, index) => (
                 <motion.a
                   key={index}
                   href={social.href}
                   whileHover={{ y: -3, scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-9 h-9 rounded-full border border-[rgba(255,245,220,0.07)] flex items-center justify-center text-[rgba(245,238,216,0.42)] transition-all hover:border-[rgba(212,175,85,0.35)] hover:text-[#d4af55] hover:bg-[rgba(212,175,85,0.08)]"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: '50%',
+                    border: '1px solid var(--footer-border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--footer-muted)',
+                    transition: 'border-color 0.2s, color 0.2s, background 0.2s',
+                    background: 'transparent',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--footer-gold)'
+                    e.currentTarget.style.color = 'var(--footer-gold)'
+                    e.currentTarget.style.background = 'var(--footer-gold-dim)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--footer-border)'
+                    e.currentTarget.style.color = 'var(--footer-muted)'
+                    e.currentTarget.style.background = 'transparent'
+                  }}
                 >
                   <social.icon size={15} />
                 </motion.a>
@@ -123,19 +374,41 @@ const Footer = () => {
             </div>
           </motion.div>
 
-          {/* QUICK LINKS */}
+          {/* Quick Links */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <p className="text-[10px] font-bold tracking-[0.14em] uppercase mb-4" style={{ color: '#d4af55' }}>Quick Links</p>
-            <ul className="space-y-2">
+            <p style={{
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--footer-gold)',
+              marginBottom: 16,
+            }}>
+              Quick Links
+            </p>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {quickLinks.map((link) => (
                 <motion.li key={link.name} whileHover={{ x: 4 }}>
-                  <a href={link.href} className="flex items-center gap-2 text-xs transition-colors hover:text-[#f5eed8]" style={{ color: 'rgba(245,238,216,0.42)' }}>
-                    <link.icon size={11} style={{ color: 'rgba(245,238,216,0.18)' }} />
+                  <a
+                    href={link.href}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      fontSize: 12,
+                      color: 'var(--footer-muted)',
+                      textDecoration: 'none',
+                      transition: 'color 0.2s',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--footer-cream)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--footer-muted)'}
+                  >
+                    <link.icon size={11} style={{ color: 'var(--footer-dim)' }} />
                     {link.name}
                   </a>
                 </motion.li>
@@ -143,19 +416,41 @@ const Footer = () => {
             </ul>
           </motion.div>
 
-          {/* RESOURCES */}
+          {/* Resources */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <p className="text-[10px] font-bold tracking-[0.14em] uppercase mb-4" style={{ color: '#d4af55' }}>Resources</p>
-            <ul className="space-y-2">
+            <p style={{
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--footer-gold)',
+              marginBottom: 16,
+            }}>
+              Resources
+            </p>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {resources.map((link) => (
                 <motion.li key={link.name} whileHover={{ x: 4 }}>
-                  <a href={link.href} className="flex items-center gap-2 text-xs transition-colors hover:text-[#f5eed8]" style={{ color: 'rgba(245,238,216,0.42)' }}>
-                    <link.icon size={11} style={{ color: 'rgba(245,238,216,0.18)' }} />
+                  <a
+                    href={link.href}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      fontSize: 12,
+                      color: 'var(--footer-muted)',
+                      textDecoration: 'none',
+                      transition: 'color 0.2s',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--footer-cream)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--footer-muted)'}
+                  >
+                    <link.icon size={11} style={{ color: 'var(--footer-dim)' }} />
                     {link.name}
                   </a>
                 </motion.li>
@@ -163,27 +458,39 @@ const Footer = () => {
             </ul>
           </motion.div>
 
-          {/* NEWSLETTER */}
+          {/* Newsletter */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <div className="glass-card p-6">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border mb-3" style={{ borderColor: 'rgba(212,175,85,0.35)', background: 'rgba(212,175,85,0.12)', color: '#d4af55' }}>
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#d4af55' }} />
+            <div className="footer-card">
+              <div className="footer-badge">
+                <span className="dot" />
                 Newsletter
               </div>
-              <p className="text-lg font-bold mb-1" style={{ fontFamily: "'Playfair Display', serif", color: '#f5eed8' }}>
+              <p style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: 'var(--footer-cream)',
+                marginBottom: 4,
+                lineHeight: 1.3,
+                fontFamily: 'var(--footer-display)',
+              }}>
                 Stay in the loop ✦
               </p>
-              <p className="text-xs leading-relaxed mb-4" style={{ color: 'rgba(245,238,216,0.42)' }}>
+              <p style={{
+                fontSize: 12,
+                lineHeight: 1.7,
+                marginBottom: 18,
+                color: 'var(--footer-muted)',
+              }}>
                 Get weekly insights on web dev, design trends, and exclusive tutorials.
               </p>
 
               <form onSubmit={handleSubscribe}>
-                <div className="flex flex-col gap-2.5">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <motion.input
                     type="email"
                     value={email}
@@ -191,7 +498,7 @@ const Footer = () => {
                     onFocus={() => setInputFocused(true)}
                     onBlur={() => setInputFocused(false)}
                     placeholder="your@email.com"
-                    className="w-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,245,220,0.07)] rounded-xl px-4 py-3 text-sm text-[#f5eed8] outline-none transition-all focus:border-[rgba(212,175,85,0.35)] focus:shadow-[0_0_0_3px_rgba(212,175,85,0.12)]"
+                    className="footer-input"
                     required
                     animate={inputFocused ? { scale: 1.005 } : { scale: 1 }}
                     transition={{ duration: 0.15 }}
@@ -200,20 +507,30 @@ const Footer = () => {
                     type="submit"
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`w-full py-3 rounded-xl border-none font-semibold text-sm flex items-center justify-center gap-2 transition-all min-h-[48px] whitespace-nowrap ${
-                      subscribed
-                        ? 'bg-[#10b981] text-white shadow-[0_4px_20px_rgba(16,185,129,0.35)]'
-                        : 'bg-[#d4af55] text-[#0c0b09] shadow-[0_4px_20px_rgba(212,175,85,0.35)] hover:bg-[#e0be6a] hover:shadow-[0_8px_32px_rgba(212,175,85,0.5)]'
-                    }`}
+                    className={`footer-btn-primary ${subscribed ? 'footer-btn-success' : ''}`}
                   >
                     <AnimatePresence mode="wait">
                       {subscribed ? (
-                        <motion.span key="done" initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
-                          <FiCheck size={14} /> You're in!
+                        <motion.span
+                          key="done"
+                          initial={{ opacity: 0, scale: 0.7 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0 }}
+                          style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                        >
+                          <FiCheck size={14} />
+                          You're in!
                         </motion.span>
                       ) : (
-                        <motion.span key="sub" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
-                          <FiArrowRight size={13} /> Subscribe
+                        <motion.span
+                          key="sub"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                        >
+                          <FiArrowRight size={13} />
+                          Subscribe
                         </motion.span>
                       )}
                     </AnimatePresence>
@@ -221,10 +538,11 @@ const Footer = () => {
                 </div>
               </form>
 
-              <div className="flex flex-wrap gap-2 mt-3.5">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
                 {perks.map((perk) => (
-                  <span key={perk} className="flex items-center gap-1 text-[10px]" style={{ color: 'rgba(245,238,216,0.18)' }}>
-                    <FiCheck size={9} style={{ color: '#d4af55' }} /> {perk}
+                  <span key={perk} className="footer-perk">
+                    <FiCheck size={9} />
+                    {perk}
                   </span>
                 ))}
               </div>
@@ -232,50 +550,93 @@ const Footer = () => {
           </motion.div>
         </div>
 
-        {/* ── RULE ── */}
-        <div className="rule-gold mb-[clamp(28px,4vw,40px)]" />
+        <div className="footer-rule" style={{ marginBottom: 'clamp(28px, 4vw, 40px)' }} />
 
-        {/* ── BOTTOM BAR ── */}
-        <div className="flex flex-wrap justify-between items-center gap-4">
-          <p className="text-[11px]" style={{ color: 'rgba(245,238,216,0.18)' }}>
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 16,
+        }}>
+          <p style={{ fontSize: 11, color: 'var(--footer-dim)' }}>
             © {new Date().getFullYear()} Muhire Dieudonne. All rights reserved.
           </p>
-          <div className="flex gap-5 flex-wrap">
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
             {legal.map((link) => (
-              <a key={link.name} href={link.href} className="text-[10px] transition-colors hover:text-[#f5eed8]" style={{ color: 'rgba(245,238,216,0.18)' }}>
+              <a
+                key={link.name}
+                href={link.href}
+                style={{
+                  fontSize: 10,
+                  color: 'var(--footer-dim)',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--footer-cream)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--footer-dim)'}
+              >
                 {link.name}
               </a>
             ))}
           </div>
-          <p className="text-[10px] flex items-center gap-1.5" style={{ color: 'rgba(245,238,216,0.18)' }}>
+          <p style={{
+            fontSize: 10,
+            color: 'var(--footer-dim)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}>
             Built with
-            <FaReact className="text-[#61DAFB]" size={14} />
-            <SiThreedotjs className="text-[#049EF4]" size={14} />
+            <FaReact style={{ color: '#61DAFB' }} size={14} />
+            <SiThreedotjs style={{ color: '#049EF4' }} size={14} />
             and
-            <FiHeart style={{ color: '#d4af55' }} size={11} />
+            <FiHeart style={{ color: 'var(--footer-gold)' }} size={11} />
           </p>
         </div>
       </div>
 
-      {/* ── SCROLL TO TOP ── */}
       <motion.button
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-6 right-6 z-[100] w-[52px] h-[52px] rounded-full border border-[rgba(212,175,85,0.35)] bg-[rgba(22,20,16,0.88)] backdrop-blur-sm flex items-center justify-center cursor-pointer shadow-2xl transition-colors hover:border-[#d4af55]"
+        style={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          zIndex: 100,
+          width: 52,
+          height: 52,
+          borderRadius: '50%',
+          border: '1px solid var(--footer-border-hi)',
+          background: 'var(--footer-card)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          transition: 'border-color 0.2s',
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--footer-gold)'}
+        onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--footer-border-hi)'}
       >
-        <svg className="absolute w-11 h-11 -rotate-90">
-          <circle cx="22" cy="22" r="20" fill="none" stroke="rgba(255,245,220,0.07)" strokeWidth="2.5" />
-          <circle cx="22" cy="22" r="20" fill="none" stroke="#d4af55" strokeWidth="2.5"
+        <svg style={{ position: 'absolute', width: 44, height: 44, transform: 'rotate(-90deg)' }}>
+          <circle cx="22" cy="22" r="20" fill="none" stroke="var(--footer-border)" strokeWidth="2.5" />
+          <circle
+            cx="22" cy="22" r="20"
+            fill="none"
+            stroke="var(--footer-gold)"
+            strokeWidth="2.5"
             strokeDasharray={2 * Math.PI * 20}
             strokeDashoffset={2 * Math.PI * 20 * (1 - scrollProgress / 100)}
             strokeLinecap="round"
-            className="transition-[stroke-dashoffset] duration-100 ease-linear"
+            style={{ transition: 'stroke-dashoffset 0.1s ease' }}
           />
         </svg>
-        <FiChevronUp size={18} style={{ color: '#f5eed8' }} />
+        <FiChevronUp size={18} style={{ color: 'var(--footer-cream)' }} />
       </motion.button>
     </footer>
   )
