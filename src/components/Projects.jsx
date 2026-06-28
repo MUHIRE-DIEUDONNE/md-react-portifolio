@@ -1,5 +1,5 @@
 // src/components/Projects.jsx
-import React, { useState, useEffect } { useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiStar, FiMonitor, FiZap, FiExternalLink, FiGithub } from 'react-icons/fi'
 
