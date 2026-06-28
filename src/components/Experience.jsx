@@ -1,3 +1,4 @@
+// src/components/Experience.jsx
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import {
@@ -5,11 +6,10 @@ import {
   FiArrowUpRight, FiDownload, FiCheckCircle, FiRotateCw, FiGlobe
 } from 'react-icons/fi'
 import * as THREE from 'three'
-// Static import handles OrbitControls safely without asynchronous syntax crashes
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 /* ─────────────────────────────────────────────
-   INJECTED STYLES (transparent background for globe)
+   INJECTED STYLES
 ───────────────────────────────────────────── */
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
@@ -36,14 +36,14 @@ const STYLES = `
 
   .exp-root {
     font-family: var(--exp-body);
-    background: #030303; /* Fallback deep dark tone */
+    background: #030303;
     color: var(--exp-cream);
     -webkit-font-smoothing: antialiased;
     position: relative;
     overflow: hidden;
   }
 
-  /* Grain overlay (subtle) */
+  /* Grain overlay */
   .exp-root::before {
     content: '';
     position: absolute; inset: 0; z-index: 2; pointer-events: none;
@@ -430,7 +430,7 @@ const ExpCard = ({ exp, index, total }) => {
 }
 
 /* ─────────────────────────────────────────────
-   GLOBE BACKGROUND COMPONENT
+   GLOBE BACKGROUND COMPONENT (UPDATED - FASTER ROTATION)
 ───────────────────────────────────────────── */
 const GlobeBackground = ({ autoRotate, showCities }) => {
   const containerRef = useRef(null)
@@ -449,7 +449,6 @@ const GlobeBackground = ({ autoRotate, showCities }) => {
     
     // Scene
     const scene = new THREE.Scene()
-    // Using transparent color to align with layout backgrounds
     scene.background = null 
     sceneRef.current = scene
     
@@ -458,19 +457,19 @@ const GlobeBackground = ({ autoRotate, showCities }) => {
     camera.position.set(0, 0, 3.2)
     cameraRef.current = camera
     
-    // Renderer - sets alpha true to act as an underlay
+    // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(width, height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     containerRef.current.appendChild(renderer.domElement)
     rendererRef.current = renderer
     
-    // Controls
+    // Controls — UPDATED for faster rotation
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
     controls.dampingFactor = 0.05
     controls.autoRotate = autoRotate
-    controls.autoRotateSpeed = 0.8
+    controls.autoRotateSpeed = 2.5  // ← INCREASED from 0.8 to 2.5 for faster rotation
     controls.enableZoom = false
     controls.enablePan = false
     controls.rotateSpeed = 1.0
@@ -607,12 +606,45 @@ const GlobeBackground = ({ autoRotate, showCities }) => {
 }
 
 /* ─────────────────────────────────────────────
+   LIGHT MODE STYLES
+───────────────────────────────────────────── */
+const lightModeStyles = `
+  html.light-mode .exp-root {
+    --exp-bg: #ffffff;
+    --exp-surface: #f8fafc;
+    --exp-card: rgba(255, 255, 255, 0.95);
+    --exp-border: rgba(0, 0, 0, 0.1);
+    --exp-border-hi: rgba(99, 102, 241, 0.3);
+    --exp-gold: #6366f1;
+    --exp-gold-dim: rgba(99, 102, 241, 0.1);
+    --exp-cream: #0f172a;
+    --exp-muted: rgba(15, 23, 42, 0.7);
+    --exp-dim: rgba(15, 23, 42, 0.5);
+  }
+  html.light-mode .exp-root::before {
+    opacity: 0.1;
+  }
+`
+
+/* ─────────────────────────────────────────────
    MAIN SECTION
 ───────────────────────────────────────────── */
 const Experience = () => {
   const [filter, setFilter] = useState('all')
   const [autoRotate, setAutoRotate] = useState(true)
   const [showCities, setShowCities] = useState(true)
+  const [isDarkMode, setIsDarkMode] = useState(true)
+
+  useEffect(() => {
+    const checkTheme = () => {
+      const html = document.documentElement
+      setIsDarkMode(!html.classList.contains('light-mode'))
+    }
+    checkTheme()
+    const observer = new MutationObserver(checkTheme)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
 
   const filtered = filter === 'all'
     ? EXPERIENCES
@@ -620,12 +652,12 @@ const Experience = () => {
 
   return (
     <section id="experience" className="exp-root" style={{ position: 'relative', padding: 'clamp(60px, 8vw, 120px) 0', minHeight: '100vh' }}>
-      <style>{STYLES}</style>
+      <style>{STYLES}{lightModeStyles}</style>
       
       {/* 3D Globe Background */}
       <GlobeBackground autoRotate={autoRotate} showCities={showCities} />
       
-      {/* Radial overlay to improve content contrast and mask edge transparency */}
+      {/* Radial overlay to improve content contrast */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0, width: '100%', height: '100%',
