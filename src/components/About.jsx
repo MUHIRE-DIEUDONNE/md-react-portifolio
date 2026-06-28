@@ -8,23 +8,26 @@ import {
   FiArrowUpRight, FiZap, FiBriefcase
 } from 'react-icons/fi'
 
+/* ─────────────────────────────────────────────
+   SHARED DESIGN TOKENS
+───────────────────────────────────────────── */
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
 
   :root {
-    --ab-bg: #0c0b09;
-    --ab-surface: #131210;
-    --ab-card: rgba(22, 20, 16, 0.95);
-    --ab-border: rgba(255,245,220,0.07);
+    --ab-bg:        #0c0b09;
+    --ab-surface:   #131210;
+    --ab-card:      rgba(22, 20, 16, 0.95);
+    --ab-border:    rgba(255,245,220,0.07);
     --ab-border-hi: rgba(212,175,85,0.35);
-    --ab-gold: #d4af55;
-    --ab-gold-dim: rgba(212,175,85,0.18);
-    --ab-cream: #f5eed8;
-    --ab-muted: rgba(245,238,216,0.42);
-    --ab-dim: rgba(245,238,216,0.18);
-    --ab-teal: #2ecc9a;
-    --ab-display: 'Playfair Display', Georgia, serif;
-    --ab-body: 'Instrument Sans', system-ui, sans-serif;
+    --ab-gold:      #d4af55;
+    --ab-gold-dim:  rgba(212,175,85,0.18);
+    --ab-cream:     #f5eed8;
+    --ab-muted:     rgba(245,238,216,0.42);
+    --ab-dim:       rgba(245,238,216,0.18);
+    --ab-teal:      #2ecc9a;
+    --ab-display:   'Playfair Display', Georgia, serif;
+    --ab-body:      'Instrument Sans', system-ui, sans-serif;
   }
 
   .ab-root *, .ab-root *::before, .ab-root *::after {
@@ -168,8 +171,65 @@ const STYLES = `
   }
 `
 
-// ... (rest of the component: data, Counter, etc.) same as before ...
+/* ─────────────────────────────────────────────
+   DATA
+───────────────────────────────────────────── */
+const STATS = [
+  { value: 5,  suffix: '+', label: 'Years Active',      color: '#d4af55' },
+  { value: 50, suffix: '+', label: 'Projects Shipped',  color: '#2ecc9a' },
+  { value: 30, suffix: '+', label: 'Happy Clients',     color: '#e07070' },
+  { value: 15, suffix: '',  label: 'Awards Won',        color: '#7ec8e3' },
+]
 
+const TIMELINE = [
+  { year: '2023', event: 'Lead Frontend Developer at Creative Agency', color: '#d4af55' },
+  { year: '2021', event: 'Senior Frontend Developer — Tech Startup',   color: '#2ecc9a' },
+  { year: '2019', event: 'Full-Stack Developer — Digital Studio',      color: '#e07070' },
+  { year: '2017', event: 'Started the Coding Journey',                 color: '#7ec8e3' },
+]
+
+const INTERESTS = [
+  { icon: '🎮', name: 'Gaming' },
+  { icon: '📖', name: 'Reading' },
+  { icon: '🎧', name: 'Music' },
+  { icon: '🏋️', name: 'Fitness' },
+  { icon: '✈️', name: 'Travel' },
+  { icon: '📷', name: 'Photography' },
+]
+
+const SKILLS = ['React', 'Three.js', 'GSAP', 'Framer Motion', 'TypeScript', 'Node.js']
+
+const TABS = [
+  { id: 'bio',       label: 'Bio' },
+  { id: 'timeline',  label: 'Timeline' },
+  { id: 'interests', label: 'Interests' },
+]
+
+/* ─────────────────────────────────────────────
+   ANIMATED COUNTER
+───────────────────────────────────────────── */
+const Counter = ({ value, suffix }) => {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true })
+  const [display, setDisplay] = useState(0)
+
+  useEffect(() => {
+    if (!inView) return
+    let i = 0
+    const step = 1200 / value
+    const t = setInterval(() => {
+      i += 1; setDisplay(i)
+      if (i >= value) clearInterval(t)
+    }, step)
+    return () => clearInterval(t)
+  }, [inView, value])
+
+  return <span ref={ref}>{inView ? display : 0}{suffix}</span>
+}
+
+/* ─────────────────────────────────────────────
+   MAIN COMPONENT
+───────────────────────────────────────────── */
 const About = () => {
   const [activeTab, setActiveTab] = useState('bio')
   const [isDarkMode, setIsDarkMode] = useState(true)
@@ -185,7 +245,17 @@ const About = () => {
     return () => observer.disconnect()
   }, [])
 
-  // (motion values, handlers same as before)
+  // 3-D tilt on image
+  const mx = useMotionValue(0); const my = useMotionValue(0)
+  const rx = useSpring(useTransform(my, [-120, 120], [10, -10]), { damping: 30 })
+  const ry = useSpring(useTransform(mx, [-120, 120], [-10, 10]), { damping: 30 })
+
+  const onMove = (e) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    mx.set(e.clientX - (r.left + r.width / 2))
+    my.set(e.clientY - (r.top  + r.height / 2))
+  }
+  const onLeave = () => { mx.set(0); my.set(0) }
 
   const lightModeStyles = `
     html.light-mode .ab-root {
@@ -206,6 +276,7 @@ const About = () => {
     <section id="about" className="ab-root py-[clamp(60px,8vw,120px)]">
       <style>{STYLES}{lightModeStyles}</style>
 
+      {/* Ambient blobs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[5%] right-[-12%] w-[480px] h-[480px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(212,175,85,0.07) 0%, transparent 70%)' }} />
         <div className="absolute bottom-[8%] left-[-10%] w-[560px] h-[560px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(46,204,154,0.05) 0%, transparent 70%)' }} />
@@ -235,7 +306,7 @@ const About = () => {
           </p>
         </motion.div>
 
-        {/* Stats */}
+        {/* Stats Row */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -258,9 +329,9 @@ const About = () => {
         {/* Rule */}
         <div className="rule-gold mb-[clamp(28px,4vw,40px)]" />
 
-        {/* Two‑column */}
+        {/* Two Column Body */}
         <div className="grid grid-cols-1 md:grid-cols-[1fr,1.15fr] gap-[clamp(28px,4vw,56px)] items-start">
-          {/* Left – image */}
+          {/* Left – Image with tilt */}
           <motion.div
             style={{ perspective: 900, rotateX: rx, rotateY: ry }}
             onMouseMove={onMove} onMouseLeave={onLeave}
@@ -270,6 +341,7 @@ const About = () => {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="relative">
+              {/* Ghost numeral */}
               <div className="absolute -top-5 -left-3 text-[clamp(80px,14vw,160px)] font-black leading-none select-none pointer-events-none" style={{ fontFamily: 'var(--ab-display)', color: 'transparent', WebkitTextStroke: '1px rgba(212,175,85,0.1)' }}>
                 MD
               </div>
@@ -279,6 +351,7 @@ const About = () => {
                   alt="Muhire Dieudonne"
                   className="w-full h-full object-cover block"
                 />
+                {/* Gold corner accent */}
                 <div className="absolute bottom-5 left-5 z-20 flex flex-col gap-1">
                   <div className="w-8 h-0.5 rounded-sm" style={{ background: 'var(--ab-gold)' }} />
                   <div className="w-5 h-0.5 rounded-sm" style={{ background: 'var(--ab-gold)', opacity: 0.5 }} />
@@ -286,6 +359,7 @@ const About = () => {
               </div>
             </div>
 
+            {/* Availability badge */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -301,13 +375,14 @@ const About = () => {
             </motion.div>
           </motion.div>
 
-          {/* Right – tabs */}
+          {/* Right – Tabs + Content */}
           <motion.div
             initial={{ opacity: 0, x: 32 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
+            {/* Tabs */}
             <div className="flex flex-wrap gap-2 mb-7">
               {TABS.map(t => (
                 <button key={t.id} className={`ab-tab ${activeTab === t.id ? 'active' : ''}`}
@@ -317,7 +392,9 @@ const About = () => {
               ))}
             </div>
 
+            {/* Tab content */}
             <AnimatePresence mode="wait">
+              {/* BIO */}
               {activeTab === 'bio' && (
                 <motion.div key="bio"
                   initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -333,9 +410,11 @@ const About = () => {
                     <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--ab-muted)' }}>
                       My journey started with curiosity for visual effects and has evolved into a career pushing the boundaries of what's possible on the web — one frame at a time.
                     </p>
+                    {/* Skill badges */}
                     <div className="flex flex-wrap gap-1.5 mb-6">
                       {SKILLS.map(s => <span key={s} className="ab-badge">{s}</span>)}
                     </div>
+                    {/* CTA */}
                     <a href="#" className="ab-cta">
                       <FiDownload size={14} />
                       Download CV
@@ -347,17 +426,69 @@ const About = () => {
                 </motion.div>
               )}
 
+              {/* TIMELINE */}
               {activeTab === 'timeline' && (
-                // ... timeline content (same as before)
+                <motion.div key="timeline"
+                  initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.28 }}
+                >
+                  <div className="ab-card p-[clamp(20px,3vw,28px)]">
+                    <p className="text-[9px] font-bold tracking-[0.14em] uppercase mb-5" style={{ color: 'var(--ab-gold)' }}>
+                      Career Milestones
+                    </p>
+                    <div className="flex flex-col">
+                      {TIMELINE.map((item, i) => (
+                        <motion.div key={i}
+                          initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.09 }}
+                          className={`flex gap-4 relative ${i < TIMELINE.length - 1 ? 'pb-6' : ''}`}
+                        >
+                          {/* Vertical connector */}
+                          {i < TIMELINE.length - 1 && (
+                            <div className="absolute left-1 top-4.5 bottom-0 w-px" style={{ background: 'linear-gradient(180deg, var(--ab-gold-dim), transparent)' }} />
+                          )}
+                          <div className="ab-tl-dot" style={{ background: item.color, boxShadow: `0 0 10px ${item.color}60` }} />
+                          <div>
+                            <div className="text-[11px] font-bold tracking-[0.1em] mb-1" style={{ color: item.color }}>
+                              {item.year}
+                            </div>
+                            <div className="text-sm leading-relaxed" style={{ color: 'var(--ab-muted)' }}>
+                              {item.event}
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
               )}
 
+              {/* INTERESTS */}
               {activeTab === 'interests' && (
-                // ... interests content (same as before)
+                <motion.div key="interests"
+                  initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.28 }}
+                >
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    {INTERESTS.map((item, i) => (
+                      <motion.div key={i} className="ab-interest"
+                        initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: i * 0.06 }}
+                      >
+                        <div className="text-2xl mb-2 leading-none">{item.icon}</div>
+                        <div className="text-[11px] font-semibold tracking-[0.06em] uppercase" style={{ color: 'var(--ab-muted)' }}>
+                          {item.name}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
         </div>
 
+        {/* Rule */}
         <div className="rule-gold mt-[clamp(40px,5vw,64px)]" />
       </div>
     </section>
