@@ -1,10 +1,10 @@
 // src/components/Projects.jsx
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } { useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiStar, FiMonitor, FiZap, FiCpu as FiBot, FiExternalLink, FiGithub } from 'react-icons/fi'
+import { FiStar, FiMonitor, FiZap, FiExternalLink, FiGithub } from 'react-icons/fi'
 
 /* ─────────────────────────────────────────────
-   PREMIUM DARK THEME STYLES
+   PREMIUM DARK THEME STYLES (mirrors About.jsx)
 ───────────────────────────────────────────── */
 const PREMIUM_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
@@ -46,17 +46,67 @@ const PREMIUM_STYLES = `
   .pj-root ::-webkit-scrollbar { width: 3px; }
   .pj-root ::-webkit-scrollbar-track { background: transparent; }
   .pj-root ::-webkit-scrollbar-thumb { background: var(--pj-border-hi); border-radius: 4px; }
+
+  /* Filter pill — matches ab-tab */
+  .pj-pill {
+    padding: 8px 22px; border-radius: 100px; font-size: 12px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+    border: 1px solid var(--pj-border);
+    background: transparent;
+    color: var(--pj-muted); font-family: var(--pj-body);
+    transition: all 0.22s ease;
+  }
+  .pj-pill:hover { border-color: var(--pj-border-hi); color: var(--pj-cream); }
+  .pj-pill.active {
+    background: var(--pj-gold); border-color: var(--pj-gold);
+    color: #0c0b09; font-weight: 600;
+    box-shadow: 0 4px 20px rgba(212,175,85,0.35);
+  }
+
+  /* Card — matches ab-card */
+  .pj-card {
+    border: 1px solid var(--pj-border);
+    background: var(--pj-card);
+    border-radius: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .pj-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--pj-gold-dim), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .pj-card:hover {
+    border-color: var(--pj-border-hi);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    transform: translateY(-2px);
+  }
+  .pj-card:hover::before { opacity: 1; }
+
+  /* Badge — matches ab-badge */
+  .pj-badge {
+    padding: 4px 14px; border-radius: 100px; font-size: 10px;
+    font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    border: 1px solid var(--pj-border-hi);
+    background: var(--pj-gold-dim); color: var(--pj-gold);
+    font-family: var(--pj-body);
+    transition: transform 0.15s, background 0.15s;
+  }
+  .pj-badge:hover { transform: scale(1.05); background: rgba(212,175,85,0.25); }
+
+  /* Section rule */
+  .pj-rule {
+    height: 1px;
+    background: linear-gradient(90deg, var(--pj-gold) 0%, rgba(212,175,85,0.15) 60%, transparent 100%);
+  }
 `
 
 const Projects = () => {
   const [selectedProject, setSelectedProject] = useState(null)
   const [filter, setFilter] = useState('all')
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0)
-  const [isMobile, setIsMobile] = useState(false)
-  const [hoveredProject, setHoveredProject] = useState(null)
-  const [layout, setLayout] = useState('grid')
-  const [screenshotIndex, setScreenshotIndex] = useState(0)
   const [isDarkMode, setIsDarkMode] = useState(true)
+  const [screenshotIndex, setScreenshotIndex] = useState(0)
 
   useEffect(() => {
     const checkTheme = () => {
@@ -90,7 +140,7 @@ const Projects = () => {
       ],
       github: 'https://github.com/muhire-dieudonne/snake_game',
       live: 'https://muhire-dieudonne.github.io/snake_game/',
-      logo: 'https://img.icons8.com/fluency/48/game-controller.png'
+      logo: '🎮'
     },
     {
       id: 2,
@@ -112,7 +162,7 @@ const Projects = () => {
       ],
       github: 'https://github.com/muhire-dieudonne/jump_game_in_vue',
       live: 'https://muhire-dieudonne.github.io/jump_game_in_vue/',
-      logo: 'https://img.icons8.com/fluency/48/vue-js.png'
+      logo: '⚡'
     },
     {
       id: 3,
@@ -134,7 +184,7 @@ const Projects = () => {
       ],
       github: 'https://github.com/muhire-dieudonne/language_translator',
       live: 'https://muhire-dieudonne.github.io/language_translator/',
-      logo: 'https://img.icons8.com/fluency/48/translate.png'
+      logo: '🌐'
     },
     {
       id: 4,
@@ -157,7 +207,7 @@ const Projects = () => {
       ],
       github: 'https://github.com/muhire-dieudonne/money_converter',
       live: 'https://muhire-dieudonne.github.io/money_converter/',
-      logo: 'https://img.icons8.com/fluency/48/currency-exchange.png'
+      logo: '💱'
     },
     {
       id: 5,
@@ -179,26 +229,16 @@ const Projects = () => {
       ],
       github: 'https://github.com/muhire-dieudonne/3d-portfolio',
       live: 'https://muhire-dieudonne.github.io/portfolio/',
-      logo: 'https://img.icons8.com/fluency/48/3d.png'
+      logo: '🎯'
     }
   ]
 
   const filters = [
-    { id: 'all', label: 'All Projects', icon: <FiStar />, image: 'https://img.icons8.com/fluency/48/star.png' },
-    { id: 'game', label: 'Games', icon: <FiMonitor />, image: 'https://img.icons8.com/fluency/48/game-controller.png' },
-    { id: 'webapp', label: 'Web Apps', icon: <FiZap />, image: 'https://img.icons8.com/fluency/48/web.png' },
-    { id: 'threejs', label: 'Three.js', icon: <FiMonitor />, image: 'https://img.icons8.com/fluency/48/3d.png' }
+    { id: 'all', label: 'All Projects' },
+    { id: 'game', label: 'Games' },
+    { id: 'webapp', label: 'Web Apps' },
+    { id: 'threejs', label: 'Three.js' }
   ]
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth)
-      setIsMobile(window.innerWidth < 768)
-    }
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
 
   const filteredProjects = filter === 'all'
     ? projects
@@ -220,359 +260,440 @@ const Projects = () => {
   `
 
   return (
-    <section id="projects" className="pj-root py-16 sm:py-20">
+    <section id="projects" className="pj-root" style={{ padding: 'clamp(60px,8vw,120px) 0' }}>
       <style>{PREMIUM_STYLES}{lightModeStyles}</style>
-      <div className="container mx-auto px-4 sm:px-6">
+
+      {/* Ambient blobs */}
+      <div aria-hidden style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+        <div style={{ position: 'absolute', top: '5%', left: '-12%', width: 480, height: 480, background: 'radial-gradient(circle, rgba(212,175,85,0.07) 0%, transparent 70%)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', bottom: '8%', right: '-10%', width: 560, height: 560, background: 'radial-gradient(circle, rgba(46,204,154,0.05) 0%, transparent 70%)', borderRadius: '50%' }} />
+      </div>
+
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 clamp(20px,5vw,48px)', position: 'relative', zIndex: 1 }}>
+
+        {/* ── HEADER ── */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          style={{ marginBottom: 'clamp(48px,6vw,72px)' }}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold" style={{ fontFamily: 'var(--pj-display)', color: 'var(--pj-cream)' }}>
-            Featured Projects
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ width: 28, height: 1, background: 'var(--pj-gold)' }} />
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--pj-gold)', fontFamily: 'var(--pj-body)' }}>
+              Portfolio
+            </span>
+          </div>
+          <h2 style={{ fontFamily: 'var(--pj-display)', fontSize: 'clamp(38px,7vw,72px)', fontWeight: 900, lineHeight: 1.02, color: 'var(--pj-cream)', letterSpacing: '-0.02em', marginBottom: 18 }}>
+            Featured<br />
+            <em style={{ color: 'var(--pj-gold)', fontStyle: 'italic' }}>Projects</em>
           </h2>
-          <p className={`mt-4 max-w-2xl mx-auto ${isDarkMode ? 'text-[#f5eed8]/60' : 'text-dark/60'}`}>
-            A selection of my best work, showcasing creativity and technical expertise
+          <p style={{ fontSize: 15, color: 'var(--pj-muted)', maxWidth: 480, lineHeight: 1.7 }}>
+            A selection of my best work — where creativity meets technical excellence.
           </p>
         </motion.div>
 
-        {/* Layout Toggle */}
-        <div className="flex justify-center gap-4 mb-8">
-          <button
-            onClick={() => setLayout('grid')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-all ${
-              layout === 'grid' 
-                ? 'bg-[#d4af55] text-[#0c0b09]' 
-                : isDarkMode ? 'bg-[#131210] text-[#f5eed8]/70' : 'bg-white/50 text-dark/70'
-            }`}
-          >
-            📱 Grid View
-          </button>
-          <button
-            onClick={() => setLayout('horizontal')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-all ${
-              layout === 'horizontal' 
-                ? 'bg-[#d4af55] text-[#0c0b09]' 
-                : isDarkMode ? 'bg-[#131210] text-[#f5eed8]/70' : 'bg-white/50 text-dark/70'
-            }`}
-          >
-            📜 Horizontal Scroll
-          </button>
-        </div>
+        {/* ── RULE ── */}
+        <div className="pj-rule" style={{ marginBottom: 'clamp(28px,4vw,40px)' }} />
 
-        {/* Filter Buttons */}
-        <div className="mb-8 overflow-x-auto pb-4">
-          <div className="flex gap-3 min-w-max sm:flex-wrap sm:justify-center">
-            {filters.map((f) => (
-              <motion.button
-                key={f.id}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setFilter(f.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all ${
-                  filter === f.id
-                    ? 'bg-gradient-to-r from-[#d4af55] to-[#e0be6a] text-[#0c0b09] shadow-lg'
-                    : isDarkMode ? 'bg-[#131210] backdrop-blur-sm text-[#f5eed8]/70 border border-[#d4af55]/20' : 'bg-white/50 text-dark/70 border border-[#d4af55]/20'
-                }`}
-              >
-                <img src={f.image} alt={f.label} className="w-5 h-5" />
-                <span>{f.label}</span>
-              </motion.button>
-            ))}
-          </div>
-        </div>
-
-        {/* Projects Grid */}
+        {/* ── FILTERS ── */}
         <motion.div
-          key={filter + layout}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          style={{ display: 'flex', gap: 8, marginBottom: 'clamp(28px,4vw,44px)', flexWrap: 'wrap' }}
+        >
+          {filters.map(f => (
+            <button key={f.id} className={`pj-pill ${filter === f.id ? 'active' : ''}`}
+              onClick={() => setFilter(f.id)}>
+              {f.label}
+            </button>
+          ))}
+        </motion.div>
+
+        {/* ── PROJECTS GRID ── */}
+        <motion.div
+          key={filter}
           initial="hidden"
           animate="visible"
           variants={{
             hidden: { opacity: 0 },
             visible: {
               opacity: 1,
-              transition: { staggerChildren: 0.1 }
+              transition: { staggerChildren: 0.08 }
             }
           }}
-          className={`grid ${
-            layout === 'grid' 
-              ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' 
-              : 'grid-cols-1 gap-8'
-          }`}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))',
+            gap: 'clamp(20px,3vw,32px)',
+          }}
         >
           {filteredProjects.map((project) => (
             <motion.div
               key={project.id}
               variants={{
-                hidden: { y: 50, opacity: 0 },
-                visible: {
-                  y: 0,
-                  opacity: 1,
-                  transition: { type: 'spring', stiffness: 100 }
-                }
+                hidden: { opacity: 0, y: 40 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
               }}
-              whileHover={!isMobile ? { y: -10 } : {}}
-              className="group relative cursor-pointer"
+              className="pj-card"
+              style={{ cursor: 'pointer' }}
               onClick={() => {
                 setSelectedProject(project)
                 setScreenshotIndex(0)
               }}
-              onMouseEnter={() => setHoveredProject(project.id)}
-              onMouseLeave={() => setHoveredProject(null)}
             >
-              <div className={`relative h-[300px] sm:h-[350px] lg:h-[400px] rounded-xl overflow-hidden ${
-                layout === 'horizontal' ? 'w-full max-w-4xl mx-auto' : ''
-              }`}>
-                {/* Image/Video */}
-                <AnimatePresence mode="wait">
-                  {hoveredProject === project.id && project.video ? (
-                    <motion.video
-                      key="video"
-                      src={project.video}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="absolute inset-0 w-full h-full object-cover"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  ) : (
-                    <motion.img
-                      key="image"
-                      src={project.image}
-                      alt={project.title}
-                      className="w-full h-full object-cover"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      onError={(e) => {
-                        e.target.src = 'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop'
-                      }}
-                    />
-                  )}
-                </AnimatePresence>
-
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0c0b09] via-[#0c0b09]/50 to-transparent" />
-
-                {/* Category Badge */}
-                <div className="absolute top-4 left-4 z-10">
-                  <span 
-                    className="flex items-center gap-2 px-4 py-2 bg-[#131210]/80 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium border"
-                    style={{ color: project.color, borderColor: project.color }}
-                  >
-                    <img src={project.logo} alt={project.categoryLabel} className="w-4 h-4" />
-                    {project.categoryLabel}
-                  </span>
+              <div style={{ position: 'relative', height: 'clamp(200px,30vw,260px)', overflow: 'hidden' }}>
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  onError={(e) => {
+                    e.target.src = 'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop'
+                  }}
+                />
+                {/* Gradient overlay */}
+                <div style={{
+                  position: 'absolute', bottom: 0, left: 0, right: 0,
+                  height: '60%',
+                  background: 'linear-gradient(180deg, transparent, rgba(12,11,9,0.85))',
+                  pointerEvents: 'none',
+                }} />
+                {/* Category badge */}
+                <div style={{
+                  position: 'absolute', top: 14, left: 14,
+                  padding: '4px 12px',
+                  borderRadius: 100,
+                  fontSize: 9,
+                  fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  background: 'rgba(12,11,9,0.7)',
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid var(--pj-border-hi)',
+                  color: 'var(--pj-gold)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}>
+                  <span style={{ fontSize: 14 }}>{project.logo}</span>
+                  {project.categoryLabel}
                 </div>
-
-                {/* Content */}
-                <div className="absolute inset-x-0 bottom-0 p-6 transform translate-y-0 group-hover:translate-y-0 transition-transform duration-300">
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#f5eed8] mb-2">
+                {/* Content overlay */}
+                <div style={{
+                  position: 'absolute', bottom: 0, left: 0, right: 0,
+                  padding: '20px 20px 18px',
+                }}>
+                  <h3 style={{
+                    fontFamily: 'var(--pj-display)',
+                    fontSize: 'clamp(18px,2.4vw,22px)',
+                    fontWeight: 700,
+                    color: 'var(--pj-cream)',
+                    marginBottom: 4,
+                  }}>
                     {project.title}
                   </h3>
-                  <p className="text-sm text-[#f5eed8]/80 mb-3 line-clamp-2">
+                  <p style={{ fontSize: 12, color: 'var(--pj-muted)', lineHeight: 1.6, marginBottom: 10 }}>
                     {project.description}
                   </p>
-
-                  {/* Tech Stack */}
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                     {project.technologies.slice(0, 3).map((tech, i) => (
-                      <span
-                        key={i}
-                        className="px-3 py-1 bg-[#d4af55]/20 rounded-full text-xs text-[#f5eed8]"
-                      >
+                      <span key={i} className="pj-badge" style={{ fontSize: 8, padding: '2px 10px' }}>
                         {tech}
                       </span>
                     ))}
+                    {project.technologies.length > 3 && (
+                      <span className="pj-badge" style={{ fontSize: 8, padding: '2px 10px' }}>
+                        +{project.technologies.length - 3}
+                      </span>
+                    )}
                   </div>
-
-                  {/* View Project Button */}
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-6 py-2 bg-[#d4af55] text-[#0c0b09] rounded-full text-sm font-semibold"
-                  >
-                    View Project
-                  </motion.button>
                 </div>
               </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Project Modal */}
-        <AnimatePresence>
-          {selectedProject && (
+        {/* ── RULE ── */}
+        <div className="pj-rule" style={{ margin: 'clamp(40px,5vw,64px) 0 0' }} />
+      </div>
+
+      {/* ── PROJECT MODAL ── */}
+      <AnimatePresence>
+        {selectedProject && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 1000,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 'clamp(16px,4vw,40px)',
+              background: 'rgba(12,11,9,0.92)',
+              backdropFilter: 'blur(16px)',
+              overflowY: 'auto',
+            }}
+            onClick={() => setSelectedProject(null)}
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0c0b09]/95 backdrop-blur-lg overflow-y-auto"
-              onClick={() => setSelectedProject(null)}
+              initial={{ scale: 0.92, y: 30, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.92, y: 30, opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                maxWidth: 720, width: '100%',
+                background: 'var(--pj-card)',
+                borderRadius: 20,
+                border: '1px solid var(--pj-border)',
+                overflow: 'hidden',
+                maxHeight: '90vh',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <motion.div
-                initial={{ scale: 0.9, y: 50 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: 50 }}
-                className="relative max-w-4xl w-full bg-gradient-to-b from-[#131210] to-[#0c0b09] rounded-2xl overflow-hidden my-8 border border-[#d4af55]/20"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Screenshot Carousel */}
-                <div className="relative h-[250px] sm:h-[350px] bg-black">
-                  <AnimatePresence mode="wait">
-                    <motion.img
-                      key={screenshotIndex}
-                      src={selectedProject.screenshots[screenshotIndex]}
-                      alt={`Screenshot ${screenshotIndex + 1}`}
-                      className="w-full h-full object-cover"
-                      initial={{ opacity: 0, x: 100 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -100 }}
-                      transition={{ duration: 0.3 }}
-                      onError={(e) => {
-                        e.target.src = 'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop'
+              {/* Carousel */}
+              <div style={{ position: 'relative', height: 'clamp(220px,40vw,360px)', background: '#0c0b09', flexShrink: 0 }}>
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={screenshotIndex}
+                    src={selectedProject.screenshots[screenshotIndex]}
+                    alt={`Screenshot ${screenshotIndex + 1}`}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    initial={{ opacity: 0, x: 60 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -60 }}
+                    transition={{ duration: 0.3 }}
+                    onError={(e) => {
+                      e.target.src = 'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop'
+                    }}
+                  />
+                </AnimatePresence>
+
+                {/* Carousel controls */}
+                {selectedProject.screenshots.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setScreenshotIndex(prev => prev === 0 ? selectedProject.screenshots.length - 1 : prev - 1)
                       }}
-                    />
-                  </AnimatePresence>
+                      style={{
+                        position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
+                        width: 40, height: 40, borderRadius: '50%',
+                        background: 'rgba(12,11,9,0.7)',
+                        backdropFilter: 'blur(4px)',
+                        border: '1px solid var(--pj-border)',
+                        color: 'var(--pj-cream)',
+                        cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 18,
+                        transition: 'background 0.2s',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212,175,85,0.3)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(12,11,9,0.7)'}
+                    >
+                      ‹
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setScreenshotIndex(prev => prev === selectedProject.screenshots.length - 1 ? 0 : prev + 1)
+                      }}
+                      style={{
+                        position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                        width: 40, height: 40, borderRadius: '50%',
+                        background: 'rgba(12,11,9,0.7)',
+                        backdropFilter: 'blur(4px)',
+                        border: '1px solid var(--pj-border)',
+                        color: 'var(--pj-cream)',
+                        cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 18,
+                        transition: 'background 0.2s',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212,175,85,0.3)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(12,11,9,0.7)'}
+                    >
+                      ›
+                    </button>
+                  </>
+                )}
 
-                  {/* Carousel Controls */}
-                  <button
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-[#131210]/80 rounded-full hover:bg-[#d4af55]/80 transition-colors text-[#f5eed8]"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setScreenshotIndex((prev) =>
-                        prev === 0 ? selectedProject.screenshots.length - 1 : prev - 1
-                      )
-                    }}
-                  >
-                    ←
-                  </button>
-                  <button
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-[#131210]/80 rounded-full hover:bg-[#d4af55]/80 transition-colors text-[#f5eed8]"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setScreenshotIndex((prev) =>
-                        prev === selectedProject.screenshots.length - 1 ? 0 : prev + 1
-                      )
-                    }}
-                  >
-                    →
-                  </button>
-
-                  {/* Close Button */}
-                  <button
-                    onClick={() => setSelectedProject(null)}
-                    className="absolute top-4 right-4 p-2 bg-[#131210]/80 backdrop-blur-sm rounded-full hover:bg-[#d4af55]/80 transition-colors z-10 text-[#f5eed8]"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-
-                  {/* Dots */}
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                {/* Dots */}
+                {selectedProject.screenshots.length > 1 && (
+                  <div style={{
+                    position: 'absolute', bottom: 14, left: '50%', transform: 'translateX(-50%)',
+                    display: 'flex', gap: 6,
+                  }}>
                     {selectedProject.screenshots.map((_, i) => (
                       <button
                         key={i}
-                        className={`w-2 h-2 rounded-full transition-all ${
-                          i === screenshotIndex ? 'w-6 bg-[#d4af55]' : 'bg-[#f5eed8]/50'
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setScreenshotIndex(i)
+                        onClick={(e) => { e.stopPropagation(); setScreenshotIndex(i) }}
+                        style={{
+                          width: i === screenshotIndex ? 24 : 6,
+                          height: 6,
+                          borderRadius: 4,
+                          border: 'none',
+                          background: i === screenshotIndex ? 'var(--pj-gold)' : 'rgba(245,238,216,0.3)',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
                         }}
                       />
                     ))}
                   </div>
+                )}
+
+                <button
+                  onClick={() => setSelectedProject(null)}
+                  style={{
+                    position: 'absolute', top: 14, right: 14,
+                    width: 36, height: 36, borderRadius: '50%',
+                    background: 'rgba(12,11,9,0.7)',
+                    backdropFilter: 'blur(4px)',
+                    border: '1px solid var(--pj-border)',
+                    color: 'var(--pj-cream)',
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 16,
+                    transition: 'background 0.2s',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212,175,85,0.3)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(12,11,9,0.7)'}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Content */}
+              <div style={{ padding: 'clamp(20px,4vw,32px)', overflowY: 'auto', flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
+                  <h3 style={{
+                    fontFamily: 'var(--pj-display)',
+                    fontSize: 'clamp(22px,3vw,28px)',
+                    fontWeight: 700,
+                    color: 'var(--pj-cream)',
+                  }}>
+                    {selectedProject.title}
+                  </h3>
+                  <span style={{
+                    padding: '4px 14px',
+                    borderRadius: 100,
+                    fontSize: 10,
+                    fontWeight: 600,
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    background: `${selectedProject.color}20`,
+                    color: selectedProject.color,
+                    border: `1px solid ${selectedProject.color}50`,
+                  }}>
+                    {selectedProject.categoryLabel}
+                  </span>
                 </div>
 
-                {/* Project Details */}
-                <div className="p-6 sm:p-8">
-                  <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
-                    <div>
-                      <h3 className="text-2xl sm:text-3xl font-bold text-[#f5eed8] mb-2">{selectedProject.title}</h3>
-                      <span 
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#d4af55]/20 rounded-full text-sm"
-                        style={{ color: selectedProject.color }}
-                      >
-                        <img src={selectedProject.logo} alt="" className="w-4 h-4" />
-                        {selectedProject.categoryLabel}
-                      </span>
-                    </div>
-                    <div className="text-sm text-[#f5eed8]/60">
-                      <p>Duration: {selectedProject.duration}</p>
-                      <p>Client: {selectedProject.client}</p>
-                    </div>
-                  </div>
+                <p style={{ fontSize: 13, color: 'var(--pj-muted)', lineHeight: 1.8, marginBottom: 16 }}>
+                  {selectedProject.longDescription}
+                </p>
 
-                  <p className="text-[#f5eed8]/80 mb-6 leading-relaxed">
-                    {selectedProject.longDescription}
+                {/* Features */}
+                <div style={{ marginBottom: 16 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--pj-gold)', marginBottom: 8 }}>
+                    Key Features
                   </p>
-
-                  {/* Features */}
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-[#f5eed8] mb-3">Key Features:</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {selectedProject.features.map((feature, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-[#d4af55] rounded-full" />
-                          <span className="text-[#f5eed8]/80 text-sm">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Technologies */}
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-[#f5eed8] mb-3">Technologies:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedProject.technologies.map((tech, i) => (
-                        <span
-                          key={i}
-                          className="px-4 py-2 bg-[#d4af55]/10 rounded-full text-sm border border-[#d4af55]/30 text-[#f5eed8]"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <motion.a
-                      href={selectedProject.live}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="flex-1 px-6 py-3 bg-[#d4af55] text-[#0c0b09] rounded-lg text-center font-semibold flex items-center justify-center gap-2"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FiExternalLink /> View Live Demo
-                    </motion.a>
-                    <motion.a
-                      href={selectedProject.github}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="flex-1 px-6 py-3 bg-[#131210] border border-[#d4af55]/30 text-[#f5eed8] rounded-lg text-center font-semibold flex items-center justify-center gap-2"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FiGithub /> View Source Code
-                    </motion.a>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {selectedProject.features.map((feature, i) => (
+                      <span key={i} style={{
+                        padding: '3px 12px',
+                        borderRadius: 100,
+                        fontSize: 10,
+                        fontWeight: 500,
+                        background: 'rgba(212,175,85,0.08)',
+                        border: '1px solid var(--pj-border)',
+                        color: 'var(--pj-muted)',
+                      }}>
+                        {feature}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              </motion.div>
+
+                {/* Tech */}
+                <div style={{ marginBottom: 20 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--pj-gold)', marginBottom: 8 }}>
+                    Technologies
+                  </p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {selectedProject.technologies.map((tech, i) => (
+                      <span key={i} className="pj-badge">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                  <a
+                    href={selectedProject.live}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 8,
+                      padding: '10px 24px',
+                      borderRadius: 100,
+                      border: 'none',
+                      background: 'var(--pj-gold)',
+                      color: '#0c0b09',
+                      fontFamily: 'var(--pj-body)',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                      boxShadow: '0 8px 32px rgba(212,175,85,0.3)',
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(212,175,85,0.45)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(212,175,85,0.3)' }}
+                  >
+                    <FiExternalLink size={14} />
+                    Live Demo
+                  </a>
+                  <a
+                    href={selectedProject.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 8,
+                      padding: '10px 24px',
+                      borderRadius: 100,
+                      border: '1px solid var(--pj-border)',
+                      background: 'transparent',
+                      color: 'var(--pj-cream)',
+                      fontFamily: 'var(--pj-body)',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                      transition: 'border-color 0.2s, background 0.2s',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--pj-gold)'; e.currentTarget.style.background = 'rgba(212,175,85,0.05)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--pj-border)'; e.currentTarget.style.background = 'transparent' }}
+                  >
+                    <FiGithub size={14} />
+                    Source Code
+                  </a>
+                </div>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }
