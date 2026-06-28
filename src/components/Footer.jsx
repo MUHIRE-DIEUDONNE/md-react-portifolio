@@ -6,12 +6,9 @@ import {
   FiCode, FiFolder, FiBriefcase, FiMail, FiBookOpen, FiGift,
   FiChevronUp, FiCheck, FiHeart, FiArrowRight
 } from 'react-icons/fi'
-import { FaReact, FaNodeJs } from 'react-icons/fa'
+import { FaReact } from 'react-icons/fa'
 import { SiThreedotjs } from 'react-icons/si'
 
-/* ─────────────────────────────────────────────
-   PREMIUM DARK THEME STYLES (mirrors About.jsx)
-───────────────────────────────────────────── */
 const PREMIUM_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
 
@@ -53,7 +50,6 @@ const PREMIUM_STYLES = `
   .ft-root ::-webkit-scrollbar-track { background: transparent; }
   .ft-root ::-webkit-scrollbar-thumb { background: var(--ft-border-hi); border-radius: 4px; }
 
-  /* Avatar ring glow */
   .ft-avatar-wrap {
     position: relative;
     width: 96px;
@@ -79,7 +75,6 @@ const PREMIUM_STYLES = `
     transform: scale(1.08);
   }
 
-  /* Newsletter card — matches ab-card */
   .ft-newsletter-card {
     border: 1px solid var(--ft-border);
     background: var(--ft-card);
@@ -217,7 +212,6 @@ const PREMIUM_STYLES = `
   }
   .ft-perk svg { color: var(--ft-gold); flex-shrink: 0; }
 
-  /* Section rule */
   .ft-rule {
     height: 1px;
     background: linear-gradient(90deg, var(--ft-gold) 0%, rgba(212,175,85,0.15) 60%, transparent 100%);
@@ -304,168 +298,105 @@ const Footer = () => {
     { icon: FiInstagram, href: '#', name: 'Instagram' }
   ]
 
-  const perks = [
-    'Weekly insights',
-    'No spam, ever',
-    'Unsubscribe anytime'
-  ]
+  const perks = ['Weekly insights', 'No spam, ever', 'Unsubscribe anytime']
 
   return (
-    <footer className="ft-root" style={{ padding: 'clamp(60px,8vw,100px) 0 clamp(40px,5vw,60px)' }}>
+    <footer className="ft-root py-[clamp(60px,8vw,100px)] pb-[clamp(40px,5vw,60px)]">
       <style>{PREMIUM_STYLES}{lightModeStyles}</style>
 
-      {/* Ambient blobs */}
-      <div aria-hidden style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-        <div style={{ position: 'absolute', top: '5%', left: '-10%', width: 400, height: 400, background: 'radial-gradient(circle, rgba(212,175,85,0.06) 0%, transparent 70%)', borderRadius: '50%' }} />
-        <div style={{ position: 'absolute', bottom: '10%', right: '-8%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(46,204,154,0.04) 0%, transparent 70%)', borderRadius: '50%' }} />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[5%] left-[-10%] w-[400px] h-[400px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(212,175,85,0.06) 0%, transparent 70%)' }} />
+        <div className="absolute bottom-[10%] right-[-8%] w-[500px] h-[500px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(46,204,154,0.04) 0%, transparent 70%)' }} />
       </div>
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 clamp(20px,5vw,48px)', position: 'relative', zIndex: 1 }}>
-
-        {/* ── MAIN GRID ── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr)',
-          gap: 'clamp(32px,4vw,56px)',
-          marginBottom: 'clamp(40px,5vw,64px)',
-        }}>
-
-          {/* ── BRAND COLUMN ── */}
-          <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="ft-avatar-wrap">
-                <div className="ft-avatar-inner">
-                  <img
-                    src="/images/muhire-dieudonne.jpg"
-                    alt="Muhire Dieudonne"
-                  />
-                </div>
+      <div className="container-responsive relative z-10">
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[clamp(32px,4vw,56px)] mb-[clamp(40px,5vw,64px)]">
+          {/* Brand */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="ft-avatar-wrap">
+              <div className="ft-avatar-inner">
+                <img src="/images/muhire-dieudonne.jpg" alt="Muhire Dieudonne" />
               </div>
+            </div>
+            <p className="text-sm font-bold" style={{ color: 'var(--ft-cream)' }}>Muhire Dieudonne</p>
+            <p className="text-xs font-medium mb-2.5" style={{ color: 'var(--ft-gold)' }}>Full-Stack Developer</p>
+            <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--ft-muted)' }}>
+              Creating immersive digital experiences with cutting-edge web technologies. Let's build something amazing together.
+            </p>
+            <div className="flex gap-2.5">
+              {socialLinks.map((social, index) => (
+                <motion.a
+                  key={index}
+                  href={social.href}
+                  whileHover={{ y: -3, scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-9 h-9 rounded-full border border-[var(--ft-border)] flex items-center justify-center transition-all hover:border-[var(--ft-gold)] hover:text-[var(--ft-gold)] hover:bg-[var(--ft-gold-dim)]"
+                  style={{ color: 'var(--ft-muted)' }}
+                >
+                  <social.icon size={15} />
+                </motion.a>
+              ))}
+            </div>
+          </motion.div>
 
-              <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--ft-cream)', marginBottom: 2 }}>
-                Muhire Dieudonne
-              </p>
-              <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--ft-gold)', marginBottom: 10 }}>
-                Full-Stack Developer
-              </p>
+          {/* Quick Links */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            <p className="text-[10px] font-bold tracking-[0.14em] uppercase mb-4" style={{ color: 'var(--ft-gold)' }}>Quick Links</p>
+            <ul className="space-y-2">
+              {quickLinks.map((link) => (
+                <motion.li key={link.name} whileHover={{ x: 4 }}>
+                  <a href={link.href} className="flex items-center gap-2 text-xs transition-colors hover:text-[var(--ft-cream)]" style={{ color: 'var(--ft-muted)' }}>
+                    <link.icon size={11} style={{ color: 'var(--ft-dim)' }} />
+                    {link.name}
+                  </a>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
 
-              <p style={{ fontSize: 12, color: 'var(--ft-muted)', lineHeight: 1.7, marginBottom: 16 }}>
-                Creating immersive digital experiences with cutting-edge web technologies. Let's build something amazing together.
-              </p>
+          {/* Resources */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <p className="text-[10px] font-bold tracking-[0.14em] uppercase mb-4" style={{ color: 'var(--ft-gold)' }}>Resources</p>
+            <ul className="space-y-2">
+              {resources.map((link) => (
+                <motion.li key={link.name} whileHover={{ x: 4 }}>
+                  <a href={link.href} className="flex items-center gap-2 text-xs transition-colors hover:text-[var(--ft-cream)]" style={{ color: 'var(--ft-muted)' }}>
+                    <link.icon size={11} style={{ color: 'var(--ft-dim)' }} />
+                    {link.name}
+                  </a>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
 
-              <div style={{ display: 'flex', gap: 10 }}>
-                {socialLinks.map((social, index) => (
-                  <motion.a
-                    key={index}
-                    href={social.href}
-                    whileHover={{ y: -3, scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    style={{
-                      width: 36, height: 36,
-                      borderRadius: '50%',
-                      border: '1px solid var(--ft-border)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: 'var(--ft-muted)',
-                      transition: 'border-color 0.2s, color 0.2s, background 0.2s',
-                      background: 'transparent',
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--ft-gold)'; e.currentTarget.style.color = 'var(--ft-gold)'; e.currentTarget.style.background = 'var(--ft-gold-dim)' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--ft-border)'; e.currentTarget.style.color = 'var(--ft-muted)'; e.currentTarget.style.background = 'transparent' }}
-                  >
-                    <social.icon size={15} />
-                  </motion.a>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-
-          {/* ── QUICK LINKS ── */}
-          <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ft-gold)', marginBottom: 16 }}>
-                Quick Links
-              </p>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {quickLinks.map((link) => (
-                  <motion.li key={link.name} whileHover={{ x: 4 }}>
-                    <a
-                      href={link.href}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 8,
-                        fontSize: 12, color: 'var(--ft-muted)',
-                        textDecoration: 'none',
-                        transition: 'color 0.2s',
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = 'var(--ft-cream)'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'var(--ft-muted)'}
-                    >
-                      <link.icon size={11} style={{ color: 'var(--ft-dim)' }} />
-                      {link.name}
-                    </a>
-                  </motion.li>
-                ))}
-              </ul>
-            </motion.div>
-          </div>
-
-          {/* ── RESOURCES ── */}
-          <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ft-gold)', marginBottom: 16 }}>
-                Resources
-              </p>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {resources.map((link) => (
-                  <motion.li key={link.name} whileHover={{ x: 4 }}>
-                    <a
-                      href={link.href}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 8,
-                        fontSize: 12, color: 'var(--ft-muted)',
-                        textDecoration: 'none',
-                        transition: 'color 0.2s',
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = 'var(--ft-cream)'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'var(--ft-muted)'}
-                    >
-                      <link.icon size={11} style={{ color: 'var(--ft-dim)' }} />
-                      {link.name}
-                    </a>
-                  </motion.li>
-                ))}
-              </ul>
-            </motion.div>
-          </div>
-
-          {/* ── NEWSLETTER ── */}
-          <div>
-            <motion.div
-              className="ft-newsletter-card"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
+          {/* Newsletter */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <div className="ft-newsletter-card">
               <div className="ft-newsletter-badge">
                 <span className="dot" />
                 Newsletter
               </div>
-
               <p className="ft-newsletter-title">Stay in the loop ✦</p>
               <p className="ft-newsletter-sub">
                 Get weekly insights on web dev, design trends, and exclusive tutorials.
@@ -485,7 +416,6 @@ const Footer = () => {
                     animate={inputFocused ? { scale: 1.005 } : { scale: 1 }}
                     transition={{ duration: 0.15 }}
                   />
-
                   <motion.button
                     type="submit"
                     whileHover={{ scale: 1.01 }}
@@ -494,26 +424,12 @@ const Footer = () => {
                   >
                     <AnimatePresence mode="wait">
                       {subscribed ? (
-                        <motion.span
-                          key="done"
-                          initial={{ opacity: 0, scale: 0.7 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0 }}
-                          style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-                        >
-                          <FiCheck size={14} />
-                          You're in!
+                        <motion.span key="done" initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
+                          <FiCheck size={14} /> You're in!
                         </motion.span>
                       ) : (
-                        <motion.span
-                          key="sub"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-                        >
-                          <FiArrowRight size={13} />
-                          Subscribe
+                        <motion.span key="sub" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
+                          <FiArrowRight size={13} /> Subscribe
                         </motion.span>
                       )}
                     </AnimatePresence>
@@ -524,93 +440,61 @@ const Footer = () => {
               <div className="ft-perks">
                 {perks.map((perk) => (
                   <span key={perk} className="ft-perk">
-                    <FiCheck size={9} />
-                    {perk}
+                    <FiCheck size={9} /> {perk}
                   </span>
                 ))}
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </div>
 
-        {/* ── RULE ── */}
-        <div className="ft-rule" style={{ marginBottom: 'clamp(28px,4vw,40px)' }} />
+        {/* Rule */}
+        <div className="ft-rule mb-[clamp(28px,4vw,40px)]" />
 
-        {/* ── BOTTOM BAR ── */}
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 16,
-        }}>
-          <p style={{ fontSize: 11, color: 'var(--ft-dim)' }}>
+        {/* Bottom Bar */}
+        <div className="flex flex-wrap justify-between items-center gap-4">
+          <p className="text-[11px]" style={{ color: 'var(--ft-dim)' }}>
             © {new Date().getFullYear()} Muhire Dieudonne. All rights reserved.
           </p>
-
-          <div style={{ display: 'flex', gap: 20 }}>
+          <div className="flex gap-5">
             {legal.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                style={{
-                  fontSize: 10,
-                  color: 'var(--ft-dim)',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--ft-cream)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--ft-dim)'}
-              >
+              <a key={link.name} href={link.href} className="text-[10px] transition-colors hover:text-[var(--ft-cream)]" style={{ color: 'var(--ft-dim)' }}>
                 {link.name}
               </a>
             ))}
           </div>
-
-          <p style={{ fontSize: 10, color: 'var(--ft-dim)', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <p className="text-[10px] flex items-center gap-1.5" style={{ color: 'var(--ft-dim)' }}>
             Built with
-            <FaReact style={{ color: '#61DAFB' }} size={14} />
-            <SiThreedotjs style={{ color: '#049EF4' }} size={14} />
+            <FaReact className="text-[#61DAFB]" size={14} />
+            <SiThreedotjs className="text-[#049EF4]" size={14} />
             and
-            <FiHeart style={{ color: 'var(--ft-gold)' }} size={11} />
+            <FiHeart className="text-[var(--ft-gold)]" size={11} />
           </p>
         </div>
       </div>
 
-      {/* ── SCROLL TO TOP ── */}
+      {/* Scroll to Top */}
       <motion.button
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="fixed bottom-6 right-6 z-[100] w-[52px] h-[52px] rounded-full border-[var(--ft-border-hi)] backdrop-blur-sm flex items-center justify-center cursor-pointer shadow-2xl transition-colors"
         style={{
-          position: 'fixed', bottom: 24, right: 24,
-          zIndex: 100,
-          width: 52, height: 52,
-          borderRadius: '50%',
           border: '1px solid var(--ft-border-hi)',
           background: 'var(--ft-card)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-          transition: 'border-color 0.2s',
         }}
         onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--ft-gold)'}
         onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--ft-border-hi)'}
       >
-        <svg style={{ position: 'absolute', width: 44, height: 44, transform: 'rotate(-90deg)' }}>
+        <svg className="absolute w-11 h-11 -rotate-90">
           <circle cx="22" cy="22" r="20" fill="none" stroke="var(--ft-border)" strokeWidth="2.5" />
-          <circle
-            cx="22" cy="22" r="20"
-            fill="none"
-            stroke="var(--ft-gold)"
-            strokeWidth="2.5"
+          <circle cx="22" cy="22" r="20" fill="none" stroke="var(--ft-gold)" strokeWidth="2.5"
             strokeDasharray={2 * Math.PI * 20}
             strokeDashoffset={2 * Math.PI * 20 * (1 - scrollProgress / 100)}
             strokeLinecap="round"
-            style={{ transition: 'stroke-dashoffset 0.1s ease' }}
+            className="transition-[stroke-dashoffset] duration-100 ease-linear"
           />
         </svg>
         <FiChevronUp size={18} style={{ color: 'var(--ft-cream)' }} />
