@@ -8,26 +8,23 @@ import {
   FiArrowUpRight, FiZap, FiBriefcase
 } from 'react-icons/fi'
 
-/* ─────────────────────────────────────────────
-   SHARED DESIGN TOKENS (mirrors Experience.jsx)
-───────────────────────────────────────────── */
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
 
   :root {
-    --ab-bg:        #0c0b09;
-    --ab-surface:   #131210;
-    --ab-card:      rgba(22, 20, 16, 0.95);
-    --ab-border:    rgba(255,245,220,0.07);
+    --ab-bg: #0c0b09;
+    --ab-surface: #131210;
+    --ab-card: rgba(22, 20, 16, 0.95);
+    --ab-border: rgba(255,245,220,0.07);
     --ab-border-hi: rgba(212,175,85,0.35);
-    --ab-gold:      #d4af55;
-    --ab-gold-dim:  rgba(212,175,85,0.18);
-    --ab-cream:     #f5eed8;
-    --ab-muted:     rgba(245,238,216,0.42);
-    --ab-dim:       rgba(245,238,216,0.18);
-    --ab-teal:      #2ecc9a;
-    --ab-display:   'Playfair Display', Georgia, serif;
-    --ab-body:      'Instrument Sans', system-ui, sans-serif;
+    --ab-gold: #d4af55;
+    --ab-gold-dim: rgba(212,175,85,0.18);
+    --ab-cream: #f5eed8;
+    --ab-muted: rgba(245,238,216,0.42);
+    --ab-dim: rgba(245,238,216,0.18);
+    --ab-teal: #2ecc9a;
+    --ab-display: 'Playfair Display', Georgia, serif;
+    --ab-body: 'Instrument Sans', system-ui, sans-serif;
   }
 
   .ab-root *, .ab-root *::before, .ab-root *::after {
@@ -42,7 +39,6 @@ const STYLES = `
     position: relative; overflow: hidden;
   }
 
-  /* Grain — identical to Experience */
   .ab-root::before {
     content: '';
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -50,18 +46,10 @@ const STYLES = `
     opacity: 1;
   }
 
-  /* Scrollbar */
   .ab-root ::-webkit-scrollbar { width: 3px; }
   .ab-root ::-webkit-scrollbar-track { background: transparent; }
   .ab-root ::-webkit-scrollbar-thumb { background: var(--ab-border-hi); border-radius: 4px; }
 
-  /* Section rule */
-  .ab-rule {
-    height: 1px;
-    background: linear-gradient(90deg, var(--ab-gold) 0%, rgba(212,175,85,0.15) 60%, transparent 100%);
-  }
-
-  /* Stat card — matches exp-stat */
   .ab-stat {
     border: 1px solid var(--ab-border);
     border-radius: 12px; padding: 20px 16px;
@@ -75,7 +63,6 @@ const STYLES = `
     background: rgba(212,175,85,0.04);
   }
 
-  /* Card — matches exp-card */
   .ab-card {
     border: 1px solid var(--ab-border);
     background: var(--ab-card);
@@ -96,7 +83,6 @@ const STYLES = `
   }
   .ab-card:hover::before { opacity: 1; }
 
-  /* Tab pill — matches exp-pill */
   .ab-tab {
     padding: 8px 22px; border-radius: 100px; font-size: 12px; font-weight: 500;
     letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
@@ -111,7 +97,6 @@ const STYLES = `
     box-shadow: 0 4px 20px rgba(212,175,85,0.35);
   }
 
-  /* Skill badge — matches exp-badge */
   .ab-badge {
     padding: 4px 14px; border-radius: 100px; font-size: 10px;
     font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
@@ -122,7 +107,6 @@ const STYLES = `
   }
   .ab-badge:hover { transform: scale(1.05); background: rgba(212,175,85,0.25); }
 
-  /* CTA — matches exp-cta */
   .ab-cta {
     display: inline-flex; align-items: center; gap: 10px;
     padding: 14px 32px; border-radius: 100px; border: none;
@@ -139,7 +123,6 @@ const STYLES = `
     background: #e0be6a;
   }
 
-  /* Interest chip */
   .ab-interest {
     border: 1px solid var(--ab-border);
     border-radius: 12px; padding: 16px 12px;
@@ -153,7 +136,6 @@ const STYLES = `
     transform: translateY(-3px);
   }
 
-  /* Timeline dot line */
   .ab-tl-dot {
     width: 10px; height: 10px; border-radius: 50%;
     background: var(--ab-gold); flex-shrink: 0;
@@ -162,7 +144,6 @@ const STYLES = `
     margin-top: 5px;
   }
 
-  /* Profile image frame */
   .ab-imgframe {
     border-radius: 20px; overflow: hidden;
     border: 1px solid var(--ab-border);
@@ -182,9 +163,6 @@ const STYLES = `
   }
 `
 
-/* ─────────────────────────────────────────────
-   DATA
-───────────────────────────────────────────── */
 const STATS = [
   { value: 5,  suffix: '+', label: 'Years Active',      color: '#d4af55' },
   { value: 50, suffix: '+', label: 'Projects Shipped',  color: '#2ecc9a' },
@@ -216,9 +194,6 @@ const TABS = [
   { id: 'interests', label: 'Interests' },
 ]
 
-/* ─────────────────────────────────────────────
-   ANIMATED COUNTER
-───────────────────────────────────────────── */
 const Counter = ({ value, suffix }) => {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true })
@@ -238,9 +213,6 @@ const Counter = ({ value, suffix }) => {
   return <span ref={ref}>{inView ? display : 0}{suffix}</span>
 }
 
-/* ─────────────────────────────────────────────
-   MAIN COMPONENT
-───────────────────────────────────────────── */
 const About = () => {
   const [activeTab, setActiveTab] = useState('bio')
   const [isDarkMode, setIsDarkMode] = useState(true)
@@ -256,7 +228,6 @@ const About = () => {
     return () => observer.disconnect()
   }, [])
 
-  // 3-D tilt on image
   const mx = useMotionValue(0); const my = useMotionValue(0)
   const rx = useSpring(useTransform(my, [-120, 120], [10, -10]), { damping: 30 })
   const ry = useSpring(useTransform(mx, [-120, 120], [-10, 10]), { damping: 30 })
@@ -284,67 +255,64 @@ const About = () => {
   `
 
   return (
-    <section id="about" className="ab-root" style={{ padding: 'clamp(60px,8vw,120px) 0' }}>
+    <section id="about" className="ab-root py-[clamp(60px,8vw,120px)]">
       <style>{STYLES}{lightModeStyles}</style>
 
-      {/* Ambient blobs */}
-      <div aria-hidden style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-        <div style={{ position: 'absolute', top: '5%', right: '-12%', width: 480, height: 480, background: 'radial-gradient(circle, rgba(212,175,85,0.07) 0%, transparent 70%)', borderRadius: '50%' }} />
-        <div style={{ position: 'absolute', bottom: '8%', left: '-10%', width: 560, height: 560, background: 'radial-gradient(circle, rgba(46,204,154,0.05) 0%, transparent 70%)', borderRadius: '50%' }} />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[5%] right-[-12%] w-[480px] h-[480px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(212,175,85,0.07) 0%, transparent 70%)' }} />
+        <div className="absolute bottom-[8%] left-[-10%] w-[560px] h-[560px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(46,204,154,0.05) 0%, transparent 70%)' }} />
       </div>
 
-      <div style={{ maxWidth: 980, margin: '0 auto', padding: '0 clamp(20px,5vw,48px)', position: 'relative', zIndex: 1 }}>
-
-        {/* ── HEADER ── */}
+      <div className="container-responsive relative z-10">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          style={{ marginBottom: 'clamp(48px,6vw,72px)' }}
+          className="mb-[clamp(48px,6vw,72px)]"
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <div style={{ width: 28, height: 1, background: 'var(--ab-gold)' }} />
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ab-gold)', fontFamily: 'var(--ab-body)' }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-7 h-px" style={{ background: 'var(--ab-gold)' }} />
+            <span className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: 'var(--ab-gold)', fontFamily: 'var(--ab-body)' }}>
               Personal Profile
             </span>
           </div>
-          <h2 style={{ fontFamily: 'var(--ab-display)', fontSize: 'clamp(38px,7vw,72px)', fontWeight: 900, lineHeight: 1.02, color: 'var(--ab-cream)', letterSpacing: '-0.02em', marginBottom: 18 }}>
+          <h2 className="section-title">
             About<br />
             <em style={{ color: 'var(--ab-gold)', fontStyle: 'italic' }}>Me</em>
           </h2>
-          <p style={{ fontSize: 15, color: 'var(--ab-muted)', maxWidth: 480, lineHeight: 1.7 }}>
+          <p className="section-sub">
             A creative developer who believes great interfaces are felt, not just seen.
           </p>
         </motion.div>
 
-        {/* ── STATS ROW ── */}
+        {/* Stats Row */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 'clamp(36px,5vw,56px)' }}
+          className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-[clamp(36px,5vw,56px)]"
         >
           {STATS.map((s, i) => (
             <motion.div key={i} className="ab-stat" whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-              <div style={{ fontFamily: 'var(--ab-display)', fontSize: 'clamp(24px,4vw,36px)', fontWeight: 900, color: s.color, lineHeight: 1, marginBottom: 6 }}>
+              <div className="text-[clamp(24px,4vw,36px)] font-black leading-none mb-1.5" style={{ fontFamily: 'var(--ab-display)', color: s.color }}>
                 <Counter value={s.value} suffix={s.suffix} />
               </div>
-              <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ab-dim)' }}>
+              <div className="text-[10px] font-semibold tracking-[0.1em] uppercase" style={{ color: 'var(--ab-dim)' }}>
                 {s.label}
               </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* ── RULE ── */}
-        <div className="ab-rule" style={{ marginBottom: 'clamp(28px,4vw,40px)' }} />
+        {/* Rule */}
+        <div className="rule-gold mb-[clamp(28px,4vw,40px)]" />
 
-        {/* ── TWO-COLUMN BODY ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.15fr)', gap: 'clamp(28px,4vw,56px)', alignItems: 'start' }}>
-
-          {/* LEFT — image with tilt */}
+        {/* Two Column Body */}
+        <div className="grid grid-cols-1 md:grid-cols-[1fr,1.15fr] gap-[clamp(28px,4vw,56px)] items-start">
+          {/* Left - Image */}
           <motion.div
             style={{ perspective: 900, rotateX: rx, rotateY: ry }}
             onMouseMove={onMove} onMouseLeave={onLeave}
@@ -353,67 +321,46 @@ const About = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Ghost numeral — decorative like Experience */}
-            <div style={{
-              fontFamily: 'var(--ab-display)',
-              fontSize: 'clamp(80px,14vw,160px)',
-              fontWeight: 900, lineHeight: 1,
-              color: 'transparent',
-              WebkitTextStroke: '1px rgba(212,175,85,0.1)',
-              userSelect: 'none', pointerEvents: 'none',
-              position: 'absolute', top: -20, left: -12, zIndex: 0,
-            }}>MD</div>
-
-            <div className="ab-imgframe" style={{
-              height: 'clamp(280px,40vw,440px)',
-              background: '#131210',
-              position: 'relative', zIndex: 1,
-            }}>
-              <img
-                src="/images/muhire-dieudonne.jpg"
-                alt="Muhire Dieudonne"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-              />
-              {/* Gold corner accent */}
-              <div style={{
-                position: 'absolute', bottom: 20, left: 20, zIndex: 2,
-                display: 'flex', flexDirection: 'column', gap: 4,
-              }}>
-                <div style={{ width: 32, height: 2, background: 'var(--ab-gold)', borderRadius: 1 }} />
-                <div style={{ width: 20, height: 2, background: 'var(--ab-gold)', opacity: 0.5, borderRadius: 1 }} />
+            <div className="relative">
+              <div className="absolute -top-5 -left-3 text-[clamp(80px,14vw,160px)] font-black leading-none select-none pointer-events-none" style={{ fontFamily: 'var(--ab-display)', color: 'transparent', WebkitTextStroke: '1px rgba(212,175,85,0.1)' }}>
+                MD
+              </div>
+              <div className="ab-imgframe h-[clamp(280px,40vw,440px)] bg-[#131210] relative z-10">
+                <img
+                  src="/images/muhire-dieudonne.jpg"
+                  alt="Muhire Dieudonne"
+                  className="w-full h-full object-cover block"
+                />
+                <div className="absolute bottom-5 left-5 z-20 flex flex-col gap-1">
+                  <div className="w-8 h-0.5 rounded-sm" style={{ background: 'var(--ab-gold)' }} />
+                  <div className="w-5 h-0.5 rounded-sm" style={{ background: 'var(--ab-gold)', opacity: 0.5 }} />
+                </div>
               </div>
             </div>
 
-            {/* Availability badge below image */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
-              style={{
-                marginTop: 16, padding: '10px 18px', borderRadius: 100,
-                border: '1px solid rgba(46,204,154,0.3)',
-                background: 'rgba(46,204,154,0.08)',
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-              }}
+              className="mt-4 px-4 py-2.5 rounded-full border flex items-center gap-2"
+              style={{ borderColor: 'rgba(46,204,154,0.3)', background: 'rgba(46,204,154,0.08)' }}
             >
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ab-teal)', animation: 'ab-blink 1.6s ease-in-out infinite' }} />
-              <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ab-teal)' }}>
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--ab-teal)' }} />
+              <span className="text-[11px] font-semibold tracking-[0.08em] uppercase" style={{ color: 'var(--ab-teal)' }}>
                 Available for Work
               </span>
             </motion.div>
-            <style>{`@keyframes ab-blink { 0%,100%{opacity:1;} 50%{opacity:0.35;} }`}</style>
           </motion.div>
 
-          {/* RIGHT — tabs + content */}
+          {/* Right - Tabs */}
           <motion.div
             initial={{ opacity: 0, x: 32 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Tabs */}
-            <div style={{ display: 'flex', gap: 8, marginBottom: 28, flexWrap: 'wrap' }}>
+            <div className="flex flex-wrap gap-2 mb-7">
               {TABS.map(t => (
                 <button key={t.id} className={`ab-tab ${activeTab === t.id ? 'active' : ''}`}
                   onClick={() => setActiveTab(t.id)}>
@@ -422,28 +369,25 @@ const About = () => {
               ))}
             </div>
 
-            {/* Tab content */}
             <AnimatePresence mode="wait">
-              {/* BIO */}
               {activeTab === 'bio' && (
                 <motion.div key="bio"
                   initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.28 }}>
-                  <div className="ab-card" style={{ padding: 28, marginBottom: 20 }}>
-                    <h3 style={{ fontFamily: 'var(--ab-display)', fontSize: 'clamp(20px,3vw,26px)', fontWeight: 700, color: 'var(--ab-cream)', marginBottom: 14 }}>
+                  exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.28 }}
+                >
+                  <div className="ab-card p-[clamp(20px,3vw,28px)] mb-5">
+                    <h3 className="text-[clamp(20px,3vw,26px)] font-bold mb-3.5" style={{ fontFamily: 'var(--ab-display)', color: 'var(--ab-cream)' }}>
                       Hi, I'm <em style={{ color: 'var(--ab-gold)', fontStyle: 'italic' }}>Muhire Dieudonne</em>
                     </h3>
-                    <p style={{ fontSize: 13, color: 'var(--ab-muted)', lineHeight: 1.8, marginBottom: 14 }}>
+                    <p className="text-sm leading-relaxed mb-3.5" style={{ color: 'var(--ab-muted)' }}>
                       A passionate creative developer with 5+ years of experience building immersive web experiences. I specialise in React, Three.js, and advanced animations to craft sites that don't just look stunning — they feel alive.
                     </p>
-                    <p style={{ fontSize: 13, color: 'var(--ab-muted)', lineHeight: 1.8, marginBottom: 22 }}>
+                    <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--ab-muted)' }}>
                       My journey started with curiosity for visual effects and has evolved into a career pushing the boundaries of what's possible on the web — one frame at a time.
                     </p>
-                    {/* Skill badges */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 24 }}>
+                    <div className="flex flex-wrap gap-1.5 mb-6">
                       {SKILLS.map(s => <span key={s} className="ab-badge">{s}</span>)}
                     </div>
-                    {/* CTA */}
                     <a href="#" className="ab-cta">
                       <FiDownload size={14} />
                       Download CV
@@ -455,35 +399,31 @@ const About = () => {
                 </motion.div>
               )}
 
-              {/* TIMELINE */}
               {activeTab === 'timeline' && (
                 <motion.div key="timeline"
                   initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.28 }}>
-                  <div className="ab-card" style={{ padding: 28 }}>
-                    <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ab-gold)', marginBottom: 20 }}>
+                  exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.28 }}
+                >
+                  <div className="ab-card p-[clamp(20px,3vw,28px)]">
+                    <p className="text-[9px] font-bold tracking-[0.14em] uppercase mb-5" style={{ color: 'var(--ab-gold)' }}>
                       Career Milestones
                     </p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                    <div className="flex flex-col">
                       {TIMELINE.map((item, i) => (
                         <motion.div key={i}
                           initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.09 }}
-                          style={{ display: 'flex', gap: 16, paddingBottom: i < TIMELINE.length - 1 ? 24 : 0, position: 'relative' }}
+                          className={`flex gap-4 relative ${i < TIMELINE.length - 1 ? 'pb-6' : ''}`}
                         >
-                          {/* Vertical connector */}
                           {i < TIMELINE.length - 1 && (
-                            <div style={{
-                              position: 'absolute', left: 4, top: 18, bottom: 0, width: 1,
-                              background: 'linear-gradient(180deg, var(--ab-gold-dim), transparent)',
-                            }} />
+                            <div className="absolute left-1 top-4.5 bottom-0 w-px" style={{ background: 'linear-gradient(180deg, var(--ab-gold-dim), transparent)' }} />
                           )}
                           <div className="ab-tl-dot" style={{ background: item.color, boxShadow: `0 0 10px ${item.color}60` }} />
                           <div>
-                            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: item.color, marginBottom: 4 }}>
+                            <div className="text-[11px] font-bold tracking-[0.1em] mb-1" style={{ color: item.color }}>
                               {item.year}
                             </div>
-                            <div style={{ fontSize: 13, color: 'var(--ab-muted)', lineHeight: 1.6 }}>
+                            <div className="text-sm leading-relaxed" style={{ color: 'var(--ab-muted)' }}>
                               {item.event}
                             </div>
                           </div>
@@ -494,18 +434,19 @@ const About = () => {
                 </motion.div>
               )}
 
-              {/* INTERESTS */}
               {activeTab === 'interests' && (
                 <motion.div key="interests"
                   initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.28 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+                  exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.28 }}
+                >
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                     {INTERESTS.map((item, i) => (
                       <motion.div key={i} className="ab-interest"
                         initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: i * 0.06 }}>
-                        <div style={{ fontSize: 24, marginBottom: 8, lineHeight: 1 }}>{item.icon}</div>
-                        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ab-muted)' }}>
+                        transition={{ delay: i * 0.06 }}
+                      >
+                        <div className="text-2xl mb-2 leading-none">{item.icon}</div>
+                        <div className="text-[11px] font-semibold tracking-[0.06em] uppercase" style={{ color: 'var(--ab-muted)' }}>
                           {item.name}
                         </div>
                       </motion.div>
@@ -517,9 +458,8 @@ const About = () => {
           </motion.div>
         </div>
 
-        {/* ── RULE ── */}
-        <div className="ab-rule" style={{ margin: 'clamp(40px,5vw,64px) 0 0' }} />
-
+        {/* Rule */}
+        <div className="rule-gold mt-[clamp(40px,5vw,64px)]" />
       </div>
     </section>
   )
