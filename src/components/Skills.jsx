@@ -1,6 +1,6 @@
 // src/components/Skills.jsx
-import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import ThreeHero from './ThreeHero'
 
 // ─── useTheme hook (inline) ────────────────────
@@ -24,6 +24,19 @@ const useTheme = () => {
   return isDarkMode
 }
 
+// ─── useMediaQuery hook (inline) ──────────────
+const useMediaQuery = (query) => {
+  const [matches, setMatches] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    setMatches(mq.matches)
+    const handler = (e) => setMatches(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [query])
+  return matches
+}
+
 // ─── Styles ──────────────────────────────────────
 const PREMIUM_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Instrument+Sans:wght@300;400;500;600&display=swap');
@@ -31,6 +44,7 @@ const PREMIUM_STYLES = `
   .skills-globe-root {
     position: relative;
     min-height: 100vh;
+    min-height: 100dvh;
     background: #0c0b09;
     color: #f5eed8;
     font-family: 'Instrument Sans', system-ui, sans-serif;
@@ -38,21 +52,99 @@ const PREMIUM_STYLES = `
     display: flex;
     align-items: center;
     justify-content: center;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* ── Globe stage: full-bleed on desktop, a contained rounded
+     panel on mobile so it never fights the title/filter text ── */
+  .skills-globe-root .globe-stage {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  @media (max-width: 680px) {
+    .skills-globe-root .globe-stage {
+      top: max(17%, calc(env(safe-area-inset-top) + 92px));
+      bottom: max(20%, calc(env(safe-area-inset-bottom) + 96px));
+      left: 3%;
+      right: 3%;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 1px solid rgba(212,175,85,0.18);
+      box-shadow: 0 0 0 1px rgba(212,175,85,0.06), 0 30px 80px rgba(0,0,0,0.55);
+    }
+  }
+
+  .skills-globe-root .globe-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .skills-globe-root .globe-loading .ring {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid rgba(212,175,85,0.18);
+    border-top-color: #d4af55;
+    animation: globe-spin 0.9s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skills-globe-root .globe-loading .ring { animation-duration: 1.6s; }
+  }
+
+  .skills-globe-root .globe-loading span {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(245,238,216,0.4);
+  }
+
+  @keyframes globe-spin { to { transform: rotate(360deg); } }
+
+  /* ── Vignettes so overlay text stays legible over the globe ── */
+  .skills-globe-root .vignette-top,
+  .skills-globe-root .vignette-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .skills-globe-root .vignette-top {
+    top: 0;
+    height: clamp(120px, 22vh, 220px);
+    background: linear-gradient(to bottom, rgba(12,11,9,0.92) 0%, rgba(12,11,9,0) 100%);
+  }
+  .skills-globe-root .vignette-bottom {
+    bottom: 0;
+    height: clamp(110px, 20vh, 200px);
+    background: linear-gradient(to top, rgba(12,11,9,0.92) 0%, rgba(12,11,9,0) 100%);
   }
 
   .skills-globe-root .globe-title {
     position: absolute;
-    top: 5%;
+    top: max(5%, calc(env(safe-area-inset-top) + 18px));
     left: 50%;
     transform: translateX(-50%);
     z-index: 20;
     text-align: center;
     pointer-events: none;
+    width: min(92vw, 640px);
   }
 
   .skills-globe-root .globe-title h2 {
     font-family: 'Playfair Display', Georgia, serif;
-    font-size: clamp(2rem, 6vw, 4rem);
+    font-size: clamp(1.75rem, 7vw, 4rem);
+    line-height: 1.1;
     margin-bottom: 0.25rem;
     background: linear-gradient(135deg, #d4af55, #f5eed8);
     -webkit-background-clip: text;
@@ -62,27 +154,29 @@ const PREMIUM_STYLES = `
 
   .skills-globe-root .globe-title p {
     color: rgba(245,238,216,0.6);
-    font-size: 1rem;
+    font-size: clamp(0.75rem, 2.5vw, 1rem);
     letter-spacing: 0.1em;
   }
 
-  /* Optional filter overlay (remove if not needed) */
+  /* Filter overlay */
   .skills-globe-root .filter-overlay {
     position: absolute;
-    bottom: 5%;
+    bottom: max(5%, calc(env(safe-area-inset-bottom) + 18px));
     left: 50%;
     transform: translateX(-50%);
     z-index: 20;
     display: flex;
-    gap: 0.75rem;
+    gap: 0.6rem;
     flex-wrap: wrap;
     justify-content: center;
+    width: min(92vw, 560px);
     pointer-events: none;
   }
 
   .skills-globe-root .filter-overlay button {
     pointer-events: auto;
-    padding: 0.5rem 1.25rem;
+    padding: 0.6rem 1.25rem;
+    min-height: 40px;
     border-radius: 999px;
     font-size: 0.75rem;
     font-weight: 500;
@@ -92,7 +186,8 @@ const PREMIUM_STYLES = `
     backdrop-filter: blur(8px);
     color: rgba(245,238,216,0.7);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.15s;
+    touch-action: manipulation;
   }
 
   .skills-globe-root .filter-overlay button:hover {
@@ -101,25 +196,60 @@ const PREMIUM_STYLES = `
     background: rgba(212,175,85,0.15);
   }
 
+  .skills-globe-root .filter-overlay button:active {
+    transform: scale(0.95);
+  }
+
   .skills-globe-root .filter-overlay button.active {
     background: #d4af55;
     border-color: #d4af55;
     color: #0c0b09;
     font-weight: 600;
   }
+
+  .skills-globe-root .filter-count {
+    position: absolute;
+    bottom: max(5%, calc(env(safe-area-inset-bottom) + 18px));
+    left: 50%;
+    transform: translate(-50%, calc(-100% - 52px));
+    z-index: 20;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(245,238,216,0.35);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 420px) {
+    .skills-globe-root .filter-overlay button {
+      padding: 0.55rem 1rem;
+      font-size: 0.7rem;
+    }
+  }
 `
+
+// ─── Category tags for the optional filter ─────
+const CATEGORY = {
+  React: 'frontend', 'Three.js': 'frontend', TypeScript: 'frontend', JavaScript: 'frontend',
+  Tailwind: 'frontend', 'Next.js': 'frontend', Svelte: 'frontend', WebGL: 'frontend', GSAP: 'frontend',
+  'Node.js': 'backend', GraphQL: 'backend', Python: 'backend',
+  MongoDB: 'tools', Docker: 'tools', AWS: 'tools', Figma: 'tools',
+}
 
 // ─── Main Component ────────────────────────────
 const Skills = () => {
   const [mouse, setMouse] = useState({ x: 0, y: 0 })
   const [threeReady, setThreeReady] = useState(false)
   const isDarkMode = useTheme()
+  const isMobile = useMediaQuery('(max-width: 680px)')
+  const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
 
   // ─── Optional category filter state ──────────
   const [selectedCategory, setSelectedCategory] = useState('all')
 
   // ─── Custom tech stack for the globe ──────────
-  const allTech = [
+  const allTech = useMemo(() => ([
     { label: 'React',          color: '#61dafb', radius: 3.1, speed: 0.38, phase: 0,   tiltX: 0.3 },
     { label: 'Three.js',       color: '#049EF4', radius: 3.4, speed: 0.30, phase: 1.2, tiltX: 0.2 },
     { label: 'Node.js',        color: '#68A063', radius: 3.2, speed: 0.34, phase: 2.4, tiltX: 0.4 },
@@ -136,12 +266,7 @@ const Skills = () => {
     { label: 'Docker',         color: '#2496ED', radius: 3.0, speed: 0.44, phase: 3.2, tiltX: 0.18 },
     { label: 'AWS',            color: '#FF9900', radius: 3.3, speed: 0.33, phase: 5.0, tiltX: 0.40 },
     { label: 'Figma',          color: '#F24E1E', radius: 3.6, speed: 0.27, phase: 2.8, tiltX: 0.30 },
-  ]
-
-  // ─── Category groups (for filtering) ──────────
-  // If you want to filter the badges by category, you can implement a mapping here.
-  // For simplicity, we keep all badges visible.
-  // You can remove the filter buttons entirely if you don't need them.
+  ].map(t => ({ ...t, category: CATEGORY[t.label] || 'tools' }))), [])
 
   const categories = [
     { id: 'all', label: 'All' },
@@ -150,23 +275,33 @@ const Skills = () => {
     { id: 'tools', label: 'Tools' },
   ]
 
-  // ─── Filter logic (optional) ──────────────────
-  // Example: filter based on category – you'd need to tag each tech with a category.
-  // For now, we keep all.
-  const filteredTech = allTech // you can apply filtering here
+  // ─── Filtering actually applies now ───────────
+  const filteredTech = useMemo(
+    () => selectedCategory === 'all' ? allTech : allTech.filter(t => t.category === selectedCategory),
+    [allTech, selectedCategory]
+  )
 
-  // Globe parameters
-  const orbitSpeed = 0.8
+  // Globe parameters — slightly calmer rotation on mobile / reduced-motion,
+  // since lower-power GPUs and smaller viewports make fast spin feel jittery.
+  const orbitSpeed = (prefersReducedMotion ? 0.25 : isMobile ? 0.6 : 0.8)
   const ringColor = '#d4af55'
   const accentColor = '#2ecc9a'
 
-  // ─── Mouse tracking ────────────────────────────
+  // ─── Pointer tracking (mouse + touch, so the parallax tilt
+  //     works on phones too, not just desktop) ─────────────
   useEffect(() => {
     const onMove = (e) => setMouse({ x: e.clientX - window.innerWidth / 2, y: e.clientY - window.innerHeight / 2 })
+    const onTouch = (e) => {
+      const t = e.touches[0]
+      if (!t) return
+      setMouse({ x: t.clientX - window.innerWidth / 2, y: t.clientY - window.innerHeight / 2 })
+    }
     window.addEventListener('mousemove', onMove)
-    const t = setTimeout(() => setThreeReady(true), 400)
+    window.addEventListener('touchmove', onTouch, { passive: true })
+    const t = setTimeout(() => setThreeReady(true), 350)
     return () => {
       window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('touchmove', onTouch)
       clearTimeout(t)
     }
   }, [])
@@ -175,9 +310,9 @@ const Skills = () => {
     <section id="skills" className="skills-globe-root">
       <style>{PREMIUM_STYLES}</style>
 
-      {/* ─── 3D Globe Background ─── */}
-      {threeReady && (
-        <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+      {/* ─── 3D Globe ─── */}
+      <div className="globe-stage">
+        {threeReady ? (
           <ThreeHero
             mousePosition={mouse}
             orbitSpeed={orbitSpeed}
@@ -185,10 +320,19 @@ const Skills = () => {
             accentColor={accentColor}
             techStack={filteredTech}
           />
-        </div>
-      )}
+        ) : (
+          <div className="globe-loading">
+            <div className="ring" />
+            <span>Loading skills</span>
+          </div>
+        )}
+      </div>
 
-      {/* ─── Overlay Content ─── */}
+      {/* ─── Legibility vignettes ─── */}
+      <div className="vignette-top" />
+      <div className="vignette-bottom" />
+
+      {/* ─── Title ─── */}
       <div className="globe-title">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -206,13 +350,30 @@ const Skills = () => {
         </motion.p>
       </div>
 
-      {/* ─── Optional Filter (can be removed) ─── */}
-      <div className="filter-overlay">
+      {/* ─── Filter count (small contextual hint) ─── */}
+      <AnimatePresence>
+        {selectedCategory !== 'all' && (
+          <motion.div
+            key="count"
+            className="filter-count"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.2 }}
+          >
+            {filteredTech.length} {filteredTech.length === 1 ? 'technology' : 'technologies'}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── Filter ─── */}
+      <div className="filter-overlay" role="group" aria-label="Filter skills by category">
         {categories.map((cat) => (
           <button
             key={cat.id}
             className={selectedCategory === cat.id ? 'active' : ''}
             onClick={() => setSelectedCategory(cat.id)}
+            aria-pressed={selectedCategory === cat.id}
           >
             {cat.label}
           </button>
