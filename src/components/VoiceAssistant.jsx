@@ -39,9 +39,12 @@ const style = `
   .nova-wrap * { box-sizing: border-box; margin: 0; padding: 0; }
   .nova-wrap { font-family: var(--nova-font-body); -webkit-font-smoothing: antialiased; }
 
+  .nova-messages { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
   .nova-messages::-webkit-scrollbar { width: 3px; }
   .nova-messages::-webkit-scrollbar-track { background: transparent; }
   .nova-messages::-webkit-scrollbar-thumb { background: var(--nova-border-accent); border-radius: 10px; }
+
+  .nova-panel { overscroll-behavior: contain; }
 
   @keyframes wave {
     0%, 100% { height: 4px; }
@@ -75,17 +78,23 @@ const style = `
   .typing-dot:nth-child(2) { animation-delay: 0.15s; }
   .typing-dot:nth-child(3) { animation-delay: 0.3s; }
 
-  .nova-mic-btn { position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.3s; }
+  .nova-mic-btn { position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.3s; touch-action: manipulation; }
   .nova-mic-btn::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.18), transparent 60%); pointer-events: none; }
   .nova-mic-btn:hover { transform: translateY(-1px); }
   .nova-mic-btn:active { transform: translateY(1px); }
 
-  .nova-pill { transition: background 0.2s, border-color 0.2s, transform 0.15s; }
+  .nova-pill { transition: background 0.2s, border-color 0.2s, transform 0.15s; touch-action: manipulation; }
   .nova-pill:hover { background: rgba(129,90,255,0.18) !important; border-color: rgba(129,90,255,0.5) !important; transform: translateY(-1px); }
 
+  .nova-input { -webkit-appearance: none; font-size: 16px; }
   .nova-input:focus { outline: none; border-color: var(--nova-accent); box-shadow: 0 0 0 3px rgba(129,90,255,0.15); }
 
   .nova-grain::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; opacity: 0.4; z-index: 0; }
+
+  /* Compact spacing + slightly smaller type on very narrow phones */
+  @media (max-width: 380px) {
+    .nova-tight { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+  }
 `
 
 /* ─────────────────────────────────────────────
@@ -426,8 +435,10 @@ const VoiceAssistant = () => {
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.94 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999] w-14 h-14 rounded-full border-none cursor-pointer flex items-center justify-center shadow-2xl"
+            className="fixed z-[9999] w-12 h-12 sm:w-14 sm:h-14 rounded-full border-none cursor-pointer flex items-center justify-center shadow-2xl"
             style={{
+              bottom: 'max(1rem, env(safe-area-inset-bottom))',
+              right: 'max(1rem, env(safe-area-inset-right))',
               background: 'linear-gradient(135deg, #815aff 0%, #ff5acd 100%)',
               boxShadow: '0 8px 32px rgba(129,90,255,0.55), 0 0 0 1px rgba(255,255,255,0.1)',
             }}
@@ -438,7 +449,7 @@ const VoiceAssistant = () => {
               className="absolute inset-0 rounded-full"
               style={{ background: 'rgba(129,90,255,0.4)' }}
             />
-            <FaRobot size={22} color="#fff" className="relative z-10" />
+            <FaRobot size={20} color="#fff" className="relative z-10" />
             {unreadCount > 0 && (
               <motion.span
                 initial={{ scale: 0 }}
@@ -461,25 +472,30 @@ const VoiceAssistant = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.88, y: 40 }}
             transition={{ type: 'spring', stiffness: 340, damping: 30 }}
-            className="nova-grain fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9998] w-[calc(100vw-2rem)] max-w-sm sm:max-w-md lg:max-w-lg rounded-2xl overflow-hidden flex flex-col"
+            className="nova-grain nova-panel fixed z-[9998] w-[calc(100vw-1.5rem)] sm:w-[calc(100vw-2rem)] max-w-sm sm:max-w-md lg:max-w-lg rounded-2xl flex flex-col"
             style={{
+              bottom: 'max(0.75rem, env(safe-area-inset-bottom))',
+              right: 'max(0.75rem, env(safe-area-inset-right))',
+              maxHeight: 'min(680px, calc(100dvh - 1.5rem))',
               background: 'var(--nova-surface)',
               border: '1px solid var(--nova-border)',
               boxShadow: 'var(--nova-shadow)',
+              overflowY: 'auto',
+              overflowX: 'hidden',
             }}
           >
             {/* ── HEADER ── */}
-            <div className="flex items-center gap-3 p-4 border-b border-white/10 relative z-10"
-              style={{ background: 'linear-gradient(135deg, rgba(129,90,255,0.12) 0%, rgba(255,90,205,0.07) 100%)' }}
+            <div className="nova-tight flex items-center gap-2.5 sm:gap-3 px-3 py-3 sm:p-4 border-b border-white/10 relative z-10 sticky top-0"
+              style={{ background: 'linear-gradient(135deg, rgba(129,90,255,0.12) 0%, rgba(255,90,205,0.07) 100%)', backdropFilter: 'blur(6px)' }}
             >
               <div className="relative flex-shrink-0">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-lg"
                   style={{
                     background: 'linear-gradient(135deg, #5af0ff, #815aff)',
                     boxShadow: '0 0 20px rgba(90,240,255,0.35)',
                   }}
                 >
-                  <FaRobot size={18} color="#fff" />
+                  <FaRobot size={17} color="#fff" />
                 </div>
                 {(isListening || isSpeaking) && (
                   <motion.div
@@ -495,15 +511,15 @@ const VoiceAssistant = () => {
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 font-bold text-sm sm:text-base" style={{ color: 'var(--nova-text)', fontFamily: 'var(--nova-font-display)' }}>
-                  Muhire Dieudonne
-                  <span className="text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full border border-green-500/20"
+                <div className="flex items-center gap-2 font-bold text-sm sm:text-base min-w-0" style={{ color: 'var(--nova-text)', fontFamily: 'var(--nova-font-display)' }}>
+                  <span className="truncate">Muhire Dieudonne</span>
+                  <span className="hidden sm:inline-flex flex-shrink-0 text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full border border-green-500/20"
                     style={{ background: 'rgba(54,245,160,0.12)', color: 'var(--nova-success)' }}
                   >
                     Fullstack
                   </span>
                 </div>
-                <div className="text-xs mt-0.5 flex items-center gap-1.5" style={{ color: 'var(--nova-muted)' }}>
+                <div className="text-[11px] sm:text-xs mt-0.5 flex items-center gap-1.5 truncate" style={{ color: 'var(--nova-muted)' }}>
                   {isListening ? (
                     <><Waveform active count={4} color="var(--nova-danger)" /><span style={{ color: 'var(--nova-danger)' }}>Listening…</span></>
                   ) : isSpeaking ? (
@@ -516,7 +532,7 @@ const VoiceAssistant = () => {
 
               <div className="flex gap-1.5 flex-shrink-0">
                 <button onClick={toggleMute} title={isMuted ? 'Unmute' : 'Mute'}
-                  className="w-8 h-8 rounded-lg border border-white/10 flex items-center justify-center transition-all hover:scale-105"
+                  className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center transition-all active:scale-95"
                   style={{
                     background: isMuted ? 'rgba(255,79,114,0.08)' : 'rgba(129,90,255,0.15)',
                     color: isMuted ? 'var(--nova-danger)' : 'var(--nova-accent)',
@@ -525,7 +541,7 @@ const VoiceAssistant = () => {
                   {isMuted ? <FiVolumeX size={14} /> : <FiVolume2 size={14} />}
                 </button>
                 <button onClick={() => setIsMinimized(m => !m)} title={isMinimized ? 'Expand' : 'Minimise'}
-                  className="w-8 h-8 rounded-lg border border-white/10 flex items-center justify-center transition-all hover:scale-105"
+                  className="hidden sm:flex w-9 h-9 rounded-lg border border-white/10 items-center justify-center transition-all active:scale-95"
                   style={{ background: 'var(--nova-glass)', color: 'var(--nova-muted)' }}
                 >
                   {isMinimized ? <FiMaximize2 size={14} /> : <FiMinimize2 size={14} />}
@@ -533,7 +549,7 @@ const VoiceAssistant = () => {
                 <button
                   onClick={() => { setIsOpen(false); synthRef.current?.cancel() }}
                   title="Close (ESC)"
-                  className="w-9 h-9 rounded-lg border border-red-500/30 flex items-center justify-center transition-all hover:scale-105"
+                  className="w-9 h-9 rounded-lg border border-red-500/30 flex items-center justify-center transition-all active:scale-95"
                   style={{
                     background: 'linear-gradient(135deg, rgba(255,79,114,0.15), rgba(255,79,114,0.08))',
                     color: 'var(--nova-danger)',
@@ -557,7 +573,7 @@ const VoiceAssistant = () => {
                   className="overflow-hidden"
                 >
                   {/* ── MESSAGES ── */}
-                  <div className="nova-messages h-[320px] sm:h-[340px] overflow-y-auto px-4 py-4 flex flex-col gap-3.5"
+                  <div className="nova-tight nova-messages h-[min(42dvh,300px)] sm:h-[340px] overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 flex flex-col gap-3 sm:gap-3.5"
                     style={{
                       background: 'linear-gradient(180deg, rgba(7,7,15,0.6) 0%, rgba(7,7,15,0.9) 100%)',
                     }}
@@ -587,9 +603,9 @@ const VoiceAssistant = () => {
                         transition={{ duration: 0.28 }}
                         className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
-                        <div className={`flex gap-2.5 max-w-[82%] ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'} items-end`}>
+                        <div className={`flex gap-2 sm:gap-2.5 max-w-[86%] sm:max-w-[82%] ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'} items-end`}>
                           <Avatar isUser={msg.type === 'user'} />
-                          <div className="px-3.5 py-2.5 rounded-lg shadow-md"
+                          <div className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-lg shadow-md"
                             style={{
                               background: msg.type === 'user'
                                 ? 'linear-gradient(135deg, #815aff, #ff5acd)'
@@ -645,7 +661,7 @@ const VoiceAssistant = () => {
                     {transcript && isListening && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                        className="px-4 py-2 border-t border-white/5 flex items-center gap-2 overflow-hidden"
+                        className="px-3 sm:px-4 py-2 border-t border-white/5 flex items-center gap-2 overflow-hidden"
                         style={{ background: 'rgba(129,90,255,0.06)' }}
                       >
                         <Waveform active count={5} color="var(--nova-danger)" />
@@ -657,7 +673,7 @@ const VoiceAssistant = () => {
                   </AnimatePresence>
 
                   {/* ── INPUT AREA ── */}
-                  <div className="px-4 py-3 border-t border-white/10" style={{ background: 'rgba(7,7,15,0.8)' }}>
+                  <div className="nova-tight px-3 py-3 sm:px-4 border-t border-white/10" style={{ background: 'rgba(7,7,15,0.8)' }}>
                     <div className="flex gap-2 items-center">
                       <button
                         className="nova-mic-btn w-11 h-11 rounded-xl border-none flex items-center justify-center flex-shrink-0 transition-all"
@@ -675,7 +691,7 @@ const VoiceAssistant = () => {
 
                       <input
                         ref={inputRef}
-                        className="nova-input flex-1 h-11 px-4 rounded-xl border text-sm font-sans transition-all"
+                        className="nova-input flex-1 min-w-0 h-11 px-4 rounded-xl border font-sans transition-all"
                         type="text"
                         value={inputText}
                         onChange={e => setInputText(e.target.value)}
@@ -727,14 +743,14 @@ const VoiceAssistant = () => {
                         },
                       ].map((btn, i) => (
                         <button key={i} onClick={btn.onClick}
-                          className="flex-1 py-1.5 px-2 rounded-lg border border-white/5 text-[10px] flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02]"
+                          className="flex-1 py-1.5 px-1.5 sm:px-2 rounded-lg border border-white/5 text-[10px] flex items-center justify-center gap-1 sm:gap-1.5 transition-all active:scale-95"
                           style={{
                             background: btn.accent ? 'rgba(129,90,255,0.12)' : btn.danger ? 'rgba(255,79,114,0.07)' : 'var(--nova-glass)',
                             color: btn.accent ? 'var(--nova-accent)' : btn.danger ? 'var(--nova-danger)' : 'var(--nova-muted)',
                           }}
                         >
                           <btn.icon size={11} />
-                          {btn.label}
+                          <span className="truncate">{btn.label}</span>
                         </button>
                       ))}
                     </div>
@@ -746,7 +762,7 @@ const VoiceAssistant = () => {
                         className="flex-1 h-1 rounded-full cursor-pointer"
                         style={{ accentColor: 'var(--nova-accent)' }}
                       />
-                      <span className="text-[10px]" style={{ color: 'var(--nova-dim)' }}>{voiceSpeed.toFixed(2)}×</span>
+                      <span className="text-[10px] w-9 text-right" style={{ color: 'var(--nova-dim)' }}>{voiceSpeed.toFixed(2)}×</span>
                     </div>
                   </div>
 
@@ -762,7 +778,7 @@ const VoiceAssistant = () => {
                         className="border-t border-white/10 overflow-hidden"
                         style={{ background: 'rgba(7,7,15,0.7)' }}
                       >
-                        <div className="px-4 py-3">
+                        <div className="nova-tight px-3 py-3 sm:px-4">
                           <p className="text-[10px] tracking-wider uppercase flex items-center gap-1.5 mb-2" style={{ color: 'var(--nova-dim)' }}>
                             <FiZap size={10} style={{ color: 'var(--nova-accent)' }} />
                             Ask about Muhire
@@ -780,7 +796,7 @@ const VoiceAssistant = () => {
                                 >
                                   <s.icon size={10} color={s.color} />
                                 </div>
-                                <span className="text-[11px]" style={{ color: 'var(--nova-text)' }}>{s.text}</span>
+                                <span className="text-[11px] truncate" style={{ color: 'var(--nova-text)' }}>{s.text}</span>
                               </motion.button>
                             ))}
                           </div>
@@ -790,7 +806,7 @@ const VoiceAssistant = () => {
                   </AnimatePresence>
 
                   {/* ── FOOTER ── */}
-                  <div className="px-4 py-2 border-t border-white/10 flex items-center justify-center gap-2"
+                  <div className="px-3 py-2 sm:px-4 border-t border-white/10 flex items-center justify-center gap-2"
                     style={{ background: 'rgba(7,7,15,0.9)' }}
                   >
                     {isSpeaking && (
@@ -800,7 +816,7 @@ const VoiceAssistant = () => {
                         ))}
                       </div>
                     )}
-                    <span className="text-[10px] tracking-wide" style={{ color: 'var(--nova-dim)' }}>
+                    <span className="text-[10px] tracking-wide truncate" style={{ color: 'var(--nova-dim)' }}>
                       {isSpeaking ? 'Nova is speaking…' : isListening ? 'Listening for your voice…' : 'Muhire · Fullstack · Kigali'}
                     </span>
                   </div>
@@ -812,20 +828,20 @@ const VoiceAssistant = () => {
             {isMinimized && (
               <div className="px-4 py-3" style={{ background: 'rgba(7,7,15,0.9)' }}>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 min-w-0">
                     <StatusOrb listening={isListening} speaking={isSpeaking} />
-                    <span className="text-xs font-bold" style={{ color: 'var(--nova-text)', fontFamily: 'var(--nova-font-display)' }}>
+                    <span className="text-xs font-bold truncate" style={{ color: 'var(--nova-text)', fontFamily: 'var(--nova-font-display)' }}>
                       Muhire · Fullstack
                     </span>
                     {unreadCount > 0 && (
-                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500 text-white">
+                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500 text-white flex-shrink-0">
                         {unreadCount}
                       </span>
                     )}
                   </div>
                   <button
                     onClick={() => setIsMinimized(false)}
-                    className="w-8 h-8 rounded-lg border border-white/10 flex items-center justify-center transition-all hover:scale-105"
+                    className="w-8 h-8 rounded-lg border border-white/10 flex items-center justify-center transition-all hover:scale-105 flex-shrink-0"
                     style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--nova-text)' }}
                   >
                     <FiMaximize2 size={14} />
