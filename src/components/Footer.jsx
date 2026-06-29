@@ -38,6 +38,7 @@ const STYLES = `
     color: var(--footer-cream);
     font-family: var(--footer-body);
     padding: clamp(80px, 10vw, 120px) 0 clamp(40px, 5vw, 60px);
+    padding-bottom: max(clamp(40px, 5vw, 60px), calc(env(safe-area-inset-bottom) + 32px));
   }
 
   .footer-root::before {
@@ -53,15 +54,15 @@ const STYLES = `
   .footer-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 clamp(24px, 5vw, 60px);
+    padding: 0 clamp(20px, 5vw, 60px);
     position: relative;
     z-index: 1;
   }
 
   .footer-avatar {
     position: relative;
-    width: 96px;
-    height: 96px;
+    width: clamp(72px, 18vw, 96px);
+    height: clamp(72px, 18vw, 96px);
     margin-bottom: 16px;
   }
   .footer-avatar-inner {
@@ -87,7 +88,7 @@ const STYLES = `
     background: var(--footer-card);
     backdrop-filter: blur(20px);
     border-radius: 20px;
-    padding: 24px 24px 26px;
+    padding: clamp(20px, 4vw, 24px) clamp(20px, 4vw, 24px) clamp(22px, 4vw, 26px);
     transition: border-color 0.3s, box-shadow 0.3s;
     position: relative;
     overflow: hidden;
@@ -147,11 +148,15 @@ const STYLES = `
     box-shadow: 0 4px 20px rgba(212,175,85,0.35);
     min-height: 48px;
     white-space: nowrap;
+    touch-action: manipulation;
   }
   .footer-btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 32px rgba(212,175,85,0.5);
     background: #e0be6a;
+  }
+  .footer-btn-primary:active {
+    transform: translateY(0) scale(0.98);
   }
 
   .footer-btn-success {
@@ -206,6 +211,89 @@ const STYLES = `
     color: var(--footer-dim);
   }
   .footer-perk svg { color: var(--footer-gold); flex-shrink: 0; }
+
+  .footer-social-link {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--footer-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--footer-muted);
+    transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.15s;
+    background: transparent;
+    touch-action: manipulation;
+  }
+  .footer-social-link:hover,
+  .footer-social-link:focus-visible {
+    border-color: var(--footer-gold);
+    color: var(--footer-gold);
+    background: var(--footer-gold-dim);
+  }
+  .footer-social-link:active { transform: scale(0.92); }
+
+  .footer-quicklink {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--footer-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-quicklink:hover { color: var(--footer-cream); }
+
+  .footer-bottom-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  /* ── Scroll-to-top: bottom-left + safe-area aware so it never collides
+     with a bottom-right chat / assistant FAB on the same page ── */
+  .footer-scrolltop {
+    position: fixed;
+    left: max(20px, env(safe-area-inset-left));
+    bottom: max(20px, env(safe-area-inset-bottom));
+    z-index: 100;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--footer-border-hi);
+    background: var(--footer-card);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transition: border-color 0.2s, transform 0.15s;
+    touch-action: manipulation;
+  }
+  .footer-scrolltop:hover { border-color: var(--footer-gold); }
+  .footer-scrolltop:active { transform: scale(0.93); }
+
+  @media (max-width: 640px) {
+    .footer-input { font-size: 16px; } /* prevents iOS Safari auto-zoom on focus */
+    .footer-scrolltop {
+      width: 44px;
+      height: 44px;
+      left: max(14px, env(safe-area-inset-left));
+      bottom: max(14px, env(safe-area-inset-bottom));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .footer-bottom-row {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 14px;
+    }
+  }
 `
 
 const Footer = () => {
@@ -343,30 +431,9 @@ const Footer = () => {
                 <motion.a
                   key={index}
                   href={social.href}
+                  className="footer-social-link"
                   whileHover={{ y: -3, scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    border: '1px solid var(--footer-border)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--footer-muted)',
-                    transition: 'border-color 0.2s, color 0.2s, background 0.2s',
-                    background: 'transparent',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--footer-gold)'
-                    e.currentTarget.style.color = 'var(--footer-gold)'
-                    e.currentTarget.style.background = 'var(--footer-gold-dim)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--footer-border)'
-                    e.currentTarget.style.color = 'var(--footer-muted)'
-                    e.currentTarget.style.background = 'transparent'
-                  }}
                 >
                   <social.icon size={15} />
                 </motion.a>
@@ -394,20 +461,7 @@ const Footer = () => {
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {quickLinks.map((link) => (
                 <motion.li key={link.name} whileHover={{ x: 4 }}>
-                  <a
-                    href={link.href}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      fontSize: 12,
-                      color: 'var(--footer-muted)',
-                      textDecoration: 'none',
-                      transition: 'color 0.2s',
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--footer-cream)'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--footer-muted)'}
-                  >
+                  <a href={link.href} className="footer-quicklink">
                     <link.icon size={11} style={{ color: 'var(--footer-dim)' }} />
                     {link.name}
                   </a>
@@ -436,20 +490,7 @@ const Footer = () => {
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {resources.map((link) => (
                 <motion.li key={link.name} whileHover={{ x: 4 }}>
-                  <a
-                    href={link.href}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      fontSize: 12,
-                      color: 'var(--footer-muted)',
-                      textDecoration: 'none',
-                      transition: 'color 0.2s',
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--footer-cream)'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--footer-muted)'}
-                  >
+                  <a href={link.href} className="footer-quicklink">
                     <link.icon size={11} style={{ color: 'var(--footer-dim)' }} />
                     {link.name}
                   </a>
@@ -552,17 +593,11 @@ const Footer = () => {
 
         <div className="footer-rule" style={{ marginBottom: 'clamp(28px, 4vw, 40px)' }} />
 
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 16,
-        }}>
+        <div className="footer-bottom-row">
           <p style={{ fontSize: 11, color: 'var(--footer-dim)' }}>
             © {new Date().getFullYear()} Muhire Dieudonne. All rights reserved.
           </p>
-          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
             {legal.map((link) => (
               <a
                 key={link.name}
@@ -602,26 +637,8 @@ const Footer = () => {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        style={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-          zIndex: 100,
-          width: 52,
-          height: 52,
-          borderRadius: '50%',
-          border: '1px solid var(--footer-border-hi)',
-          background: 'var(--footer-card)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-          transition: 'border-color 0.2s',
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--footer-gold)'}
-        onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--footer-border-hi)'}
+        className="footer-scrolltop"
+        aria-label="Scroll to top"
       >
         <svg style={{ position: 'absolute', width: 44, height: 44, transform: 'rotate(-90deg)' }}>
           <circle cx="22" cy="22" r="20" fill="none" stroke="var(--footer-border)" strokeWidth="2.5" />
