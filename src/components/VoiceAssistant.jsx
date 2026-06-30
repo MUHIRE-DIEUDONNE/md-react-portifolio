@@ -1,129 +1,156 @@
 // src/components/VoiceAssistant.jsx
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion'
-import { 
-  FiMic, FiMicOff, FiVolume2, FiVolumeX, FiUser, 
-  FiType, FiTrash2, FiX, FiMinimize2, FiMaximize2,
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  FiMic, FiVolume2, FiVolumeX, FiUser,
+  FiTrash2, FiX, FiMinimize2, FiMaximize2,
   FiBriefcase, FiCode, FiMail, FiGlobe,
-  FiAward, FiBook, FiZap, FiChevronDown, FiChevronUp
+  FiAward, FiChevronDown, FiChevronUp
 } from 'react-icons/fi'
 import { FaRobot, FaMicrophone, FaStop, FaPaperPlane } from 'react-icons/fa'
 
 /* ─────────────────────────────────────────────
-   DESIGN TOKENS
+   DESIGN TOKENS — "Signal" console aesthetic
+   A developer's instrument panel, not a chat-bot
+   cliché. Mint signal accent on near-black slate,
+   monospace status language, VU-meter ring as the
+   one signature motif.
 ───────────────────────────────────────────── */
 const style = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
   :root {
-    --nova-bg: #07070f;
-    --nova-surface: rgba(14, 14, 26, 0.97);
-    --nova-glass: rgba(255,255,255,0.03);
-    --nova-border: rgba(255,255,255,0.07);
-    --nova-border-accent: rgba(129,90,255,0.35);
-    --nova-accent: #815aff;
-    --nova-accent2: #ff5acd;
-    --nova-accent3: #5af0ff;
-    --nova-text: #f0eeff;
-    --nova-muted: rgba(240,238,255,0.4);
-    --nova-dim: rgba(240,238,255,0.18);
-    --nova-success: #36f5a0;
-    --nova-danger: #ff4f72;
-    --nova-glow: 0 0 40px rgba(129,90,255,0.25);
-    --nova-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
-    --nova-r: 20px;
-    --nova-font-display: 'Syne', sans-serif;
-    --nova-font-body: 'DM Sans', sans-serif;
+    --sig-bg: #0a0c10;
+    --sig-surface: rgba(15,17,22,0.98);
+    --sig-glass: rgba(255,255,255,0.035);
+    --sig-line: rgba(255,255,255,0.08);
+    --sig-line-bright: rgba(94,234,212,0.30);
+    --sig-mint: #5eead4;
+    --sig-mint-dim: rgba(94,234,212,0.14);
+    --sig-indigo: #818cf8;
+    --sig-rose: #fb7185;
+    --sig-ink: #eef1f6;
+    --sig-dim: rgba(238,241,246,0.52);
+    --sig-faint: rgba(238,241,246,0.24);
+    --sig-shadow: 0 28px 70px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.05);
+    --sig-font-display: 'Space Grotesk', sans-serif;
+    --sig-font-body: 'Inter', sans-serif;
+    --sig-font-mono: 'JetBrains Mono', monospace;
   }
 
-  .nova-wrap * { box-sizing: border-box; margin: 0; padding: 0; }
-  .nova-wrap { font-family: var(--nova-font-body); -webkit-font-smoothing: antialiased; }
+  .sig-wrap * { box-sizing: border-box; margin: 0; padding: 0; }
+  .sig-wrap { font-family: var(--sig-font-body); -webkit-font-smoothing: antialiased; }
 
-  .nova-messages { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
-  .nova-messages::-webkit-scrollbar { width: 3px; }
-  .nova-messages::-webkit-scrollbar-track { background: transparent; }
-  .nova-messages::-webkit-scrollbar-thumb { background: var(--nova-border-accent); border-radius: 10px; }
+  .sig-messages { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+  .sig-messages::-webkit-scrollbar { width: 3px; }
+  .sig-messages::-webkit-scrollbar-track { background: transparent; }
+  .sig-messages::-webkit-scrollbar-thumb { background: var(--sig-line-bright); border-radius: 10px; }
+  .sig-panel { overscroll-behavior: contain; }
 
-  .nova-panel { overscroll-behavior: contain; }
-
-  @keyframes wave {
-    0%, 100% { height: 4px; }
-    50% { height: 20px; }
-  }
-  .wave-bar { width: 3px; border-radius: 2px; background: var(--nova-accent); animation: wave 0.8s ease-in-out infinite; transition: background 0.3s; }
-  .wave-bar:nth-child(2) { animation-delay: 0.1s; }
-  .wave-bar:nth-child(3) { animation-delay: 0.2s; }
-  .wave-bar:nth-child(4) { animation-delay: 0.3s; }
-  .wave-bar:nth-child(5) { animation-delay: 0.15s; }
-
-  @keyframes speak {
-    0%, 100% { height: 3px; }
-    50% { height: 14px; }
-  }
-  .speak-bar { width: 2px; border-radius: 2px; background: var(--nova-accent3); animation: speak 0.6s ease-in-out infinite; }
-  .speak-bar:nth-child(2) { animation-delay: 0.12s; }
-  .speak-bar:nth-child(3) { animation-delay: 0.24s; }
-  .speak-bar:nth-child(4) { animation-delay: 0.08s; }
-
-  @keyframes orb-pulse {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.15); opacity: 0.3; }
+  /* faint scanline texture for the "instrument" feel */
+  .sig-scan::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background: repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
   }
 
-  @keyframes dot-bounce {
-    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-    40% { transform: translateY(-5px); opacity: 1; }
+  @keyframes meter {
+    0%, 100% { height: 30%; opacity: 0.5; }
+    50% { height: 100%; opacity: 1; }
   }
-  .typing-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--nova-accent); animation: dot-bounce 1.2s ease-in-out infinite; }
-  .typing-dot:nth-child(2) { animation-delay: 0.15s; }
-  .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+  .meter-bar { width: 2.5px; border-radius: 1px; background: var(--sig-mint); animation: meter 0.85s ease-in-out infinite; transition: background 0.25s; }
+  .meter-bar:nth-child(2) { animation-delay: 0.10s; }
+  .meter-bar:nth-child(3) { animation-delay: 0.20s; }
+  .meter-bar:nth-child(4) { animation-delay: 0.06s; }
+  .meter-bar:nth-child(5) { animation-delay: 0.16s; }
 
-  .nova-mic-btn { position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.3s; touch-action: manipulation; }
-  .nova-mic-btn::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.18), transparent 60%); pointer-events: none; }
-  .nova-mic-btn:hover { transform: translateY(-1px); }
-  .nova-mic-btn:active { transform: translateY(1px); }
+  @keyframes ring-spin { to { transform: rotate(360deg); } }
+  .sig-ring { animation: ring-spin 6s linear infinite; }
 
-  .nova-pill { transition: background 0.2s, border-color 0.2s, transform 0.15s; touch-action: manipulation; }
-  .nova-pill:hover { background: rgba(129,90,255,0.18) !important; border-color: rgba(129,90,255,0.5) !important; transform: translateY(-1px); }
+  @keyframes pulse-soft {
+    0%, 100% { transform: scale(1); opacity: 0.55; }
+    50% { transform: scale(1.5); opacity: 0; }
+  }
 
-  .nova-input { -webkit-appearance: none; font-size: 16px; }
-  .nova-input:focus { outline: none; border-color: var(--nova-accent); box-shadow: 0 0 0 3px rgba(129,90,255,0.15); }
+  @keyframes blink {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.25; }
+  }
+  .sig-dot { animation: blink 1.6s ease-in-out infinite; }
 
-  .nova-grain::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; opacity: 0.4; z-index: 0; }
+  @keyframes typedot {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
+    40% { transform: translateY(-4px); opacity: 1; }
+  }
+  .type-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--sig-mint); animation: typedot 1.1s ease-in-out infinite; }
+  .type-dot:nth-child(2) { animation-delay: 0.14s; }
+  .type-dot:nth-child(3) { animation-delay: 0.28s; }
 
-  /* Compact spacing + slightly smaller type on very narrow phones */
+  .sig-mic-btn { position: relative; overflow: hidden; transition: transform 0.18s ease, box-shadow 0.25s ease; touch-action: manipulation; }
+  .sig-mic-btn:hover { transform: translateY(-1px); }
+  .sig-mic-btn:active { transform: translateY(1px) scale(0.97); }
+
+  .sig-chip { transition: background 0.18s, border-color 0.18s, transform 0.15s; touch-action: manipulation; }
+  .sig-chip:hover { background: var(--sig-mint-dim) !important; border-color: var(--sig-line-bright) !important; transform: translateX(2px); }
+
+  .sig-input { -webkit-appearance: none; font-size: 16px; }
+  .sig-input:focus { outline: none; border-color: var(--sig-mint); box-shadow: 0 0 0 3px rgba(94,234,212,0.12); }
+
+  .sig-toolbtn { transition: background 0.18s, color 0.18s, border-color 0.18s; }
+
   @media (max-width: 380px) {
-    .nova-tight { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+    .sig-tight { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
   }
 `
 
 /* ─────────────────────────────────────────────
    MINI COMPONENTS
 ───────────────────────────────────────────── */
-const Waveform = ({ active, color = 'var(--nova-accent)', count = 5 }) => (
-  <div className="flex items-center gap-1 h-6">
+const Meter = ({ active, color = 'var(--sig-mint)', count = 5, h = 14 }) => (
+  <div className="flex items-end gap-[3px]" style={{ height: h }}>
     {Array.from({ length: count }).map((_, i) => (
-      <div key={i} className="wave-bar" style={{ background: color, animationPlayState: active ? 'running' : 'paused', height: active ? undefined : 4 }} />
+      <div key={i} className="meter-bar" style={{ background: color, animationPlayState: active ? 'running' : 'paused', height: active ? undefined : '30%' }} />
     ))}
   </div>
 )
 
-const StatusOrb = ({ listening, speaking }) => {
-  const color = listening ? 'var(--nova-danger)' : speaking ? 'var(--nova-accent3)' : 'var(--nova-success)'
+/* Signature element: instrument ring around the avatar — ticks like a VU dial,
+   sweeping arc when listening/speaking, otherwise idle. */
+const SignalRing = ({ listening, speaking }) => {
+  const active = listening || speaking
+  const color = listening ? 'var(--sig-rose)' : speaking ? 'var(--sig-mint)' : 'var(--sig-faint)'
   return (
-    <div className="relative w-2.5 h-2.5">
-      <div className="absolute -inset-1 rounded-full" style={{ background: color, opacity: 0.25, animation: (listening || speaking) ? 'orb-pulse 1.4s ease-in-out infinite' : 'none' }} />
-      <div className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
-    </div>
+    <svg width="46" height="46" viewBox="0 0 46 46" className="absolute -inset-[3px] pointer-events-none">
+      <circle cx="23" cy="23" r="20.5" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+      <g className={active ? 'sig-ring' : ''} style={{ transformOrigin: '23px 23px' }}>
+        {Array.from({ length: 18 }).map((_, i) => {
+          const a = (i / 18) * Math.PI * 2
+          const r1 = 20.5, r2 = 17.8
+          const x1 = 23 + r1 * Math.cos(a), y1 = 23 + r1 * Math.sin(a)
+          const x2 = 23 + r2 * Math.cos(a), y2 = 23 + r2 * Math.sin(a)
+          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth="1.4" opacity={active ? (i % 3 === 0 ? 0.9 : 0.35) : 0.25} />
+        })}
+      </g>
+    </svg>
+  )
+}
+
+const StatusDot = ({ listening, speaking }) => {
+  const color = listening ? 'var(--sig-rose)' : speaking ? 'var(--sig-mint)' : '#34d399'
+  return (
+    <span className="relative inline-flex w-1.5 h-1.5 flex-shrink-0">
+      <span className="absolute inset-0 rounded-full" style={{ background: color, opacity: 0.5, animation: (listening || speaking) ? 'pulse-soft 1.3s ease-out infinite' : 'none' }} />
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
+    </span>
   )
 }
 
 const Avatar = ({ isUser }) => (
-  <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center shadow-lg" style={{
-    background: isUser ? 'linear-gradient(135deg, #815aff 0%, #ff5acd 100%)' : 'linear-gradient(135deg, #5af0ff 0%, #815aff 100%)',
-    boxShadow: isUser ? '0 2px 12px rgba(129,90,255,0.4)' : '0 2px 12px rgba(90,240,255,0.3)',
-  }}>
-    {isUser ? <FiUser size={14} color="#fff" /> : <FaRobot size={13} color="#fff" />}
+  <div className="w-7 h-7 rounded-md flex-shrink-0 flex items-center justify-center"
+    style={{
+      background: isUser ? 'var(--sig-indigo)' : 'rgba(94,234,212,0.12)',
+      border: isUser ? 'none' : '1px solid var(--sig-line-bright)',
+    }}>
+    {isUser ? <FiUser size={12} color="#fff" /> : <FaRobot size={11} color="var(--sig-mint)" />}
   </div>
 )
 
@@ -179,7 +206,7 @@ const KB = {
 
 function generateResponse(input) {
   const s = input.toLowerCase()
-  
+
   if (s.includes('who are you') || s.includes('your name') || s.includes('introduce') || s.includes('tell me about yourself')) {
     return "I'm Muhire Dieudonne, a Fullstack Developer from Kigali, Rwanda. I specialize in building modern web applications with React, Next.js, Node.js, and Three.js. I'm passionate about creating immersive digital experiences that combine beautiful design with powerful functionality."
   }
@@ -238,12 +265,12 @@ function generateResponse(input) {
 }
 
 const SUGGESTIONS = [
-  { text: "Who are you?", icon: FiUser, color: '#815aff' },
-  { text: "What are your skills?", icon: FiCode, color: '#815aff' },
-  { text: "Tell me about your projects", icon: FiBriefcase, color: '#ff5acd' },
-  { text: "What is your experience?", icon: FiAward, color: '#5af0ff' },
-  { text: "How can I contact you?", icon: FiMail, color: '#36f5a0' },
-  { text: "Are you available for work?", icon: FiGlobe, color: '#ffb547' },
+  { text: "Who are you?", icon: FiUser },
+  { text: "What are your skills?", icon: FiCode },
+  { text: "Tell me about your projects", icon: FiBriefcase },
+  { text: "What is your experience?", icon: FiAward },
+  { text: "How can I contact you?", icon: FiMail },
+  { text: "Are you available for work?", icon: FiGlobe },
 ]
 
 /* ─────────────────────────────────────────────
@@ -421,7 +448,7 @@ const VoiceAssistant = () => {
 
   /* ─────────────── RENDER ─────────────── */
   return (
-    <div className="nova-wrap">
+    <div className="sig-wrap">
       <style>{style}</style>
 
       {/* ── FAB ── */}
@@ -432,29 +459,31 @@ const VoiceAssistant = () => {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.08 }}
+            whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.94 }}
             onClick={() => setIsOpen(true)}
-            className="fixed z-[9999] w-12 h-12 sm:w-14 sm:h-14 rounded-full border-none cursor-pointer flex items-center justify-center shadow-2xl"
+            className="fixed z-[9999] w-14 h-14 rounded-2xl border-none cursor-pointer flex items-center justify-center"
             style={{
               bottom: 'max(1rem, env(safe-area-inset-bottom))',
               right: 'max(1rem, env(safe-area-inset-right))',
-              background: 'linear-gradient(135deg, #815aff 0%, #ff5acd 100%)',
-              boxShadow: '0 8px 32px rgba(129,90,255,0.55), 0 0 0 1px rgba(255,255,255,0.1)',
+              background: 'var(--sig-surface)',
+              border: '1px solid var(--sig-line-bright)',
+              boxShadow: '0 12px 30px rgba(0,0,0,0.55), 0 0 0 1px rgba(94,234,212,0.08), 0 0 24px rgba(94,234,212,0.12)',
             }}
           >
-            <motion.div
-              animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0, 0.4] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
-              className="absolute inset-0 rounded-full"
-              style={{ background: 'rgba(129,90,255,0.4)' }}
+            <motion.span
+              animate={{ scale: [1, 1.6, 1], opacity: [0.35, 0, 0.35] }}
+              transition={{ duration: 2.4, repeat: Infinity }}
+              className="absolute inset-2 rounded-xl"
+              style={{ border: '1px solid var(--sig-mint)' }}
             />
-            <FaRobot size={20} color="#fff" className="relative z-10" />
+            <Meter active count={4} h={16} />
             {unreadCount > 0 && (
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-[#07070f]"
+                className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center border-2"
+                style={{ background: 'var(--sig-rose)', color: '#0a0c10', borderColor: 'var(--sig-bg)', fontFamily: 'var(--sig-font-mono)' }}
               >
                 {unreadCount}
               </motion.span>
@@ -468,95 +497,80 @@ const VoiceAssistant = () => {
         {isOpen && (
           <motion.div
             key="window"
-            initial={{ opacity: 0, scale: 0.88, y: 40, originX: 1, originY: 1 }}
+            initial={{ opacity: 0, scale: 0.92, y: 24, originX: 1, originY: 1 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.88, y: 40 }}
-            transition={{ type: 'spring', stiffness: 340, damping: 30 }}
-            className="nova-grain nova-panel fixed z-[9998] w-[calc(100vw-1.5rem)] sm:w-[calc(100vw-2rem)] max-w-sm sm:max-w-md lg:max-w-lg rounded-2xl flex flex-col"
+            exit={{ opacity: 0, scale: 0.92, y: 24 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 32 }}
+            className="sig-scan sig-panel fixed z-[9998] w-[calc(100vw-1.5rem)] sm:w-[calc(100vw-2rem)] max-w-sm sm:max-w-md lg:max-w-lg rounded-xl flex flex-col"
             style={{
               bottom: 'max(0.75rem, env(safe-area-inset-bottom))',
               right: 'max(0.75rem, env(safe-area-inset-right))',
               maxHeight: 'min(680px, calc(100dvh - 1.5rem))',
-              background: 'var(--nova-surface)',
-              border: '1px solid var(--nova-border)',
-              boxShadow: 'var(--nova-shadow)',
+              background: 'var(--sig-surface)',
+              border: '1px solid var(--sig-line)',
+              boxShadow: 'var(--sig-shadow)',
               overflowY: 'auto',
               overflowX: 'hidden',
             }}
           >
             {/* ── HEADER ── */}
-            <div className="nova-tight flex items-center gap-2.5 sm:gap-3 px-3 py-3 sm:p-4 border-b border-white/10 relative z-10 sticky top-0"
-              style={{ background: 'linear-gradient(135deg, rgba(129,90,255,0.12) 0%, rgba(255,90,205,0.07) 100%)', backdropFilter: 'blur(6px)' }}
+            <div className="sig-tight flex items-center gap-3 px-3 py-3 sm:p-4 border-b relative z-10 sticky top-0"
+              style={{ background: 'var(--sig-surface)', borderColor: 'var(--sig-line)' }}
             >
-              <div className="relative flex-shrink-0">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-lg"
-                  style={{
-                    background: 'linear-gradient(135deg, #5af0ff, #815aff)',
-                    boxShadow: '0 0 20px rgba(90,240,255,0.35)',
-                  }}
+              <div className="relative flex-shrink-0 w-10 h-10 flex items-center justify-center">
+                <SignalRing listening={isListening} speaking={isSpeaking} />
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{ background: 'rgba(94,234,212,0.10)', border: '1px solid var(--sig-line-bright)' }}
                 >
-                  <FaRobot size={17} color="#fff" />
-                </div>
-                {(isListening || isSpeaking) && (
-                  <motion.div
-                    animate={{ scale: [1, 1.35, 1], opacity: [0.5, 0, 0.5] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                    className="absolute -inset-1.5 rounded-full border-2"
-                    style={{ borderColor: isListening ? 'var(--nova-danger)' : 'var(--nova-accent3)' }}
-                  />
-                )}
-                <div className="absolute -bottom-0.5 -right-0.5">
-                  <StatusOrb listening={isListening} speaking={isSpeaking} />
+                  <FaRobot size={13} color="var(--sig-mint)" />
                 </div>
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 font-bold text-sm sm:text-base min-w-0" style={{ color: 'var(--nova-text)', fontFamily: 'var(--nova-font-display)' }}>
+                <div className="flex items-center gap-2 font-semibold text-sm sm:text-base min-w-0" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)', letterSpacing: '-0.01em' }}>
                   <span className="truncate">Muhire Dieudonne</span>
-                  <span className="hidden sm:inline-flex flex-shrink-0 text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full border border-green-500/20"
-                    style={{ background: 'rgba(54,245,160,0.12)', color: 'var(--nova-success)' }}
+                  <span className="hidden sm:inline-flex flex-shrink-0 text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded border uppercase"
+                    style={{ background: 'transparent', color: 'var(--sig-mint)', borderColor: 'var(--sig-line-bright)', fontFamily: 'var(--sig-font-mono)' }}
                   >
                     Fullstack
                   </span>
                 </div>
-                <div className="text-[11px] sm:text-xs mt-0.5 flex items-center gap-1.5 truncate" style={{ color: 'var(--nova-muted)' }}>
+                <div className="text-[11px] mt-0.5 flex items-center gap-1.5 truncate" style={{ color: 'var(--sig-dim)', fontFamily: 'var(--sig-font-mono)' }}>
+                  <StatusDot listening={isListening} speaking={isSpeaking} />
                   {isListening ? (
-                    <><Waveform active count={4} color="var(--nova-danger)" /><span style={{ color: 'var(--nova-danger)' }}>Listening…</span></>
+                    <span style={{ color: 'var(--sig-rose)' }}>recording_input…</span>
                   ) : isSpeaking ? (
-                    <><Waveform active count={4} color="var(--nova-accent3)" /><span style={{ color: 'var(--nova-accent3)' }}>Speaking…</span></>
+                    <span style={{ color: 'var(--sig-mint)' }}>speaking_output…</span>
                   ) : (
-                    <span>📍 Kigali, Rwanda</span>
+                    <span>online · kigali_rw</span>
                   )}
                 </div>
               </div>
 
               <div className="flex gap-1.5 flex-shrink-0">
                 <button onClick={toggleMute} title={isMuted ? 'Unmute' : 'Mute'}
-                  className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center transition-all active:scale-95"
+                  className="sig-toolbtn w-9 h-9 rounded-lg border flex items-center justify-center active:scale-95"
                   style={{
-                    background: isMuted ? 'rgba(255,79,114,0.08)' : 'rgba(129,90,255,0.15)',
-                    color: isMuted ? 'var(--nova-danger)' : 'var(--nova-accent)',
+                    background: isMuted ? 'rgba(251,113,133,0.07)' : 'var(--sig-glass)',
+                    borderColor: isMuted ? 'rgba(251,113,133,0.35)' : 'var(--sig-line)',
+                    color: isMuted ? 'var(--sig-rose)' : 'var(--sig-dim)',
                   }}
                 >
                   {isMuted ? <FiVolumeX size={14} /> : <FiVolume2 size={14} />}
                 </button>
                 <button onClick={() => setIsMinimized(m => !m)} title={isMinimized ? 'Expand' : 'Minimise'}
-                  className="hidden sm:flex w-9 h-9 rounded-lg border border-white/10 items-center justify-center transition-all active:scale-95"
-                  style={{ background: 'var(--nova-glass)', color: 'var(--nova-muted)' }}
+                  className="sig-toolbtn hidden sm:flex w-9 h-9 rounded-lg border items-center justify-center active:scale-95"
+                  style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)', color: 'var(--sig-dim)' }}
                 >
                   {isMinimized ? <FiMaximize2 size={14} /> : <FiMinimize2 size={14} />}
                 </button>
                 <button
                   onClick={() => { setIsOpen(false); synthRef.current?.cancel() }}
                   title="Close (ESC)"
-                  className="w-9 h-9 rounded-lg border border-red-500/30 flex items-center justify-center transition-all active:scale-95"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(255,79,114,0.15), rgba(255,79,114,0.08))',
-                    color: 'var(--nova-danger)',
-                    boxShadow: '0 0 12px rgba(255,79,114,0.2)',
-                  }}
+                  className="sig-toolbtn w-9 h-9 rounded-lg border flex items-center justify-center active:scale-95"
+                  style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)', color: 'var(--sig-dim)' }}
                 >
-                  <FiX size={18} strokeWidth={2.5} />
+                  <FiX size={17} strokeWidth={2} />
                 </button>
               </div>
             </div>
@@ -569,66 +583,57 @@ const VoiceAssistant = () => {
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25 }}
+                  transition={{ duration: 0.22 }}
                   className="overflow-hidden"
                 >
                   {/* ── MESSAGES ── */}
-                  <div className="nova-tight nova-messages h-[min(42dvh,300px)] sm:h-[340px] overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 flex flex-col gap-3 sm:gap-3.5"
-                    style={{
-                      background: 'linear-gradient(180deg, rgba(7,7,15,0.6) 0%, rgba(7,7,15,0.9) 100%)',
-                    }}
+                  <div className="sig-tight sig-messages h-[min(42dvh,300px)] sm:h-[340px] overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 flex flex-col gap-2.5 relative z-10"
+                    style={{ background: 'rgba(0,0,0,0.18)' }}
                   >
                     {conversation.length === 0 && (
-                      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
                         className="text-center mx-auto mt-8"
                       >
-                        <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center border border-purple-500/30"
-                          style={{ background: 'linear-gradient(135deg, #5af0ff20, #815aff20)' }}
+                        <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center border"
+                          style={{ background: 'rgba(94,234,212,0.06)', borderColor: 'var(--sig-line-bright)' }}
                         >
-                          <FaRobot size={22} style={{ color: 'var(--nova-accent)' }} />
+                          <FaRobot size={18} style={{ color: 'var(--sig-mint)' }} />
                         </div>
-                        <p className="font-bold text-sm sm:text-base" style={{ color: 'var(--nova-text)', fontFamily: 'var(--nova-font-display)' }}>
+                        <p className="font-semibold text-sm" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
                           Ask about Muhire Dieudonne
                         </p>
-                        <p className="text-xs mt-1.5" style={{ color: 'var(--nova-dim)' }}>
-                          Fullstack Developer from Kigali, Rwanda<br />Press the mic or type below.
+                        <p className="text-xs mt-1.5" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
+                          fullstack · kigali, rwanda
                         </p>
                       </motion.div>
                     )}
 
                     {conversation.map((msg, idx) => (
                       <motion.div key={idx}
-                        initial={{ opacity: 0, x: msg.type === 'user' ? 20 : -20, y: 8 }}
-                        animate={{ opacity: 1, x: 0, y: 0 }}
-                        transition={{ duration: 0.28 }}
+                        initial={{ opacity: 0, x: msg.type === 'user' ? 14 : -14 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.22 }}
                         className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
-                        <div className={`flex gap-2 sm:gap-2.5 max-w-[86%] sm:max-w-[82%] ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'} items-end`}>
+                        <div className={`flex gap-2 max-w-[88%] sm:max-w-[84%] ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'} items-end`}>
                           <Avatar isUser={msg.type === 'user'} />
-                          <div className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-lg shadow-md"
+                          <div className="px-3 py-2 sm:py-2.5 rounded-lg"
                             style={{
-                              background: msg.type === 'user'
-                                ? 'linear-gradient(135deg, #815aff, #ff5acd)'
-                                : 'rgba(255,255,255,0.05)',
-                              border: msg.type === 'user' ? 'none' : '1px solid var(--nova-border)',
-                              borderRadius: msg.type === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                              boxShadow: msg.type === 'user' ? '0 4px 20px rgba(129,90,255,0.35)' : '0 2px 12px rgba(0,0,0,0.3)',
+                              background: msg.type === 'user' ? 'var(--sig-indigo)' : 'var(--sig-glass)',
+                              border: msg.type === 'user' ? 'none' : '1px solid var(--sig-line)',
+                              borderLeft: msg.type === 'user' ? 'none' : '2px solid var(--sig-mint)',
+                              borderRadius: msg.type === 'user' ? '10px 10px 2px 10px' : '2px 10px 10px 10px',
                             }}
                           >
-                            <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-normal"
-                              style={{ color: msg.type === 'user' ? '#fff' : 'var(--nova-text)' }}
+                            <p className="text-[13px] leading-relaxed whitespace-pre-wrap"
+                              style={{ color: msg.type === 'user' ? '#fff' : 'var(--sig-ink)' }}
                             >
                               {msg.text}
                               {msg.isTyping && (
-                                <motion.span
-                                  animate={{ opacity: [1, 0, 1] }}
-                                  transition={{ duration: 0.8, repeat: Infinity }}
-                                  className="inline-block w-0.5 h-3 ml-1 rounded-sm align-middle"
-                                  style={{ background: 'var(--nova-accent)' }}
-                                />
+                                <span className="sig-dot inline-block w-1 h-3 ml-1 align-middle" style={{ background: 'var(--sig-mint)' }} />
                               )}
                             </p>
-                            <p className="text-[10px] mt-1.5" style={{ color: 'rgba(255,255,255,0.3)', textAlign: msg.type === 'user' ? 'right' : 'left' }}>
+                            <p className="text-[9.5px] mt-1.5" style={{ color: msg.type === 'user' ? 'rgba(255,255,255,0.45)' : 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)', textAlign: msg.type === 'user' ? 'right' : 'left' }}>
                               {msg.timestamp?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
                           </div>
@@ -639,15 +644,13 @@ const VoiceAssistant = () => {
                     <AnimatePresence>
                       {isTypingIndicator && (
                         <motion.div key="typing" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                          className="flex gap-2.5 items-end"
+                          className="flex gap-2 items-end"
                         >
                           <Avatar isUser={false} />
-                          <div className="px-4 py-3 rounded-lg flex gap-1.5 items-center"
-                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--nova-border)', borderRadius: '18px 18px 18px 4px' }}
+                          <div className="px-3.5 py-2.5 rounded-lg flex gap-1.5 items-center"
+                            style={{ background: 'var(--sig-glass)', border: '1px solid var(--sig-line)', borderLeft: '2px solid var(--sig-mint)', borderRadius: '2px 10px 10px 10px' }}
                           >
-                            {[0, 1, 2].map(i => (
-                              <div key={i} className="typing-dot" style={{ animationDelay: `${i * 0.15}s` }} />
-                            ))}
+                            {[0, 1, 2].map(i => <div key={i} className="type-dot" />)}
                           </div>
                         </motion.div>
                       )}
@@ -661,63 +664,59 @@ const VoiceAssistant = () => {
                     {transcript && isListening && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                        className="px-3 sm:px-4 py-2 border-t border-white/5 flex items-center gap-2 overflow-hidden"
-                        style={{ background: 'rgba(129,90,255,0.06)' }}
+                        className="px-3 sm:px-4 py-2 border-t flex items-center gap-2 overflow-hidden"
+                        style={{ background: 'rgba(251,113,133,0.05)', borderColor: 'var(--sig-line)' }}
                       >
-                        <Waveform active count={5} color="var(--nova-danger)" />
-                        <p className="text-xs italic truncate" style={{ color: 'rgba(255,100,100,0.8)' }}>
-                          "{transcript}"
+                        <Meter active count={4} color="var(--sig-rose)" h={12} />
+                        <p className="text-xs truncate" style={{ color: 'var(--sig-rose)', fontFamily: 'var(--sig-font-mono)' }}>
+                          {transcript}
                         </p>
                       </motion.div>
                     )}
                   </AnimatePresence>
 
                   {/* ── INPUT AREA ── */}
-                  <div className="nova-tight px-3 py-3 sm:px-4 border-t border-white/10" style={{ background: 'rgba(7,7,15,0.8)' }}>
+                  <div className="sig-tight px-3 py-3 sm:px-4 border-t" style={{ background: 'var(--sig-surface)', borderColor: 'var(--sig-line)' }}>
                     <div className="flex gap-2 items-center">
                       <button
-                        className="nova-mic-btn w-11 h-11 rounded-xl border-none flex items-center justify-center flex-shrink-0 transition-all"
+                        className="sig-mic-btn w-11 h-11 rounded-lg border flex items-center justify-center flex-shrink-0"
                         onClick={toggleListening}
                         title={isListening ? 'Stop' : 'Speak'}
                         style={{
-                          background: isListening
-                            ? 'var(--nova-danger)'
-                            : 'linear-gradient(135deg, rgba(129,90,255,0.3), rgba(255,90,205,0.2))',
-                          boxShadow: isListening ? '0 0 20px rgba(255,79,114,0.5)' : '0 2px 10px rgba(0,0,0,0.3)',
+                          background: isListening ? 'rgba(251,113,133,0.12)' : 'var(--sig-glass)',
+                          borderColor: isListening ? 'var(--sig-rose)' : 'var(--sig-line)',
                         }}
                       >
-                        {isListening ? <FaStop size={14} color="#fff" /> : <FaMicrophone size={16} style={{ color: 'var(--nova-accent)' }} />}
+                        {isListening ? <FaStop size={13} color="var(--sig-rose)" /> : <FaMicrophone size={15} style={{ color: 'var(--sig-mint)' }} />}
                       </button>
 
                       <input
                         ref={inputRef}
-                        className="nova-input flex-1 min-w-0 h-11 px-4 rounded-xl border font-sans transition-all"
+                        className="sig-input flex-1 min-w-0 h-11 px-4 rounded-lg border"
                         type="text"
                         value={inputText}
                         onChange={e => setInputText(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && !e.shiftKey && processUserInput(inputText)}
-                        placeholder="Ask about Muhire's work..."
+                        placeholder="Ask about Muhire's work…"
                         style={{
-                          border: '1px solid var(--nova-border)',
-                          background: 'rgba(255,255,255,0.04)',
-                          color: 'var(--nova-text)',
+                          border: '1px solid var(--sig-line)',
+                          background: 'rgba(255,255,255,0.025)',
+                          color: 'var(--sig-ink)',
                         }}
                       />
 
                       <motion.button
-                        whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
+                        whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.94 }}
                         onClick={() => processUserInput(inputText)}
                         disabled={!inputText.trim()}
-                        className="w-11 h-11 rounded-xl border-none flex items-center justify-center flex-shrink-0 transition-all"
+                        className="w-11 h-11 rounded-lg border flex items-center justify-center flex-shrink-0"
                         style={{
-                          background: inputText.trim()
-                            ? 'linear-gradient(135deg, #815aff, #ff5acd)'
-                            : 'rgba(255,255,255,0.05)',
-                          boxShadow: inputText.trim() ? '0 4px 18px rgba(129,90,255,0.45)' : 'none',
+                          background: inputText.trim() ? 'var(--sig-mint)' : 'var(--sig-glass)',
+                          borderColor: inputText.trim() ? 'var(--sig-mint)' : 'var(--sig-line)',
                           cursor: inputText.trim() ? 'pointer' : 'not-allowed',
                         }}
                       >
-                        <FaPaperPlane size={14} color={inputText.trim() ? '#fff' : 'rgba(255,255,255,0.2)'} />
+                        <FaPaperPlane size={13} color={inputText.trim() ? '#0a0c10' : 'var(--sig-faint)'} />
                       </motion.button>
                     </div>
 
@@ -727,7 +726,6 @@ const VoiceAssistant = () => {
                           label: showSuggestions ? 'Hide prompts' : 'Show prompts',
                           icon: showSuggestions ? FiChevronDown : FiChevronUp,
                           onClick: () => setShowSuggestions(s => !s),
-                          accent: false,
                         },
                         {
                           label: autoVoice ? 'Voice on' : 'Voice off',
@@ -743,10 +741,12 @@ const VoiceAssistant = () => {
                         },
                       ].map((btn, i) => (
                         <button key={i} onClick={btn.onClick}
-                          className="flex-1 py-1.5 px-1.5 sm:px-2 rounded-lg border border-white/5 text-[10px] flex items-center justify-center gap-1 sm:gap-1.5 transition-all active:scale-95"
+                          className="sig-toolbtn flex-1 py-1.5 px-1.5 sm:px-2 rounded-md border text-[10px] flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95"
                           style={{
-                            background: btn.accent ? 'rgba(129,90,255,0.12)' : btn.danger ? 'rgba(255,79,114,0.07)' : 'var(--nova-glass)',
-                            color: btn.accent ? 'var(--nova-accent)' : btn.danger ? 'var(--nova-danger)' : 'var(--nova-muted)',
+                            background: btn.accent ? 'var(--sig-mint-dim)' : btn.danger ? 'rgba(251,113,133,0.06)' : 'var(--sig-glass)',
+                            borderColor: btn.accent ? 'var(--sig-line-bright)' : btn.danger ? 'rgba(251,113,133,0.25)' : 'var(--sig-line)',
+                            color: btn.accent ? 'var(--sig-mint)' : btn.danger ? 'var(--sig-rose)' : 'var(--sig-dim)',
+                            fontFamily: 'var(--sig-font-mono)',
                           }}
                         >
                           <btn.icon size={11} />
@@ -755,14 +755,14 @@ const VoiceAssistant = () => {
                       ))}
                     </div>
 
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-[10px]" style={{ color: 'var(--nova-dim)' }}>Speed</span>
+                    <div className="flex items-center gap-2 mt-2.5">
+                      <span className="text-[10px]" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>rate</span>
                       <input type="range" min={0.5} max={1.5} step={0.05} value={voiceSpeed}
                         onChange={e => setVoiceSpeed(parseFloat(e.target.value))}
                         className="flex-1 h-1 rounded-full cursor-pointer"
-                        style={{ accentColor: 'var(--nova-accent)' }}
+                        style={{ accentColor: 'var(--sig-mint)' }}
                       />
-                      <span className="text-[10px] w-9 text-right" style={{ color: 'var(--nova-dim)' }}>{voiceSpeed.toFixed(2)}×</span>
+                      <span className="text-[10px] w-9 text-right" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>{voiceSpeed.toFixed(2)}×</span>
                     </div>
                   </div>
 
@@ -774,29 +774,24 @@ const VoiceAssistant = () => {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.22 }}
-                        className="border-t border-white/10 overflow-hidden"
-                        style={{ background: 'rgba(7,7,15,0.7)' }}
+                        transition={{ duration: 0.2 }}
+                        className="border-t overflow-hidden"
+                        style={{ background: 'rgba(0,0,0,0.15)', borderColor: 'var(--sig-line)' }}
                       >
-                        <div className="nova-tight px-3 py-3 sm:px-4">
-                          <p className="text-[10px] tracking-wider uppercase flex items-center gap-1.5 mb-2" style={{ color: 'var(--nova-dim)' }}>
-                            <FiZap size={10} style={{ color: 'var(--nova-accent)' }} />
-                            Ask about Muhire
+                        <div className="sig-tight px-3 py-3 sm:px-4">
+                          <p className="text-[10px] tracking-wider uppercase mb-2" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
+                            quick_prompts
                           </p>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                             {SUGGESTIONS.map((s, i) => (
-                              <motion.button key={i} className="nova-pill px-3 py-2 rounded-lg border border-white/5 text-left flex items-center gap-2 transition-all"
-                                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.04 }}
+                              <motion.button key={i} className="sig-chip px-3 py-2 rounded-md border text-left flex items-center gap-2"
+                                initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.03 }}
                                 onClick={() => processUserInput(s.text)}
-                                style={{ background: 'var(--nova-glass)' }}
+                                style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)' }}
                               >
-                                <div className="w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center"
-                                  style={{ background: `${s.color}18` }}
-                                >
-                                  <s.icon size={10} color={s.color} />
-                                </div>
-                                <span className="text-[11px] truncate" style={{ color: 'var(--nova-text)' }}>{s.text}</span>
+                                <s.icon size={11} style={{ color: 'var(--sig-mint)', flexShrink: 0 }} />
+                                <span className="text-[11.5px] truncate" style={{ color: 'var(--sig-ink)' }}>{s.text}</span>
                               </motion.button>
                             ))}
                           </div>
@@ -806,18 +801,12 @@ const VoiceAssistant = () => {
                   </AnimatePresence>
 
                   {/* ── FOOTER ── */}
-                  <div className="px-3 py-2 sm:px-4 border-t border-white/10 flex items-center justify-center gap-2"
-                    style={{ background: 'rgba(7,7,15,0.9)' }}
+                  <div className="px-3 py-2 sm:px-4 border-t flex items-center justify-center gap-2"
+                    style={{ background: 'var(--sig-surface)', borderColor: 'var(--sig-line)' }}
                   >
-                    {isSpeaking && (
-                      <div className="flex gap-0.5 items-center mr-1">
-                        {[0, 1, 2, 3].map(i => (
-                          <div key={i} className="speak-bar" style={{ animationDelay: `${i * 0.1}s` }} />
-                        ))}
-                      </div>
-                    )}
-                    <span className="text-[10px] tracking-wide truncate" style={{ color: 'var(--nova-dim)' }}>
-                      {isSpeaking ? 'Nova is speaking…' : isListening ? 'Listening for your voice…' : 'Muhire · Fullstack · Kigali'}
+                    {isSpeaking && <Meter active count={4} h={10} />}
+                    <span className="text-[9.5px] tracking-wide truncate" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
+                      {isSpeaking ? 'output_active' : isListening ? 'input_active' : 'muhire · fullstack · kigali'}
                     </span>
                   </div>
                 </motion.div>
@@ -826,29 +815,29 @@ const VoiceAssistant = () => {
 
             {/* ── MINIMISED BODY ── */}
             {isMinimized && (
-              <div className="px-4 py-3" style={{ background: 'rgba(7,7,15,0.9)' }}>
+              <div className="px-4 py-3" style={{ background: 'var(--sig-surface)' }}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <StatusOrb listening={isListening} speaking={isSpeaking} />
-                    <span className="text-xs font-bold truncate" style={{ color: 'var(--nova-text)', fontFamily: 'var(--nova-font-display)' }}>
+                    <StatusDot listening={isListening} speaking={isSpeaking} />
+                    <span className="text-xs font-semibold truncate" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
                       Muhire · Fullstack
                     </span>
                     {unreadCount > 0 && (
-                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500 text-white flex-shrink-0">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold flex-shrink-0" style={{ background: 'var(--sig-rose)', color: '#0a0c10', fontFamily: 'var(--sig-font-mono)' }}>
                         {unreadCount}
                       </span>
                     )}
                   </div>
                   <button
                     onClick={() => setIsMinimized(false)}
-                    className="w-8 h-8 rounded-lg border border-white/10 flex items-center justify-center transition-all hover:scale-105 flex-shrink-0"
-                    style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--nova-text)' }}
+                    className="w-8 h-8 rounded-lg border flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)', color: 'var(--sig-dim)' }}
                   >
                     <FiMaximize2 size={14} />
                   </button>
                 </div>
                 {conversation.length > 0 && (
-                  <p className="text-[11px] truncate mt-1.5" style={{ color: 'var(--nova-muted)' }}>
+                  <p className="text-[11px] truncate mt-1.5" style={{ color: 'var(--sig-dim)' }}>
                     {conversation[conversation.length - 1].text}
                   </p>
                 )}
