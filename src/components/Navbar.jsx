@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { useMagneticEffect } from '../hooks/useMagneticEffect'
 import { FiHome, FiUser, FiZap, FiBriefcase, FiTrendingUp, FiMail, FiVolume2, FiVolumeX, FiSun, FiMoon } from 'react-icons/fi'
+import profilePhoto from '../images/Muhire_dieudonne.JPG'
 
 /* ─────────────────────────────────────────────
    PREMIUM DARK THEME STYLES
@@ -53,7 +54,7 @@ const PREMIUM_STYLES = `
 const Floating3DElement = ({ delay, duration, size = 20, color = '#6366f1' }) => (
   <motion.div
     initial={{ opacity: 0, rotateY: 0 }}
-    animate={{ 
+    animate={{
       opacity: [0, 1, 0.8, 1],
       rotateY: [0, 180, 360],
       scale: [1, 1.2, 1]
@@ -78,7 +79,7 @@ const Floating3DElement = ({ delay, duration, size = 20, color = '#6366f1' }) =>
 )
 
 // ─── 3D Card Component ───────────────────────────────────────────────
-const Card3D = ({ children, className = '', delay = 0 }) => (
+const Card3D = ({ children, className = '', delay = 0, ...rest }) => (
   <motion.div
     initial={{ opacity: 0, rotateX: -15, y: 30 }}
     animate={{ opacity: 1, rotateX: 0, y: 0 }}
@@ -94,6 +95,7 @@ const Card3D = ({ children, className = '', delay = 0 }) => (
       transformStyle: 'preserve-3d',
       perspective: '1000px'
     }}
+    {...rest}
   >
     <div style={{
       transform: 'translateZ(30px)',
@@ -162,7 +164,6 @@ const Navbar = () => {
   const [scrollPercent, setScrollPercent] = useState(0)
   const [compact, setCompact] = useState(false)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0, activeIndex: -1 })
-  const [isMobile, setIsMobile] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(true)
 
   // Magnetic effect refs – we apply them to logo and utility buttons
@@ -220,7 +221,7 @@ const Navbar = () => {
       const currentScrollY = window.scrollY
       const winScroll = document.documentElement.scrollTop
       const height = document.documentElement.scrollHeight - document.documentElement.clientHeight
-      setScrollPercent((winScroll / height) * 100)
+      setScrollPercent(height > 0 ? (winScroll / height) * 100 : 0)
 
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false) // scrolling down
@@ -255,6 +256,7 @@ const Navbar = () => {
       if (el) observer.observe(el)
     })
     return () => observer.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const scrollToSection = (sectionId) => {
@@ -266,18 +268,6 @@ const Navbar = () => {
       setIsOpen(false)
       playClick()
     }
-  }
-
-  // Mouse move handler for underline follower
-  // Mouse move handler for 3D effects
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-      activeIndex: index
-    })
-    playHover()
   }
 
   const handleLinkMouseMove = (e, index) => {
@@ -381,7 +371,7 @@ const Navbar = () => {
                 }}
               >
                 <motion.img
-                  src="/images/muhire-dieudonne.jpg"
+                  src={profilePhoto}
                   alt="Muhire Dieudonne"
                   className="w-full h-full object-cover"
                   whileHover={{ scale: 1.1 }}
@@ -406,8 +396,8 @@ const Navbar = () => {
                           ? 'text-primary'
                           : 'text-light/70 hover:text-light'
                       }`}
-                      whileHover={!prefersReducedMotion ? { 
-                        scale: 1.05, 
+                      whileHover={!prefersReducedMotion ? {
+                        scale: 1.05,
                         rotateX: 10,
                         rotateY: 5,
                         translateZ: 20
@@ -419,7 +409,7 @@ const Navbar = () => {
                       }}
                     >
                       <span className="relative z-10 flex items-center gap-1 lg:gap-2" style={{ transform: 'translateZ(15px)' }}>
-                        <motion.span 
+                        <motion.span
                           className="text-base lg:text-lg"
                           whileHover={{ rotateZ: 360 }}
                           transition={{ duration: 0.6 }}
@@ -438,8 +428,8 @@ const Navbar = () => {
                           style={{ transform: 'translateZ(-5px)' }}
                         />
                       )}
-                      <motion.div 
-                        className="absolute inset-0 bg-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" 
+                      <motion.div
+                        className="absolute inset-0 bg-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                         style={{ transform: 'translateZ(-10px)' }}
                       />
                     </motion.button>
@@ -561,6 +551,8 @@ const Navbar = () => {
                   whileHover={{ scale: 1.1, rotateZ: 180 }}
                   whileTap={{ scale: 0.9 }}
                   style={{ transformStyle: 'preserve-3d' }}
+                  aria-label={isOpen ? 'Close menu' : 'Open menu'}
+                  aria-expanded={isOpen}
                 >
                   <span className="sr-only">Open main menu</span>
                   <div style={{ transform: 'translateZ(5px)' }}>
@@ -606,8 +598,8 @@ const Navbar = () => {
                         transition={{ delay: index * 0.05, duration: 0.6 }}
                         onClick={() => scrollToSection(item.id)}
                         onMouseEnter={playHover}
-                        whileHover={{ 
-                          scale: 1.05, 
+                        whileHover={{
+                          scale: 1.05,
                           rotateX: 10,
                           translateZ: 15
                         }}
@@ -622,8 +614,8 @@ const Navbar = () => {
                           boxShadow: activeSection === item.id ? '0 8px 25px rgba(99, 102, 241, 0.4)' : '0 4px 15px rgba(0, 0, 0, 0.2)'
                         }}
                       >
-                        <motion.span 
-                          className="text-2xl mb-1" 
+                        <motion.span
+                          className="text-2xl mb-1"
                           style={{ transform: 'translateZ(10px)' }}
                           whileHover={{ rotateZ: 360 }}
                           transition={{ duration: 0.6 }}
@@ -670,8 +662,8 @@ const Navbar = () => {
                   <motion.button
                     onClick={() => scrollToSection(item.id)}
                     onMouseEnter={playHover}
-                    whileHover={{ 
-                      scale: 1.1, 
+                    whileHover={{
+                      scale: 1.1,
                       rotateZ: 15,
                       translateZ: 10
                     }}
@@ -687,7 +679,7 @@ const Navbar = () => {
                       boxShadow: activeSection === item.id ? '0 6px 20px rgba(99, 102, 241, 0.5)' : '0 3px 10px rgba(0, 0, 0, 0.3)'
                     }}
                   >
-                    <motion.span 
+                    <motion.span
                       className="text-sm"
                       style={{ transform: 'translateZ(5px)' }}
                       whileHover={{ rotateZ: 360 }}
