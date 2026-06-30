@@ -1,19 +1,46 @@
 // src/components/Hero.jsx
-// Three.js removed — pure CSS + Framer Motion hero
+// Pure CSS + Framer Motion hero — refactored for responsiveness,
+// cleaner structure, and a mobile hamburger nav menu.
 
-import React, {
-  useRef,
-  useState,
-  useEffect,
-} from 'react'
-
+import React, { useRef, useState, useEffect, useCallback } from 'react'
 import {
   motion,
+  AnimatePresence,
   useScroll,
   useTransform,
   useSpring,
   useReducedMotion,
 } from 'framer-motion'
+import profilePhoto from '../images/Muhire_dieudonne.JPG'
+
+/* ─────────────────────────────────────────────
+   CONSTANTS
+───────────────────────────────────────────── */
+
+const NAV_LINKS = [
+  { label: 'Experience', href: '#experience' },
+  { label: 'About', href: '#about' },
+  { label: 'Skills', href: '#skills' },
+  { label: 'Projects', href: '#projects' },
+  { label: 'Contact', href: '#contact' },
+]
+
+const TECH_STACK = ['React', 'Three.js', 'Node.js', 'Framer Motion', 'Tailwind', 'TypeScript']
+
+const STATS = [
+  { value: '5+', label: 'Years Exp.' },
+  { value: '40+', label: 'Projects' },
+  { value: '20+', label: 'Clients' },
+  { value: '15+', label: 'Countries' },
+]
+
+const TYPEWRITER_TEXTS = [
+  'Crafting immersive digital experiences with cutting-edge web technologies.',
+  'Building stunning 3D visualizations and interactive web applications.',
+  'Transforming ideas into beautiful high-performance solutions.',
+]
+
+const MOBILE_BREAKPOINT = 768
 
 /* ─────────────────────────────────────────────
    PREMIUM STYLES
@@ -40,6 +67,8 @@ const PREMIUM_STYLES = `
 
   --hero-display: 'Playfair Display', serif;
   --hero-body: 'Instrument Sans', sans-serif;
+
+  --nav-height: 84px;
 }
 
 .hero-root *,
@@ -67,10 +96,183 @@ const PREMIUM_STYLES = `
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
+/* ── Navbar ── */
+.hero-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(20px, 5vw, 56px);
+}
+
+.hero-nav-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.hero-nav-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--hero-border-hi);
+  box-shadow: 0 0 0 4px rgba(212,175,85,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hero-nav-logo:hover .hero-nav-avatar {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 5px rgba(212,175,85,0.16);
+}
+
+.hero-nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 40px);
+}
+
+.hero-nav-link {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--hero-muted);
+  text-decoration: none;
+  transition: color 0.25s ease;
+  position: relative;
+}
+.hero-nav-link:hover { color: var(--hero-cream); }
+.hero-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 1px;
+  background: var(--hero-gold);
+  transition: width 0.25s ease;
+}
+.hero-nav-link:hover::after { width: 100%; }
+
+/* ── Hamburger button ── */
+.hero-menu-btn {
+  display: none;
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--hero-border);
+  background: rgba(255,255,255,0.02);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+}
+
+.hero-menu-btn span {
+  position: absolute;
+  width: 18px;
+  height: 1.5px;
+  background: var(--hero-cream);
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease, top 0.3s ease;
+}
+.hero-menu-btn span:nth-child(1) { top: 16px; }
+.hero-menu-btn span:nth-child(2) { top: 22px; }
+.hero-menu-btn span:nth-child(3) { top: 28px; }
+
+.hero-menu-btn.open span:nth-child(1) { top: 22px; transform: rotate(45deg); }
+.hero-menu-btn.open span:nth-child(2) { opacity: 0; }
+.hero-menu-btn.open span:nth-child(3) { top: 22px; transform: rotate(-45deg); }
+
+/* ── Mobile menu overlay ── */
+.hero-mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(8,7,5,0.98);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.hero-mobile-close {
+  position: absolute;
+  top: 20px;
+  right: clamp(18px, 5vw, 56px);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--hero-border);
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hero-mobile-close:hover {
+  border-color: var(--hero-border-hi);
+  background: rgba(212,175,85,0.08);
+  transform: rotate(90deg);
+  box-shadow: 0 0 24px rgba(212,175,85,0.18);
+}
+.hero-mobile-close span {
+  position: absolute;
+  width: 17px;
+  height: 1.5px;
+  background: var(--hero-cream);
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+.hero-mobile-close:hover span {
+  background: var(--hero-gold);
+}
+.hero-mobile-close span:first-child { transform: rotate(45deg); }
+.hero-mobile-close span:last-child  { transform: rotate(-45deg); }
+
+.hero-mobile-link {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-family: var(--hero-display);
+  font-size: clamp(30px, 9vw, 44px);
+  font-weight: 700;
+  color: var(--hero-cream);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+.hero-mobile-link:hover,
+.hero-mobile-link:focus-visible {
+  color: var(--hero-gold);
+  transform: translateX(6px);
+}
+.hero-mobile-link-index {
+  font-family: var(--hero-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hero-dim);
+  letter-spacing: 0.1em;
+}
+.hero-mobile-link:hover .hero-mobile-link-index {
+  color: var(--hero-gold);
+}
+
 /* ── Buttons ── */
 .hero-btn-primary {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   padding: 14px 32px;
   border-radius: 999px;
@@ -84,12 +286,15 @@ const PREMIUM_STYLES = `
   text-transform: uppercase;
   transition: 0.3s ease;
   box-shadow: 0 10px 40px rgba(212,175,85,0.35);
+  width: 100%;
+  max-width: 240px;
 }
 .hero-btn-primary:hover { transform: translateY(-3px); }
 
 .hero-btn-ghost {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   padding: 13px 30px;
   border-radius: 999px;
@@ -98,6 +303,8 @@ const PREMIUM_STYLES = `
   color: var(--hero-muted);
   cursor: pointer;
   transition: 0.3s ease;
+  width: 100%;
+  max-width: 240px;
 }
 .hero-btn-ghost:hover {
   border-color: var(--hero-border-hi);
@@ -106,8 +313,10 @@ const PREMIUM_STYLES = `
 
 /* ── Stat card ── */
 .hero-stat {
-  padding: 20px;
-  min-width: 140px;
+  padding: clamp(14px, 2.4vw, 20px);
+  flex: 1 1 130px;
+  min-width: 110px;
+  max-width: 160px;
   border-radius: 18px;
   border: 1px solid var(--hero-border);
   background: rgba(255,255,255,0.02);
@@ -145,7 +354,7 @@ const PREMIUM_STYLES = `
   mix-blend-mode: screen;
 }
 
-/* ── Animated rings (replaces Three.js) ── */
+/* ── Animated rings ── */
 @keyframes ring-spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
@@ -168,20 +377,89 @@ const PREMIUM_STYLES = `
   transform-origin: center;
   pointer-events: none;
 }
+
+/* ── Content layout ── */
+.hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 1000px;
+  width: 100%;
+  padding: calc(var(--nav-height) + 24px) 24px 40px;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: clamp(38px, 9vw, 110px);
+  line-height: 1.04;
+  margin-bottom: clamp(18px, 4vw, 30px);
+  font-family: var(--hero-display);
+}
+
+.hero-subtitle {
+  max-width: 720px;
+  margin: 0 auto clamp(30px, 5vw, 50px);
+  color: var(--hero-muted);
+  font-size: clamp(15px, 2vw, 20px);
+  min-height: 80px;
+  padding: 0 8px;
+}
+
+.hero-cta-row {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: clamp(40px, 8vw, 70px);
+}
+
+.hero-stats-row {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: clamp(36px, 6vw, 60px);
+}
+
+.hero-tech-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 0 12px;
+}
+
+/* ── Responsive breakpoints ── */
+@media (max-width: 768px) {
+  .hero-nav-links { display: none; }
+  .hero-menu-btn { display: flex; }
+  .hero-cta-row { flex-direction: column; }
+  .hero-btn-primary,
+  .hero-btn-ghost { width: 100%; max-width: 280px; }
+}
+
+@media (max-width: 480px) {
+  .hero-stat { min-width: 42%; }
+  .hero-nav { padding: 0 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-ring { animation: none !important; }
+}
 `
 
 /* ─────────────────────────────────────────────
-   AMBIENT RINGS  (replace Three.js canvas)
+   AMBIENT RINGS  (CSS replacement for a 3D canvas)
 ───────────────────────────────────────────── */
 
-const AmbientRings = ({ mouse }) => {
-  const rings = [
-    { size: 340, speed: '18s', opacity: 0.22, dir: 1,  tiltX: 65, tiltY: 10 },
-    { size: 500, speed: '28s', opacity: 0.14, dir: -1, tiltX: 45, tiltY: 25 },
-    { size: 680, speed: '40s', opacity: 0.10, dir: 1,  tiltX: 25, tiltY: 60 },
-    { size: 880, speed: '55s', opacity: 0.07, dir: -1, tiltX: 72, tiltY: 18 },
-  ]
+const RING_CONFIG = [
+  { size: 340, speed: '18s', opacity: 0.22, dir: 1, tiltX: 65, tiltY: 10 },
+  { size: 500, speed: '28s', opacity: 0.14, dir: -1, tiltX: 45, tiltY: 25 },
+  { size: 680, speed: '40s', opacity: 0.1, dir: 1, tiltX: 25, tiltY: 60 },
+  { size: 880, speed: '55s', opacity: 0.07, dir: -1, tiltX: 72, tiltY: 18 },
+]
 
+const AmbientRings = ({ mouse }) => {
   const mx = (mouse?.x ?? 0) * 0.008
   const my = (mouse?.y ?? 0) * 0.008
 
@@ -195,28 +473,25 @@ const AmbientRings = ({ mouse }) => {
         pointerEvents: 'none',
       }}
     >
-      {rings.map((r, i) => (
+      {RING_CONFIG.map((r, i) => (
         <div
-          key={i}
+          key={r.size}
           className="hero-ring"
           style={{
-            width:  r.size,
+            width: r.size,
             height: r.size,
             marginLeft: -r.size / 2,
-            marginTop:  -r.size / 2,
+            marginTop: -r.size / 2,
             opacity: r.opacity,
             animation: `${r.dir > 0 ? 'ring-spin' : 'ring-spin-rev'} ${r.speed} linear infinite,
                         ring-pulse ${parseFloat(r.speed) * 0.7}s ease-in-out infinite`,
             transform: `rotateX(${r.tiltX + my}deg) rotateY(${r.tiltY + mx}deg)`,
             transition: 'transform 0.6s ease',
-            borderColor: i % 2 === 0
-              ? 'rgba(212,175,85,0.6)'
-              : 'rgba(46,204,154,0.4)',
+            borderColor: i % 2 === 0 ? 'rgba(212,175,85,0.6)' : 'rgba(46,204,154,0.4)',
           }}
         />
       ))}
 
-      {/* Central glow dot */}
       <div
         style={{
           position: 'absolute',
@@ -236,51 +511,63 @@ const AmbientRings = ({ mouse }) => {
 }
 
 /* ─────────────────────────────────────────────
-   MAGNETIC HOOK
+   MAGNETIC HOOK  (desktop-only; no-op on touch)
 ───────────────────────────────────────────── */
 
-const useMagnetic = () => {
+const useMagnetic = (enabled = true) => {
   const ref = useRef(null)
 
   useEffect(() => {
     const el = ref.current
-    if (!el) return
+    if (!el || !enabled) return
 
     const onMove = (e) => {
       const r = el.getBoundingClientRect()
-      const x = (e.clientX - (r.left + r.width  / 2)) * 0.2
-      const y = (e.clientY - (r.top  + r.height / 2)) * 0.2
+      const x = (e.clientX - (r.left + r.width / 2)) * 0.2
+      const y = (e.clientY - (r.top + r.height / 2)) * 0.2
       el.style.transform = `translate(${x}px, ${y}px)`
     }
     const onLeave = () => {
-      el.style.transform  = 'translate(0,0)'
+      el.style.transform = 'translate(0,0)'
       el.style.transition = 'transform 0.6s cubic-bezier(0.23,1,0.32,1)'
     }
 
-    el.addEventListener('mousemove',  onMove)
+    el.addEventListener('mousemove', onMove)
     el.addEventListener('mouseleave', onLeave)
     return () => {
-      el.removeEventListener('mousemove',  onMove)
+      el.removeEventListener('mousemove', onMove)
       el.removeEventListener('mouseleave', onLeave)
     }
-  }, [])
+  }, [enabled])
 
   return ref
+}
+
+/* ─────────────────────────────────────────────
+   WINDOW SIZE HOOK
+───────────────────────────────────────────── */
+
+const useIsMobile = (breakpoint = MOBILE_BREAKPOINT) => {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < breakpoint)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [breakpoint])
+
+  return isMobile
 }
 
 /* ─────────────────────────────────────────────
    TYPEWRITER
 ───────────────────────────────────────────── */
 
-const InfiniteTypewriter = ({
-  texts,
-  speed = 38,
-  pauseDuration = 2000,
-  className,
-}) => {
-  const [shown,        setShown]        = useState('')
+const InfiniteTypewriter = ({ texts, speed = 38, pauseDuration = 2000, className }) => {
+  const [shown, setShown] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isDeleting,   setIsDeleting]   = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     const currentText = texts[currentIndex]
@@ -288,25 +575,19 @@ const InfiniteTypewriter = ({
 
     if (!isDeleting) {
       if (shown.length < currentText.length) {
-        timeout = setTimeout(() => {
-          setShown(currentText.slice(0, shown.length + 1))
-        }, speed)
+        timeout = setTimeout(() => setShown(currentText.slice(0, shown.length + 1)), speed)
       } else {
         timeout = setTimeout(() => setIsDeleting(true), pauseDuration)
       }
+    } else if (shown.length > 0) {
+      timeout = setTimeout(() => setShown(currentText.slice(0, shown.length - 1)), speed / 2)
     } else {
-      if (shown.length > 0) {
-        timeout = setTimeout(() => {
-          setShown(currentText.slice(0, shown.length - 1))
-        }, speed / 2)
-      } else {
-        setIsDeleting(false)
-        setCurrentIndex((prev) => (prev + 1) % texts.length)
-      }
+      setIsDeleting(false)
+      setCurrentIndex((prev) => (prev + 1) % texts.length)
     }
 
     return () => clearTimeout(timeout)
-  }, [shown, isDeleting, currentIndex])
+  }, [shown, isDeleting, currentIndex, texts, speed, pauseDuration])
 
   return (
     <span className={className}>
@@ -314,13 +595,7 @@ const InfiniteTypewriter = ({
       <motion.span
         animate={{ opacity: [1, 0] }}
         transition={{ repeat: Infinity, duration: 0.8 }}
-        style={{
-          display:    'inline-block',
-          width:      2,
-          height:     '1em',
-          background: 'currentColor',
-          marginLeft: 3,
-        }}
+        style={{ display: 'inline-block', width: 2, height: '1em', background: 'currentColor', marginLeft: 3 }}
       />
     </span>
   )
@@ -332,15 +607,7 @@ const InfiniteTypewriter = ({
 
 const GridLines = () => (
   <svg
-    style={{
-      position:      'absolute',
-      inset:         0,
-      width:         '100%',
-      height:        '100%',
-      opacity:       0.04,
-      pointerEvents: 'none',
-      zIndex:        2,
-    }}
+    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.04, pointerEvents: 'none', zIndex: 2 }}
   >
     <defs>
       <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
@@ -352,33 +619,108 @@ const GridLines = () => (
 )
 
 /* ─────────────────────────────────────────────
-   SUB-COMPONENTS
+   SMALL PRESENTATIONAL COMPONENTS
 ───────────────────────────────────────────── */
 
-const TechPill  = ({ label }) => <div className="hero-pill">{label}</div>
+const TechPill = ({ label }) => <div className="hero-pill">{label}</div>
 
-const StatCard  = ({ value, label }) => (
+const StatCard = ({ value, label }) => (
   <div className="hero-stat">
-    <div
-      style={{
-        fontSize:   'clamp(28px,4vw,42px)',
-        fontWeight: 900,
-        fontFamily: 'var(--hero-display)',
-      }}
-    >
+    <div style={{ fontSize: 'clamp(24px,5vw,42px)', fontWeight: 900, fontFamily: 'var(--hero-display)' }}>
       {value}
     </div>
-    <div
-      style={{
-        fontSize:      11,
-        color:         'var(--hero-dim)',
-        letterSpacing: '0.1em',
-        textTransform: 'uppercase',
-      }}
-    >
+    <div style={{ fontSize: 11, color: 'var(--hero-dim)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
       {label}
     </div>
   </div>
+)
+
+const MagneticButton = ({ as: As = 'button', className, children, enabled, ...rest }) => {
+  const ref = useMagnetic(enabled)
+  return (
+    <div ref={ref}>
+      <As className={className} {...rest}>
+        {children}
+      </As>
+    </div>
+  )
+}
+
+/* ── Hamburger toggle ── */
+const MenuButton = ({ open, onClick }) => (
+  <button
+    type="button"
+    className={`hero-menu-btn${open ? ' open' : ''}`}
+    onClick={onClick}
+    aria-label={open ? 'Close menu' : 'Open menu'}
+    aria-expanded={open}
+  >
+    <span />
+    <span />
+    <span />
+  </button>
+)
+
+/* ── Navbar (desktop links + mobile hamburger) ── */
+const Navbar = ({ menuOpen, onToggleMenu }) => (
+  <nav className="hero-nav">
+    <a href="#top" className="hero-nav-logo" aria-label="Home">
+      <img src={profilePhoto} alt="Muhire Dieudonne" className="hero-nav-avatar" />
+    </a>
+
+    <div className="hero-nav-links">
+      {NAV_LINKS.map((link) => (
+        <a key={link.label} href={link.href} className="hero-nav-link">
+          {link.label}
+        </a>
+      ))}
+    </div>
+
+    <MenuButton open={menuOpen} onClick={onToggleMenu} />
+  </nav>
+)
+
+/* ── Mobile fullscreen menu overlay ── */
+const MobileMenu = ({ open, onClose }) => (
+  <AnimatePresence>
+    {open && (
+      <motion.div
+        className="hero-mobile-menu"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.25 }}
+      >
+        <motion.button
+          type="button"
+          className="hero-mobile-close"
+          onClick={onClose}
+          aria-label="Close menu"
+          initial={{ opacity: 0, rotate: -45 }}
+          animate={{ opacity: 1, rotate: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <span />
+          <span />
+        </motion.button>
+
+        {NAV_LINKS.map((link, i) => (
+          <motion.a
+            key={link.label}
+            href={link.href}
+            className="hero-mobile-link"
+            onClick={onClose}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 * i }}
+          >
+            <span className="hero-mobile-link-index">{String(i + 1).padStart(2, '0')}</span>
+            {link.label}
+          </motion.a>
+        ))}
+      </motion.div>
+    )}
+  </AnimatePresence>
 )
 
 /* ─────────────────────────────────────────────
@@ -387,47 +729,41 @@ const StatCard  = ({ value, label }) => (
 
 const Hero = () => {
   const containerRef = useRef()
-  const btn1 = useMagnetic()
-  const btn2 = useMagnetic()
   const shouldReduceMotion = useReducedMotion()
+  const isMobile = useIsMobile()
 
-  const [mouse,   setMouse]   = useState({ x: 0, y: 0 })
+  const [mouse, setMouse] = useState({ x: 0, y: 0 })
   const [mounted, setMounted] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  const toggleMenu = useCallback(() => setMenuOpen((v) => !v), [])
+  const closeMenu = useCallback(() => setMenuOpen(false), [])
 
   useEffect(() => {
     setMounted(true)
-    const checkMobile = () => setIsMobile(window.innerWidth < 768)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
+
+    if (isMobile) return undefined // skip mouse-parallax listener on touch devices
 
     const onMove = (e) => {
-      setMouse({
-        x: e.clientX - window.innerWidth  / 2,
-        y: e.clientY - window.innerHeight / 2,
-      })
+      setMouse({ x: e.clientX - window.innerWidth / 2, y: e.clientY - window.innerHeight / 2 })
     }
     window.addEventListener('mousemove', onMove)
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [isMobile])
 
-    return () => {
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('resize',    checkMobile)
-    }
-  }, [])
+  // lock background scroll while the mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [menuOpen])
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end start'],
   })
 
-  const opacity = useSpring(
-    useTransform(scrollYProgress, [0, 0.4], [1, 0]),
-    { damping: 25, stiffness: 80 }
-  )
-  const y = useSpring(
-    useTransform(scrollYProgress, [0, 1], [0, 120]),
-    { damping: 25, stiffness: 80 }
-  )
+  const opacity = useSpring(useTransform(scrollYProgress, [0, 0.4], [1, 0]), { damping: 25, stiffness: 80 })
+  const y = useSpring(useTransform(scrollYProgress, [0, 1], [0, 120]), { damping: 25, stiffness: 80 })
 
   if (!mounted) return null
 
@@ -436,168 +772,99 @@ const Hero = () => {
       <style>{PREMIUM_STYLES}</style>
 
       <section
+        id="top"
         ref={containerRef}
         className="hero-root"
-        style={{
-          minHeight:      '100svh',
-          display:        'flex',
-          justifyContent: 'center',
-          alignItems:     'center',
-        }}
+        style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       >
-        {/* ── CSS Ambient Rings (replaces Three.js) ── */}
+        <Navbar menuOpen={menuOpen} onToggleMenu={toggleMenu} />
+        <MobileMenu open={menuOpen} onClose={closeMenu} />
+
         {!shouldReduceMotion && <AmbientRings mouse={mouse} />}
 
-        {/* ── Glow orbs ── */}
         <div
           className="glow-orb"
-          style={{
-            width:      700,
-            height:     700,
-            background: 'radial-gradient(circle, rgba(212,175,85,0.10), transparent)',
-            top:        '-20%',
-            left:       '-10%',
-            zIndex:     1,
-          }}
+          style={{ width: 700, height: 700, background: 'radial-gradient(circle, rgba(212,175,85,0.10), transparent)', top: '-20%', left: '-10%', zIndex: 1 }}
         />
         <div
           className="glow-orb"
-          style={{
-            width:      500,
-            height:     500,
-            background: 'radial-gradient(circle, rgba(46,204,154,0.07), transparent)',
-            bottom:     '-10%',
-            right:      '-10%',
-            zIndex:     1,
-          }}
+          style={{ width: 500, height: 500, background: 'radial-gradient(circle, rgba(46,204,154,0.07), transparent)', bottom: '-10%', right: '-10%', zIndex: 1 }}
         />
 
         <GridLines />
 
-        {/* ── CONTENT ── */}
-        <motion.div
-          animate={shouldReduceMotion ? {} : { y: [0, -8, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          style={{
-            opacity,
-            y,
-            position:  'relative',
-            zIndex:    10,
-            maxWidth:  1000,
-            padding:   '0 24px',
-            textAlign: 'center',
-          }}
-        >
-          {/* Badge */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', width: '100%' }}>
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            style={{ marginBottom: 30 }}
+            animate={shouldReduceMotion ? {} : { y: [0, -8, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ opacity, y, margin: '0 auto' }}
+            className="hero-content"
           >
-            <span
-              style={{
-                padding:      '8px 20px',
-                borderRadius: 999,
-                background:   'rgba(212,175,85,0.12)',
-                border:       '1px solid rgba(212,175,85,0.3)',
-                color:        '#d4af55',
-                fontSize:     13,
-              }}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              style={{ marginBottom: 30 }}
             >
-              Available for new projects
-            </span>
-          </motion.div>
+              <span
+                style={{
+                  padding: '8px 20px',
+                  borderRadius: 999,
+                  background: 'rgba(212,175,85,0.12)',
+                  border: '1px solid rgba(212,175,85,0.3)',
+                  color: '#d4af55',
+                  fontSize: 13,
+                  display: 'inline-block',
+                }}
+              >
+                Available for new projects
+              </span>
+            </motion.div>
 
-          {/* Title */}
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            style={{
-              fontSize:   'clamp(48px,9vw,110px)',
-              lineHeight: 1,
-              marginBottom: 30,
-              fontFamily: 'var(--hero-display)',
-            }}
-          >
-            Creative Developer
-            <br />
-            &amp; 3D Artist
-          </motion.h1>
-
-          {/* Subtitle typewriter */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            style={{
-              maxWidth:    720,
-              margin:      '0 auto 50px',
-              color:       'var(--hero-muted)',
-              fontSize:    'clamp(16px,2vw,20px)',
-              minHeight:   80,
-            }}
-          >
-            <InfiniteTypewriter
-              texts={[
-                'Crafting immersive digital experiences with cutting-edge web technologies.',
-                'Building stunning 3D visualizations and interactive web applications.',
-                'Transforming ideas into beautiful high-performance solutions.',
-              ]}
-            />
-          </motion.div>
-
-          {/* CTA buttons */}
-          <div
-            style={{
-              display:        'flex',
-              gap:            20,
-              justifyContent: 'center',
-              flexWrap:       'wrap',
-              marginBottom:   70,
-            }}
-          >
-            <div ref={btn1}>
-              <button className="hero-btn-primary">View My Work</button>
-            </div>
-            <div ref={btn2}>
-              <button className="hero-btn-ghost">Contact Me</button>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div
-            style={{
-              display:        'flex',
-              gap:            20,
-              justifyContent: 'center',
-              flexWrap:       'wrap',
-              marginBottom:   60,
-            }}
-          >
-            <StatCard value="5+"  label="Years Exp." />
-            <StatCard value="40+" label="Projects"   />
-            <StatCard value="20+" label="Clients"    />
-            <StatCard value="15+" label="Countries"  />
-          </div>
-
-          {/* Tech pills */}
-          {!isMobile && (
-            <div
-              style={{
-                display:        'flex',
-                justifyContent: 'center',
-                gap:            12,
-                flexWrap:       'wrap',
-              }}
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="hero-title"
             >
-              {['React', 'Three.js', 'Node.js', 'Framer Motion', 'Tailwind', 'TypeScript'].map(
-                (item) => <TechPill key={item} label={item} />
-              )}
+              Creative Developer
+              <br />
+              &amp; 3D Artist
+            </motion.h1>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="hero-subtitle"
+            >
+              <InfiniteTypewriter texts={TYPEWRITER_TEXTS} />
+            </motion.div>
+
+            <div className="hero-cta-row">
+              <MagneticButton className="hero-btn-primary" enabled={!isMobile}>
+                View My Work
+              </MagneticButton>
+              <MagneticButton className="hero-btn-ghost" enabled={!isMobile}>
+                Contact Me
+              </MagneticButton>
             </div>
-          )}
-        </motion.div>
+
+            <div className="hero-stats-row">
+              {STATS.map((s) => (
+                <StatCard key={s.label} value={s.value} label={s.label} />
+              ))}
+            </div>
+
+            {!isMobile && (
+              <div className="hero-tech-row">
+                {TECH_STACK.map((item) => (
+                  <TechPill key={item} label={item} />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </div>
       </section>
     </>
   )
