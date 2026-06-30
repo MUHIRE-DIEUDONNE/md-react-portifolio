@@ -96,178 +96,6 @@ const PREMIUM_STYLES = `
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
-/* ── Navbar ── */
-.hero-nav {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  height: var(--nav-height);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 clamp(20px, 5vw, 56px);
-}
-
-.hero-nav-logo {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-}
-
-.hero-nav-avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1.5px solid var(--hero-border-hi);
-  box-shadow: 0 0 0 4px rgba(212,175,85,0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.hero-nav-logo:hover .hero-nav-avatar {
-  transform: scale(1.06);
-  box-shadow: 0 0 0 5px rgba(212,175,85,0.16);
-}
-
-.hero-nav-links {
-  display: flex;
-  align-items: center;
-  gap: clamp(20px, 3vw, 40px);
-}
-
-.hero-nav-link {
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  color: var(--hero-muted);
-  text-decoration: none;
-  transition: color 0.25s ease;
-  position: relative;
-}
-.hero-nav-link:hover { color: var(--hero-cream); }
-.hero-nav-link::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -6px;
-  width: 0;
-  height: 1px;
-  background: var(--hero-gold);
-  transition: width 0.25s ease;
-}
-.hero-nav-link:hover::after { width: 100%; }
-
-/* ── Hamburger button ── */
-.hero-menu-btn {
-  display: none;
-  position: relative;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--hero-border);
-  background: rgba(255,255,255,0.02);
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  z-index: 60;
-}
-
-.hero-menu-btn span {
-  position: absolute;
-  width: 18px;
-  height: 1.5px;
-  background: var(--hero-cream);
-  border-radius: 2px;
-  transition: transform 0.3s ease, opacity 0.3s ease, top 0.3s ease;
-}
-.hero-menu-btn span:nth-child(1) { top: 16px; }
-.hero-menu-btn span:nth-child(2) { top: 22px; }
-.hero-menu-btn span:nth-child(3) { top: 28px; }
-
-.hero-menu-btn.open span:nth-child(1) { top: 22px; transform: rotate(45deg); }
-.hero-menu-btn.open span:nth-child(2) { opacity: 0; }
-.hero-menu-btn.open span:nth-child(3) { top: 22px; transform: rotate(-45deg); }
-
-/* ── Mobile menu overlay ── */
-.hero-mobile-menu {
-  position: fixed;
-  inset: 0;
-  z-index: 55;
-  background: rgba(8,7,5,0.98);
-  backdrop-filter: blur(20px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 30px;
-}
-
-.hero-mobile-close {
-  position: absolute;
-  top: 20px;
-  right: clamp(18px, 5vw, 56px);
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  border: 1px solid var(--hero-border);
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-}
-.hero-mobile-close:hover {
-  border-color: var(--hero-border-hi);
-  background: rgba(212,175,85,0.08);
-  transform: rotate(90deg);
-  box-shadow: 0 0 24px rgba(212,175,85,0.18);
-}
-.hero-mobile-close span {
-  position: absolute;
-  width: 17px;
-  height: 1.5px;
-  background: var(--hero-cream);
-  border-radius: 2px;
-  transition: background 0.3s ease;
-}
-.hero-mobile-close:hover span {
-  background: var(--hero-gold);
-}
-.hero-mobile-close span:first-child { transform: rotate(45deg); }
-.hero-mobile-close span:last-child  { transform: rotate(-45deg); }
-
-.hero-mobile-link {
-  position: relative;
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  font-family: var(--hero-display);
-  font-size: clamp(30px, 9vw, 44px);
-  font-weight: 700;
-  color: var(--hero-cream);
-  text-decoration: none;
-  letter-spacing: 0.01em;
-  transition: color 0.3s ease, transform 0.3s ease;
-}
-.hero-mobile-link:hover,
-.hero-mobile-link:focus-visible {
-  color: var(--hero-gold);
-  transform: translateX(6px);
-}
-.hero-mobile-link-index {
-  font-family: var(--hero-body);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--hero-dim);
-  letter-spacing: 0.1em;
-}
-.hero-mobile-link:hover .hero-mobile-link-index {
-  color: var(--hero-gold);
-}
-
 /* ── Buttons ── */
 .hero-btn-primary {
   display: inline-flex;
@@ -431,8 +259,6 @@ const PREMIUM_STYLES = `
 
 /* ── Responsive breakpoints ── */
 @media (max-width: 768px) {
-  .hero-nav-links { display: none; }
-  .hero-menu-btn { display: flex; }
   .hero-cta-row { flex-direction: column; }
   .hero-btn-primary,
   .hero-btn-ghost { width: 100%; max-width: 280px; }
@@ -440,7 +266,6 @@ const PREMIUM_STYLES = `
 
 @media (max-width: 480px) {
   .hero-stat { min-width: 42%; }
-  .hero-nav { padding: 0 18px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -646,83 +471,6 @@ const MagneticButton = ({ as: As = 'button', className, children, enabled, ...re
   )
 }
 
-/* ── Hamburger toggle ── */
-const MenuButton = ({ open, onClick }) => (
-  <button
-    type="button"
-    className={`hero-menu-btn${open ? ' open' : ''}`}
-    onClick={onClick}
-    aria-label={open ? 'Close menu' : 'Open menu'}
-    aria-expanded={open}
-  >
-    <span />
-    <span />
-    <span />
-  </button>
-)
-
-/* ── Navbar (desktop links + mobile hamburger) ── */
-const Navbar = ({ menuOpen, onToggleMenu }) => (
-  <nav className="hero-nav">
-    <a href="#top" className="hero-nav-logo" aria-label="Home">
-      <img src={profilePhoto} alt="Muhire Dieudonne" className="hero-nav-avatar" />
-    </a>
-
-    <div className="hero-nav-links">
-      {NAV_LINKS.map((link) => (
-        <a key={link.label} href={link.href} className="hero-nav-link">
-          {link.label}
-        </a>
-      ))}
-    </div>
-
-    <MenuButton open={menuOpen} onClick={onToggleMenu} />
-  </nav>
-)
-
-/* ── Mobile fullscreen menu overlay ── */
-const MobileMenu = ({ open, onClose }) => (
-  <AnimatePresence>
-    {open && (
-      <motion.div
-        className="hero-mobile-menu"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.25 }}
-      >
-        <motion.button
-          type="button"
-          className="hero-mobile-close"
-          onClick={onClose}
-          aria-label="Close menu"
-          initial={{ opacity: 0, rotate: -45 }}
-          animate={{ opacity: 1, rotate: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <span />
-          <span />
-        </motion.button>
-
-        {NAV_LINKS.map((link, i) => (
-          <motion.a
-            key={link.label}
-            href={link.href}
-            className="hero-mobile-link"
-            onClick={onClose}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 * i }}
-          >
-            <span className="hero-mobile-link-index">{String(i + 1).padStart(2, '0')}</span>
-            {link.label}
-          </motion.a>
-        ))}
-      </motion.div>
-    )}
-  </AnimatePresence>
-)
-
 /* ─────────────────────────────────────────────
    HERO
 ───────────────────────────────────────────── */
@@ -734,10 +482,6 @@ const Hero = () => {
 
   const [mouse, setMouse] = useState({ x: 0, y: 0 })
   const [mounted, setMounted] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
-
-  const toggleMenu = useCallback(() => setMenuOpen((v) => !v), [])
-  const closeMenu = useCallback(() => setMenuOpen(false), [])
 
   useEffect(() => {
     setMounted(true)
@@ -750,12 +494,6 @@ const Hero = () => {
     window.addEventListener('mousemove', onMove)
     return () => window.removeEventListener('mousemove', onMove)
   }, [isMobile])
-
-  // lock background scroll while the mobile menu is open
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [menuOpen])
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -777,9 +515,6 @@ const Hero = () => {
         className="hero-root"
         style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       >
-        <Navbar menuOpen={menuOpen} onToggleMenu={toggleMenu} />
-        <MobileMenu open={menuOpen} onClose={closeMenu} />
-
         {!shouldReduceMotion && <AmbientRings mouse={mouse} />}
 
         <div
