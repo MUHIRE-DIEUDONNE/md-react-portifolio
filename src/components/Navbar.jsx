@@ -518,22 +518,19 @@ const Navbar = () => {
                       animate={{ rotate: 0, opacity: 1, scale: 1 }}
                       exit={{ rotate: -90, opacity: 0, scale: 0.6 }}
                       transition={{ duration: 0.2 }}
-                      style={{ display: 'flex', flexDirection: 'column', gap: 5 }}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 5,
+                      }}
                     >
-                      {[0, 1, 2].map((i) => (
-                        <span
-                          key={i}
-                          style={{
-                            display: 'block',
-                            width: i === 1 ? 14 : 20,
-                            height: 2,
-                            borderRadius: 2,
-                            background: '#f5eed8',
-                            marginLeft: i === 1 ? 6 : 0,
-                            transition: 'width 0.2s',
-                          }}
-                        />
-                      ))}
+                      {/* top line — full width */}
+                      <span style={{ display: 'block', width: 20, height: 2.5, borderRadius: 2, background: '#f5eed8' }} />
+                      {/* middle line — half width, centered */}
+                      <span style={{ display: 'block', width: 10, height: 2.5, borderRadius: 2, background: '#d4af55' }} />
+                      {/* bottom line — full width */}
+                      <span style={{ display: 'block', width: 20, height: 2.5, borderRadius: 2, background: '#f5eed8' }} />
                     </motion.span>
                   )}
                 </AnimatePresence>
