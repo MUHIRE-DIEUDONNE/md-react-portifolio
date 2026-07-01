@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { useMagneticEffect } from '../hooks/useMagneticEffect'
-import { FiHome, FiUser, FiZap, FiBriefcase, FiTrendingUp, FiMail, FiVolume2, FiVolumeX, FiSun, FiMoon } from 'react-icons/fi'
+import { FiHome, FiUser, FiZap, FiBriefcase, FiTrendingUp, FiMail, FiVolume2, FiVolumeX, FiSun, FiMoon, FiX } from 'react-icons/fi'
 import profilePhoto from '../images/Muhire_dieudonne.JPG'
 
 /* ─────────────────────────────────────────────
@@ -48,32 +48,76 @@ const PREMIUM_STYLES = `
   .nv-root ::-webkit-scrollbar { width: 3px; }
   .nv-root ::-webkit-scrollbar-track { background: transparent; }
   .nv-root ::-webkit-scrollbar-thumb { background: var(--nv-border-hi); border-radius: 4px; }
+
+  /* ── Thumbnail menu button ── */
+  .nv-thumb-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    background: transparent;
+    flex-shrink: 0;
+  }
+  .nv-thumb-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+  /* Gold ring when open */
+  .nv-thumb-btn::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    pointer-events: none;
+  }
+  .nv-thumb-btn[data-open="true"]::after {
+    border-color: var(--nv-gold);
+    box-shadow: 0 0 14px rgba(212,175,85,0.45);
+  }
+  .nv-thumb-btn:hover img { transform: scale(1.1); }
+
+  /* ── Close "×" overlay on top of photo when open ── */
+  .nv-thumb-close {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.55);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+  .nv-thumb-btn[data-open="true"] .nv-thumb-close {
+    opacity: 1;
+  }
 `
 
 // ─── 3D Floating Elements ──────────────────────────────────────────────
-const Floating3DElement = ({ delay, duration, size = 20, color = '#6366f1' }) => (
+const Floating3DElement = ({ delay, duration, size = 20, color = '#6366f1', style: extraStyle }) => (
   <motion.div
     initial={{ opacity: 0, rotateY: 0 }}
-    animate={{
-      opacity: [0, 1, 0.8, 1],
-      rotateY: [0, 180, 360],
-      scale: [1, 1.2, 1]
-    }}
-    transition={{
-      duration,
-      repeat: Infinity,
-      ease: 'linear',
-      delay
-    }}
+    animate={{ opacity: [0, 1, 0.8, 1], rotateY: [0, 180, 360], scale: [1, 1.2, 1] }}
+    transition={{ duration, repeat: Infinity, ease: 'linear', delay }}
     style={{
       position: 'absolute',
       width: size,
       height: size,
       borderRadius: '50%',
       background: `linear-gradient(135deg, ${color}, transparent)`,
-      transform: 'translateZ(50px)',
       transformStyle: 'preserve-3d',
-      boxShadow: `0 0 20px ${color}40`
+      boxShadow: `0 0 20px ${color}40`,
+      ...extraStyle,
     }}
   />
 )
@@ -84,31 +128,18 @@ const Card3D = ({ children, className = '', delay = 0, ...rest }) => (
     initial={{ opacity: 0, rotateX: -15, y: 30 }}
     animate={{ opacity: 1, rotateX: 0, y: 0 }}
     whileHover={{ rotateX: 15, scale: 1.05 }}
-    transition={{
-      delay,
-      duration: 0.6,
-      type: 'spring',
-      stiffness: 100
-    }}
+    transition={{ delay, duration: 0.6, type: 'spring', stiffness: 100 }}
     className={`relative ${className}`}
-    style={{
-      transformStyle: 'preserve-3d',
-      perspective: '1000px'
-    }}
+    style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}
     {...rest}
   >
-    <div style={{
-      transform: 'translateZ(30px)',
-      backfaceVisibility: 'hidden'
-    }}>
+    <div style={{ transform: 'translateZ(30px)', backfaceVisibility: 'hidden' }}>
       {children}
     </div>
   </motion.div>
 )
 
-// ----------------------------------------------------------------------
-// Sound hook – defined locally (no import from hooks)
-// ----------------------------------------------------------------------
+// ─── Sound hook ───────────────────────────────────────────────────────
 const useSound = (enabled) => {
   const clickSound = useRef(null)
   const hoverSound = useRef(null)
@@ -121,14 +152,8 @@ const useSound = (enabled) => {
       if (hoverSound.current) hoverSound.current.volume = 0.2
     }
     return () => {
-      if (clickSound.current) {
-        clickSound.current.pause()
-        clickSound.current = null
-      }
-      if (hoverSound.current) {
-        hoverSound.current.pause()
-        hoverSound.current = null
-      }
+      clickSound.current?.pause()
+      hoverSound.current?.pause()
     }
   }, [])
 
@@ -138,7 +163,6 @@ const useSound = (enabled) => {
       clickSound.current.play().catch(() => {})
     }
   }
-
   const playHover = () => {
     if (enabled && hoverSound.current) {
       hoverSound.current.currentTime = 0
@@ -149,9 +173,7 @@ const useSound = (enabled) => {
   return { playClick, playHover }
 }
 
-// ----------------------------------------------------------------------
-// Navbar component
-// ----------------------------------------------------------------------
+// ─── Navbar ───────────────────────────────────────────────────────────
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
@@ -166,7 +188,6 @@ const Navbar = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0, activeIndex: -1 })
   const [isDarkMode, setIsDarkMode] = useState(true)
 
-  // Magnetic effect refs – we apply them to logo and utility buttons
   const magneticLogo = useMagneticEffect()
   const magneticSound = useMagneticEffect()
   const magneticTheme = useMagneticEffect()
@@ -185,27 +206,24 @@ const Navbar = () => {
     { id: 'skills', label: 'Skills', icon: <FiZap /> },
     { id: 'projects', label: 'Projects', icon: <FiBriefcase /> },
     { id: 'experience', label: 'Experience', icon: <FiTrendingUp /> },
-    { id: 'contact', label: 'Contact', icon: <FiMail /> }
+    { id: 'contact', label: 'Contact', icon: <FiMail /> },
   ]
 
-  // Reduced motion preference
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setPrefersReducedMotion(mediaQuery.matches)
-    const handler = () => setPrefersReducedMotion(mediaQuery.matches)
-    mediaQuery.addEventListener('change', handler)
-    return () => mediaQuery.removeEventListener('change', handler)
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefersReducedMotion(mq.matches)
+    const handler = () => setPrefersReducedMotion(mq.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
 
-  // Initialize theme from localStorage
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'dark'
-    const isDark = savedTheme === 'dark'
+    const saved = localStorage.getItem('theme') || 'dark'
+    const isDark = saved === 'dark'
     setIsDarkMode(isDark)
     applyTheme(isDark)
   }, [])
 
-  // Resize handler
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth)
@@ -215,19 +233,13 @@ const Navbar = () => {
     return () => window.removeEventListener('resize', handleResize)
   }, [isOpen])
 
-  // Scroll effects
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
       const winScroll = document.documentElement.scrollTop
       const height = document.documentElement.scrollHeight - document.documentElement.clientHeight
       setScrollPercent(height > 0 ? (winScroll / height) * 100 : 0)
-
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false) // scrolling down
-      } else {
-        setIsVisible(true)  // scrolling up
-      }
+      setIsVisible(!(currentScrollY > lastScrollY && currentScrollY > 100))
       setLastScrollY(currentScrollY)
       setScrolled(currentScrollY > 50)
       setCompact(currentScrollY > 300)
@@ -236,35 +248,30 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY])
 
-  // Intersection Observer for active section
   useEffect(() => {
-    const observerOptions = {
-      root: null,
-      rootMargin: '-20% 0px -70% 0px',
-      threshold: [0, 0.25, 0.5, 0.75, 1]
-    }
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
-          setActiveSection(entry.target.id)
-        }
-      })
-    }, observerOptions)
-
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
+            setActiveSection(entry.target.id)
+          }
+        })
+      },
+      { root: null, rootMargin: '-20% 0px -70% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] }
+    )
     navItems.forEach(({ id }) => {
       const el = document.getElementById(id)
       if (el) observer.observe(el)
     })
     return () => observer.disconnect()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId)
     if (element) {
       const navHeight = navRef.current?.offsetHeight || 80
-      const y = element.offsetTop - navHeight
-      window.scrollTo({ top: y, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+      window.scrollTo({ top: element.offsetTop - navHeight, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
       setIsOpen(false)
       playClick()
     }
@@ -272,103 +279,74 @@ const Navbar = () => {
 
   const handleLinkMouseMove = (e, index) => {
     const rect = e.currentTarget.getBoundingClientRect()
-    setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-      activeIndex: index
-    })
+    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top, activeIndex: index })
     playHover()
   }
+  const handleLinkMouseLeave = () => setMousePos({ x: 0, y: 0, activeIndex: -1 })
 
-  const handleLinkMouseLeave = () => {
-    setMousePos({ x: 0, y: 0, activeIndex: -1 })
-  }
-
-  const toggleSound = () => {
-    setSoundEnabled(!soundEnabled)
-    if (!soundEnabled) playClick()
-  }
+  const toggleSound = () => { setSoundEnabled(!soundEnabled); if (!soundEnabled) playClick() }
 
   const applyTheme = (isDark) => {
-    const htmlElement = document.documentElement
-    if (isDark) {
-      htmlElement.classList.remove('light-mode')
-      htmlElement.classList.add('dark-mode')
-    } else {
-      htmlElement.classList.remove('dark-mode')
-      htmlElement.classList.add('light-mode')
-    }
+    document.documentElement.classList.toggle('dark-mode', isDark)
+    document.documentElement.classList.toggle('light-mode', !isDark)
     localStorage.setItem('theme', isDark ? 'dark' : 'light')
   }
 
   const toggleTheme = () => {
-    setIsDarkMode(prev => {
-      const newValue = !prev
-      applyTheme(newValue)
-      playClick()
-      return newValue
-    })
+    setIsDarkMode((prev) => { applyTheme(!prev); playClick(); return !prev })
   }
 
   const showUnderline = mousePos.activeIndex !== -1 && windowWidth >= 1024
 
   const lightModeStyles = `
     html.light-mode .nv-root {
-      --nv-bg: #ffffff;
-      --nv-surface: #f8fafc;
-      --nv-card: rgba(255, 255, 255, 0.95);
-      --nv-border: rgba(0, 0, 0, 0.1);
-      --nv-border-hi: rgba(99, 102, 241, 0.3);
-      --nv-gold: #6366f1;
-      --nv-gold-dim: rgba(99, 102, 241, 0.1);
-      --nv-cream: #0f172a;
-      --nv-muted: rgba(15, 23, 42, 0.7);
-      --nv-dim: rgba(15, 23, 42, 0.5);
+      --nv-bg: #ffffff; --nv-surface: #f8fafc; --nv-card: rgba(255,255,255,0.95);
+      --nv-border: rgba(0,0,0,0.1); --nv-border-hi: rgba(99,102,241,0.3);
+      --nv-gold: #6366f1; --nv-gold-dim: rgba(99,102,241,0.1);
+      --nv-cream: #0f172a; --nv-muted: rgba(15,23,42,0.7); --nv-dim: rgba(15,23,42,0.5);
     }
   `
 
   return (
     <>
       <style>{PREMIUM_STYLES}{lightModeStyles}</style>
-      {/* 3D Floating Elements Background - Hidden in light mode */}
+
+      {/* 3D Floating Elements */}
       {isDarkMode && (
         <div className="fixed inset-0 pointer-events-none z-0">
-          <Floating3DElement delay={0} duration={8} size={15} color="#6366f1" style={{ top: '10%', left: '5%' }} />
-          <Floating3DElement delay={1} duration={10} size={20} color="#8b5cf6" style={{ top: '20%', right: '10%' }} />
-          <Floating3DElement delay={2} duration={12} size={12} color="#ec4899" style={{ bottom: '30%', left: '15%' }} />
-          <Floating3DElement delay={3} duration={9} size={18} color="#10b981" style={{ top: '50%', right: '20%' }} />
-          <Floating3DElement delay={4} duration={11} size={14} color="#f59e0b" style={{ bottom: '10%', right: '30%' }} />
+          <Floating3DElement delay={0}  duration={8}  size={15} color="#6366f1" style={{ top: '10%', left: '5%' }} />
+          <Floating3DElement delay={1}  duration={10} size={20} color="#8b5cf6" style={{ top: '20%', right: '10%' }} />
+          <Floating3DElement delay={2}  duration={12} size={12} color="#ec4899" style={{ bottom: '30%', left: '15%' }} />
+          <Floating3DElement delay={3}  duration={9}  size={18} color="#10b981" style={{ top: '50%', right: '20%' }} />
+          <Floating3DElement delay={4}  duration={11} size={14} color="#f59e0b" style={{ bottom: '10%', right: '30%' }} />
         </div>
       )}
 
       {/* Main Navbar */}
       <motion.nav
         ref={navRef}
-        style={{
-          opacity: navOpacity,
-          backdropFilter: `blur(${navBlur}px)`
-        }}
+        style={{ opacity: navOpacity, backdropFilter: `blur(${navBlur}px)` }}
         initial={{ y: -100 }}
         animate={{
           y: isVisible ? 0 : -100,
-          backgroundColor: scrolled ? (isDarkMode ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.8)') : 'transparent'
+          backgroundColor: scrolled
+            ? isDarkMode ? 'rgba(15,23,42,0.8)' : 'rgba(255,255,255,0.8)'
+            : 'transparent',
         }}
         transition={{ duration: prefersReducedMotion ? 0 : 0.5, type: 'spring', stiffness: 100 }}
         className="fixed w-full z-40 transition-all duration-300 shadow-lg shadow-primary/5"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-3 sm:py-4">
-            {/* Logo with 3D magnetic effect - Profile Image */}
+
+            {/* ── Logo (desktop) ── */}
             <Card3D delay={0.2} className="cursor-pointer" onClick={() => scrollToSection('home')} onMouseEnter={playHover}>
               <motion.div
                 ref={magneticLogo}
                 whileHover={!prefersReducedMotion ? { scale: 1.05, rotateZ: 5 } : {}}
                 whileTap={{ scale: 0.95, rotateZ: -5 }}
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden"
-                style={{
-                  transformStyle: 'preserve-3d',
-                  boxShadow: '0 0 20px rgba(99, 102, 241, 0.5)'
-                }}
+                style={{ transformStyle: 'preserve-3d', boxShadow: '0 0 20px rgba(99,102,241,0.5)' }}
               >
                 <motion.img
                   src={profilePhoto}
@@ -381,39 +359,25 @@ const Navbar = () => {
               </motion.div>
             </Card3D>
 
-            {/* Desktop Menu */}
+            {/* ── Desktop Menu ── */}
             <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
               {navItems.map((item, index) => (
                 <div key={item.id} className="relative">
                   <Card3D delay={0.3 + index * 0.1} className="cursor-pointer">
                     <motion.button
-                      ref={el => (linkRefs.current[index] = el)}
+                      ref={(el) => (linkRefs.current[index] = el)}
                       onClick={() => scrollToSection(item.id)}
                       onMouseMove={(e) => handleLinkMouseMove(e, index)}
                       onMouseLeave={handleLinkMouseLeave}
                       className={`relative px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium uppercase tracking-wider rounded-lg group transition-colors ${
-                        activeSection === item.id
-                          ? 'text-primary'
-                          : 'text-light/70 hover:text-light'
+                        activeSection === item.id ? 'text-primary' : 'text-light/70 hover:text-light'
                       }`}
-                      whileHover={!prefersReducedMotion ? {
-                        scale: 1.05,
-                        rotateX: 10,
-                        rotateY: 5,
-                        translateZ: 20
-                      } : {}}
+                      whileHover={!prefersReducedMotion ? { scale: 1.05, rotateX: 10, rotateY: 5, translateZ: 20 } : {}}
                       whileTap={{ scale: 0.95, rotateX: -5 }}
-                      style={{
-                        transformStyle: 'preserve-3d',
-                        transform: 'translateZ(10px)'
-                      }}
+                      style={{ transformStyle: 'preserve-3d', transform: 'translateZ(10px)' }}
                     >
                       <span className="relative z-10 flex items-center gap-1 lg:gap-2" style={{ transform: 'translateZ(15px)' }}>
-                        <motion.span
-                          className="text-base lg:text-lg"
-                          whileHover={{ rotateZ: 360 }}
-                          transition={{ duration: 0.6 }}
-                        >
+                        <motion.span className="text-base lg:text-lg" whileHover={{ rotateZ: 360 }} transition={{ duration: 0.6 }}>
                           {item.icon}
                         </motion.span>
                         <span className="hidden lg:inline">{item.label}</span>
@@ -422,16 +386,12 @@ const Navbar = () => {
                         <motion.div
                           layoutId="activeSection"
                           className="absolute inset-0 bg-primary/10 rounded-lg"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
+                          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                           transition={{ duration: 0.3 }}
                           style={{ transform: 'translateZ(-5px)' }}
                         />
                       )}
-                      <motion.div
-                        className="absolute inset-0 bg-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ transform: 'translateZ(-10px)' }}
-                      />
+                      <motion.div className="absolute inset-0 bg-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" style={{ transform: 'translateZ(-10px)' }} />
                     </motion.button>
                   </Card3D>
 
@@ -446,7 +406,7 @@ const Navbar = () => {
                 </div>
               ))}
 
-              {/* Sound toggle with 3D magnetic effect */}
+              {/* Sound toggle */}
               <Card3D delay={0.9}>
                 <motion.button
                   ref={magneticSound}
@@ -454,28 +414,17 @@ const Navbar = () => {
                   onMouseEnter={playHover}
                   className="ml-2 p-2 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
                   aria-label="Toggle sound"
-                  whileHover={{
-                    scale: 1.1,
-                    rotateZ: 15,
-                    translateZ: 10
-                  }}
+                  whileHover={{ scale: 1.1, rotateZ: 15, translateZ: 10 }}
                   whileTap={{ scale: 0.9, rotateZ: -15 }}
-                  style={{
-                    transformStyle: 'preserve-3d',
-                    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)'
-                  }}
+                  style={{ transformStyle: 'preserve-3d', boxShadow: '0 4px 15px rgba(99,102,241,0.3)' }}
                 >
-                  <motion.span
-                    animate={{ rotateY: soundEnabled ? 360 : 0 }}
-                    transition={{ duration: 0.6 }}
-                    style={{ transform: 'translateZ(5px)' }}
-                  >
+                  <motion.span animate={{ rotateY: soundEnabled ? 360 : 0 }} transition={{ duration: 0.6 }} style={{ transform: 'translateZ(5px)' }}>
                     {soundEnabled ? <FiVolume2 className="w-4 h-4 lg:w-5 lg:h-5 text-light" /> : <FiVolumeX className="w-4 h-4 lg:w-5 lg:h-5 text-light" />}
                   </motion.span>
                 </motion.button>
               </Card3D>
 
-              {/* Theme toggle with 3D magnetic effect */}
+              {/* Theme toggle */}
               <Card3D delay={1.0}>
                 <motion.button
                   ref={magneticTheme}
@@ -483,102 +432,117 @@ const Navbar = () => {
                   onMouseEnter={playHover}
                   className="ml-2 p-2 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
                   aria-label="Toggle theme"
-                  whileHover={{
-                    scale: 1.1,
-                    rotateZ: -15,
-                    translateZ: 10
-                  }}
+                  whileHover={{ scale: 1.1, rotateZ: -15, translateZ: 10 }}
                   whileTap={{ scale: 0.9, rotateZ: 15 }}
-                  style={{
-                    transformStyle: 'preserve-3d',
-                    boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)'
-                  }}
+                  style={{ transformStyle: 'preserve-3d', boxShadow: '0 4px 15px rgba(139,92,246,0.3)' }}
                 >
-                  <motion.span
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                    style={{ transform: 'translateZ(5px)', display: 'flex' }}
-                  >
+                  <motion.span animate={{ rotate: 360 }} transition={{ duration: 0.6 }} style={{ transform: 'translateZ(5px)', display: 'flex' }}>
                     {isDarkMode ? <FiMoon className="w-4 h-4 lg:w-5 lg:h-5 text-light" /> : <FiSun className="w-4 h-4 lg:w-5 lg:h-5 text-light" />}
                   </motion.span>
                 </motion.button>
               </Card3D>
             </div>
 
-            {/* Mobile Right Side with 3D effects */}
+            {/* ── Mobile Right Side ── */}
             <div className="flex items-center gap-2 md:hidden">
+              {/* Sound */}
               <Card3D delay={0.9}>
                 <motion.button
                   onClick={toggleSound}
                   className="p-2 bg-primary/10 rounded-full"
                   aria-label="Toggle sound"
-                  whileHover={{ scale: 1.1, rotateZ: 15 }}
-                  whileTap={{ scale: 0.9, rotateZ: -15 }}
+                  whileHover={{ scale: 1.1, rotateZ: 15 }} whileTap={{ scale: 0.9 }}
                   style={{ transformStyle: 'preserve-3d' }}
                 >
-                  <motion.span
-                    animate={{ rotateY: soundEnabled ? 360 : 0 }}
-                    transition={{ duration: 0.6 }}
-                    style={{ transform: 'translateZ(5px)' }}
-                  >
-                    {soundEnabled ? <FiVolume2 className="w-4 h-4 text-light" /> : <FiVolumeX className="w-4 h-4 text-light" />}
-                  </motion.span>
+                  {soundEnabled ? <FiVolume2 className="w-4 h-4 text-light" /> : <FiVolumeX className="w-4 h-4 text-light" />}
                 </motion.button>
               </Card3D>
+
+              {/* Theme */}
               <Card3D delay={1.0}>
                 <motion.button
                   onClick={toggleTheme}
                   className="p-2 bg-primary/10 rounded-full"
                   aria-label="Toggle theme"
-                  whileHover={{ scale: 1.1, rotateZ: -15 }}
-                  whileTap={{ scale: 0.9, rotateZ: 15 }}
+                  whileHover={{ scale: 1.1, rotateZ: -15 }} whileTap={{ scale: 0.9 }}
                   style={{ transformStyle: 'preserve-3d' }}
                 >
-                  <motion.span
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                    style={{ transform: 'translateZ(5px)', display: 'flex' }}
-                  >
+                  <span style={{ display: 'flex' }}>
                     {isDarkMode ? <FiMoon className="w-4 h-4 text-light" /> : <FiSun className="w-4 h-4 text-light" />}
-                  </motion.span>
+                  </span>
                 </motion.button>
               </Card3D>
-              <Card3D delay={1.1}>
-                <motion.button
-                  onClick={() => setIsOpen(!isOpen)}
-                  className="relative w-10 h-10 focus:outline-none bg-primary/10 rounded-full"
-                  animate={isOpen ? 'open' : 'closed'}
-                  whileHover={{ scale: 1.1, rotateZ: 180 }}
-                  whileTap={{ scale: 0.9 }}
-                  style={{ transformStyle: 'preserve-3d' }}
-                  aria-label={isOpen ? 'Close menu' : 'Open menu'}
-                  aria-expanded={isOpen}
-                >
-                  <span className="sr-only">Open main menu</span>
-                  <div style={{ transform: 'translateZ(5px)' }}>
+
+              {/* ── MOBILE MENU ICON BUTTON ── */}
+              <motion.button
+                onClick={() => { setIsOpen(!isOpen); playClick() }}
+                aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
+                aria-expanded={isOpen}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  border: 'none',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: isOpen
+                    ? 'rgba(212,175,85,0.18)'
+                    : 'rgba(255,255,255,0.06)',
+                  boxShadow: isOpen
+                    ? '0 0 0 1.5px rgba(212,175,85,0.5), 0 4px 16px rgba(212,175,85,0.2)'
+                    : '0 0 0 1px rgba(255,255,255,0.1)',
+                  transition: 'background 0.25s, box-shadow 0.25s',
+                }}
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  {isOpen ? (
                     <motion.span
-                      className={`absolute h-0.5 w-6 rounded-full ${isDarkMode ? 'bg-light' : 'bg-dark'}`}
-                      style={{ top: '30%', left: '20%' }}
-                      animate={isOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
-                    />
+                      key="close"
+                      initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
+                      animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                      exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
+                      transition={{ duration: 0.2 }}
+                      style={{ display: 'flex' }}
+                    >
+                      <FiX size={20} color="#d4af55" strokeWidth={2.5} />
+                    </motion.span>
+                  ) : (
                     <motion.span
-                      className={`absolute h-0.5 w-6 rounded-full ${isDarkMode ? 'bg-light' : 'bg-dark'}`}
-                      style={{ top: '50%', left: '20%' }}
-                      animate={isOpen ? { opacity: 0 } : { opacity: 1 }}
-                    />
-                    <motion.span
-                      className={`absolute h-0.5 w-6 rounded-full ${isDarkMode ? 'bg-light' : 'bg-dark'}`}
-                      style={{ top: '70%', left: '20%' }}
-                      animate={isOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
-                    />
-                  </div>
-                </motion.button>
-              </Card3D>
+                      key="open"
+                      initial={{ rotate: 90, opacity: 0, scale: 0.6 }}
+                      animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                      exit={{ rotate: -90, opacity: 0, scale: 0.6 }}
+                      transition={{ duration: 0.2 }}
+                      style={{ display: 'flex', flexDirection: 'column', gap: 5 }}
+                    >
+                      {[0, 1, 2].map((i) => (
+                        <span
+                          key={i}
+                          style={{
+                            display: 'block',
+                            width: i === 1 ? 14 : 20,
+                            height: 2,
+                            borderRadius: 2,
+                            background: '#f5eed8',
+                            marginLeft: i === 1 ? 6 : 0,
+                            transition: 'width 0.2s',
+                          }}
+                        />
+                      ))}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
             </div>
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* ── Mobile Menu ── */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -598,11 +562,7 @@ const Navbar = () => {
                         transition={{ delay: index * 0.05, duration: 0.6 }}
                         onClick={() => scrollToSection(item.id)}
                         onMouseEnter={playHover}
-                        whileHover={{
-                          scale: 1.05,
-                          rotateX: 10,
-                          translateZ: 15
-                        }}
+                        whileHover={{ scale: 1.05, rotateX: 10, translateZ: 15 }}
                         whileTap={{ scale: 0.95, rotateX: -5 }}
                         className={`flex flex-col items-center p-4 rounded-xl transition-all ${
                           activeSection === item.id
@@ -611,15 +571,12 @@ const Navbar = () => {
                         }`}
                         style={{
                           transformStyle: 'preserve-3d',
-                          boxShadow: activeSection === item.id ? '0 8px 25px rgba(99, 102, 241, 0.4)' : '0 4px 15px rgba(0, 0, 0, 0.2)'
+                          boxShadow: activeSection === item.id
+                            ? '0 8px 25px rgba(99,102,241,0.4)'
+                            : '0 4px 15px rgba(0,0,0,0.2)',
                         }}
                       >
-                        <motion.span
-                          className="text-2xl mb-1"
-                          style={{ transform: 'translateZ(10px)' }}
-                          whileHover={{ rotateZ: 360 }}
-                          transition={{ duration: 0.6 }}
-                        >
+                        <motion.span className="text-2xl mb-1" style={{ transform: 'translateZ(10px)' }} whileHover={{ rotateZ: 360 }} transition={{ duration: 0.6 }}>
                           {item.icon}
                         </motion.span>
                         <span className="text-xs font-medium" style={{ transform: 'translateZ(5px)' }}>{item.label}</span>
@@ -632,21 +589,20 @@ const Navbar = () => {
           )}
         </AnimatePresence>
 
-        {/* Scroll Progress Bar */}
-        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary/20">
+        {/* Scroll Progress Bar — desktop only */}
+        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary/20 hidden md:block">
           <motion.div
             className="h-full bg-gradient-to-r from-primary to-secondary"
             style={{ width: `${scrollPercent}%` }}
           />
         </div>
 
-        {/* Scroll Percentage Display */}
-        <div className="absolute bottom-1 right-4 text-xs text-primary font-mono">
+        <div className="absolute bottom-1 right-4 text-xs text-primary font-mono hidden md:block">
           {Math.round(scrollPercent)}%
         </div>
       </motion.nav>
 
-      {/* Mini Floating Navbar (Compact Mode) */}
+      {/* Mini Floating Compact Navbar */}
       <AnimatePresence>
         {compact && !isOpen && (
           <motion.div
@@ -662,29 +618,24 @@ const Navbar = () => {
                   <motion.button
                     onClick={() => scrollToSection(item.id)}
                     onMouseEnter={playHover}
-                    whileHover={{
-                      scale: 1.1,
-                      rotateZ: 15,
-                      translateZ: 10
-                    }}
+                    whileHover={{ scale: 1.1, rotateZ: 15, translateZ: 10 }}
                     whileTap={{ scale: 0.9, rotateZ: -15 }}
                     className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                       activeSection === item.id
                         ? 'bg-primary text-white'
-                        : isDarkMode ? 'bg-primary/10 hover:bg-primary/30 text-light/80' : 'bg-primary/10 hover:bg-primary/30 text-dark/80'
+                        : isDarkMode
+                          ? 'bg-primary/10 hover:bg-primary/30 text-light/80'
+                          : 'bg-primary/10 hover:bg-primary/30 text-dark/80'
                     }`}
                     title={item.label}
                     style={{
                       transformStyle: 'preserve-3d',
-                      boxShadow: activeSection === item.id ? '0 6px 20px rgba(99, 102, 241, 0.5)' : '0 3px 10px rgba(0, 0, 0, 0.3)'
+                      boxShadow: activeSection === item.id
+                        ? '0 6px 20px rgba(99,102,241,0.5)'
+                        : '0 3px 10px rgba(0,0,0,0.3)',
                     }}
                   >
-                    <motion.span
-                      className="text-sm"
-                      style={{ transform: 'translateZ(5px)' }}
-                      whileHover={{ rotateZ: 360 }}
-                      transition={{ duration: 0.6 }}
-                    >
+                    <motion.span className="text-sm" style={{ transform: 'translateZ(5px)' }} whileHover={{ rotateZ: 360 }} transition={{ duration: 0.6 }}>
                       {item.icon}
                     </motion.span>
                   </motion.button>
