@@ -171,97 +171,209 @@ const KB = {
     animation: "I use Framer Motion, GSAP, and Three.js for stunning 3-D animations and interactive experiences.",
     threejs: "88% proficiency in Three.js — 3-D product showcases, interactive planets, procedural terrain generation.",
     fullstack: "As a Fullstack Developer, I handle both frontend and backend seamlessly — from database design to UI/UX implementation.",
-    all: "React 95 · JavaScript 98 · TypeScript 88 · Next.js 85 · Three.js 88 · Framer Motion 92 · GSAP 90 · Tailwind 96 · Node.js 85 · GraphQL 75."
+    laravel: "Yes, I work with Laravel too — building clean, well-structured PHP backends and APIs.",
+    php: "I know PHP well, including modern Laravel-based development for server-side applications.",
+    node: "Definitely — Node.js is one of my core backend tools for building fast, scalable APIs and services.",
+    firebase: "I use Firebase for authentication, real-time databases, and quick backend prototyping.",
+    mysql: "Yes, I work with MySQL for structured, relational data storage in many of my projects.",
+    mongodb: "I use MongoDB frequently for flexible, document-based data storage in full-stack apps.",
+    apis: "Absolutely — I design and build RESTful and GraphQL APIs that are secure, documented, and easy to consume.",
+    all: "React 95 · JavaScript 98 · TypeScript 88 · Next.js 85 · Three.js 88 · Framer Motion 92 · GSAP 90 · Tailwind 96 · Node.js 85 · GraphQL 75 · Laravel · PHP · Firebase · MySQL · MongoDB."
   },
   projects: {
     ecommerce: "Full-stack e-commerce platform with React, Node.js, and MongoDB — real-time inventory, payments, admin dashboard.",
     metaverse: "A 3-D metaverse in Three.js where users explore virtual spaces, interact with objects, and chat in real time.",
     portfolio: "This 3-D portfolio! Interactive 3-D elements, smooth animations, fully responsive design.",
     game: "Multiplayer browser-based 3-D game using Three.js and WebSocket with real-time physics and particle effects.",
-    all: "Top projects: 3-D Interactive Portfolio · E-commerce Platform · Real-time Collaboration Tool · Metaverse · Multiplayer 3-D Game · Procedural Terrain Generator."
+    cooperative: "Yes — I've built a cooperative management system to help groups track members, savings, and shared resources digitally.",
+    school: "I've built school management systems covering student records, grading, attendance, and admin dashboards.",
+    latest: "My latest project builds on everything I've learned — combining clean full-stack architecture with polished, interactive UI.",
+    all: "Top projects: 3-D Interactive Portfolio · E-commerce Platform · Real-time Collaboration Tool · Metaverse · Multiplayer 3-D Game · Procedural Terrain Generator · Cooperative Management System · School Management System."
   },
   experience: {
     company1: "Lead Frontend Developer at Creative Agency (2022–Present), leading a team of 5 and delivering 25+ projects.",
     company2: "Senior React Developer at Tech Startup (2020–2022), cutting bundle size 35% and shipping real-time features.",
     company3: "3-D Graphics Developer at Procedural Worlds Lab (2021–Present), building terrain-gen systems and interactive worlds.",
+    years: "I have 5+ years of hands-on experience building web applications across different industries.",
+    companies: "Yes, I've worked with agencies, startups, and independent clients on a range of full-stack and 3-D projects.",
+    freelance: "Yes, I take on freelance work alongside my ongoing roles — I enjoy the variety it brings.",
+    industries: "I've worked across tech startups, creative agencies, e-commerce, education, and cooperative/community platforms.",
     all: "5+ years across global companies — 50+ projects delivered, 30+ happy clients worldwide."
   },
   contact: {
     email: "Reach me at muhiredieu7@gmail.com — I reply within 24 hours.",
     phone: "+250 798 728 379 — call or WhatsApp any time.",
+    whatsapp: "Yes, WhatsApp works too — just message +250 798 728 379.",
     location: "Based in Kigali, Rwanda — available for remote work worldwide.",
     all: "muhiredieu7@gmail.com · +250 798 728 379 · Kigali, Rwanda · remote-friendly globally."
+  },
+  social: {
+    github: "You can check out my code and open-source work on GitHub — just ask and I'll point you there.",
+    linkedin: "I'm on LinkedIn too, where I share my professional journey and connect with other developers.",
+    portfolio: "You're already exploring it — this 3-D interactive site is my portfolio!",
+    cv: "I have an up-to-date CV/resume available — just let me know and I can point you to the download link.",
   },
   education: {
     degree: "BSc Computer Science, focus on Web Development and 3-D Graphics.",
     certifications: "Certified in React Advanced Patterns, Three.js Journey, and Full-Stack Development.",
+    qualification: "I hold a BSc in Computer Science along with several specialized certifications in web and 3-D development.",
     all: "CS degree plus ongoing certifications in React, Three.js, and full-stack development."
   },
   availability: {
     status: "Currently available for freelance and full-time opportunities — 24-hour response time.",
     hours: "Flexible hours, comfortable with any time zone. Most active UTC+2 business hours (Kigali time).",
+    remote: "Yes, I work remotely with clients and teams around the world.",
+    rate: "My rates depend on project scope — reach out with your project details and I'll get you a clear estimate.",
     all: "Open to freelance, full-time, or consultation — let's talk about your project!"
+  },
+  technical: {
+    react: "React is a JavaScript library for building user interfaces from reusable components — it's one of my core tools.",
+    laravel: "Laravel is a PHP framework known for elegant syntax, making backend development faster and more structured.",
+    firebase: "Firebase is Google's platform for backend services like authentication, real-time databases, and hosting.",
+    node: "Node.js lets you run JavaScript on the server, making it great for building fast, scalable backend APIs.",
+    restapi: "A REST API is a way for applications to communicate over HTTP using standard methods like GET, POST, PUT, and DELETE.",
+    mongodb: "MongoDB is a NoSQL, document-based database that stores data in flexible, JSON-like structures.",
+    mysqlVsMongo: "MySQL is a relational database using structured tables, while MongoDB is document-based and schema-flexible — I use both depending on the project's needs.",
   }
 }
 
 function generateResponse(input) {
   const s = input.toLowerCase()
 
-  if (s.includes('who are you') || s.includes('your name') || s.includes('introduce') || s.includes('tell me about yourself')) {
+  /* ── Greetings ── */
+  if (/\b(hi|hello|hey|good morning|good afternoon|good evening|what'?s up|nice to meet you|welcome)\b/.test(s) && !s.includes('how'))
+    return "Hello! 👋 Welcome to Muhire Dieudonne's portfolio. I'm Nova, your AI assistant. I can answer questions about Muhire's skills, projects, experience, education, and contact information. How can I help you today?"
+  if (s.includes('how are you') || s.includes("how's your day") || s.includes('how is your day'))
+    return "I'm doing great, thank you! I'm here and ready to help you learn more about Muhire Dieudonne and his projects. What would you like to know?"
+
+  /* ── About the Assistant ── */
+  if (s.includes('who are you') && !s.includes('muhire'))
+    return "I'm Nova, an AI-powered assistant built for Muhire Dieudonne's portfolio. I can talk with you by voice or text about his skills, projects, and experience."
+  if (s.includes('what can you do'))
+    return "I can introduce Muhire, explain his skills, showcase his projects, provide contact details, answer software development questions, and help you navigate this portfolio using voice or text."
+  if (s.includes('how do i use you') || s.includes('how do you work'))
+    return "Just press the microphone icon to speak, or type your question below. I'll respond with voice and text — ask me anything about Muhire!"
+  if (s.includes('are you an ai') || s.includes('are you a bot') || s.includes('are you human'))
+    return "Yes, I'm an AI assistant built into this portfolio to make exploring Muhire's work more interactive."
+  if (s.includes('can you speak'))
+    return "Yes! I can respond with voice using speech synthesis — you'll hear me talk as well as read my replies."
+  if (s.includes('can you hear me'))
+    return "Yes, I can listen through your microphone using speech recognition. Just tap the mic button and start talking."
+  if (s.includes('what language') && (s.includes('support') || s.includes('speak')))
+    return "Right now I communicate in English, but I'm always improving!"
+
+  /* ── About Muhire ── */
+  if (s.includes('who is muhire') || s.includes('introduce muhire') || s.includes('tell me about muhire') || s.includes('introduce') || s.includes('tell me about yourself'))
     return "I'm Muhire Dieudonne, a Fullstack Developer from Kigali, Rwanda. I specialize in building modern web applications with React, Next.js, Node.js, and Three.js. I'm passionate about creating immersive digital experiences that combine beautiful design with powerful functionality."
-  }
-  if (s.includes('where are you from') || s.includes('location') || s.includes('kigali') || s.includes('rwanda')) {
-    return "I'm based in Kigali, Rwanda — a beautiful country in East Africa known as the land of a thousand hills. Kigali is an emerging tech hub, and I'm proud to be part of its growing developer community."
-  }
-  if (s.includes('what do you do') || s.includes('fullstack') || s.includes('full-stack') || s.includes('full stack')) {
+  if (s.includes('how old'))
+    return "I'd rather let my work speak for itself! What I can tell you is that I bring 5+ years of hands-on development experience."
+  if (s.includes('what does muhire do') || s.includes('what do you do'))
     return "As a Fullstack Developer, I work on both frontend and backend development. I create complete web applications from database design to UI implementation. My tech stack includes React, Next.js, Node.js, TypeScript, and various modern frameworks."
+  if (s.includes('what makes muhire different') || s.includes('why hire') || s.includes('why choose'))
+    return "I combine strong full-stack fundamentals with a passion for 3-D and interactive experiences — so the products I build aren't just functional, they're memorable."
+  if (s.includes('where are you from') || s.includes('where is muhire') || s.includes('location') || s.includes('kigali') || s.includes('rwanda'))
+    return "I'm based in Kigali, Rwanda — a beautiful country in East Africa known as the land of a thousand hills. Kigali is an emerging tech hub, and I'm proud to be part of its growing developer community."
+  if (s.includes('fullstack') || s.includes('full-stack') || s.includes('full stack'))
+    return KB.introduction.all
+
+  /* ── Skills ── */
+  if (s.includes('laravel')) return s.includes('what is') ? KB.technical.laravel : KB.skills.laravel
+  if (s.includes('php')) return KB.skills.php
+  if (s.includes('firebase')) return s.includes('what is') ? KB.technical.firebase : KB.skills.firebase
+  if (s.includes('mysql') && s.includes('mongodb')) return KB.technical.mysqlVsMongo
+  if (s.includes('mysql')) return KB.skills.mysql
+  if (s.includes('mongodb')) return s.includes('what is') ? KB.technical.mongodb : KB.skills.mongodb
+  if (s.includes('rest api') || s.includes('restful')) return s.includes('what is') || s.includes('explain') ? KB.technical.restapi : KB.skills.apis
+  if (s.includes('build api') || s.includes('build apis') || (s.includes('api') && s.includes('can')))
+    return KB.skills.apis
+  if (s.includes('node.js') || s.includes('nodejs') || s.includes('node js')) {
+    if (s.includes('what is') || s.includes('explain')) return KB.technical.node
+    return KB.skills.node
   }
-  if (s.includes('skill') || s.includes('technology') || s.includes('tech stack')) {
+  if (s.includes('what is react') || s.includes('explain react')) return KB.technical.react
+  if (s.includes('skill') || s.includes('technology') || s.includes('tech stack') || s.includes('programming language')) {
     if (s.includes('frontend') || s.includes('react')) return KB.skills.frontend
-    if (s.includes('backend') || s.includes('node')) return KB.skills.backend
+    if (s.includes('backend')) return KB.skills.backend
     if (s.includes('animation') || s.includes('gsap') || s.includes('motion')) return KB.skills.animation
     if (s.includes('three') || s.includes('3d') || s.includes('webgl')) return KB.skills.threejs
     if (s.includes('css') || s.includes('tailwind') || s.includes('style')) return KB.skills.styling
     if (s.includes('fullstack') || s.includes('full-stack')) return KB.skills.fullstack
     return KB.skills.all
   }
+
+  /* ── Projects ── */
+  if (s.includes('cooperative')) return KB.projects.cooperative
+  if (s.includes('school management') || s.includes('school system')) return KB.projects.school
+  if (s.includes('latest project')) return KB.projects.latest
+  if (s.includes('best project') || s.includes('show me his best'))
+    return KB.projects.portfolio
   if (s.includes('project') || s.includes('build') || s.includes('built')) {
-    if (s.includes('ecommerce') || s.includes('shop')) return KB.projects.ecommerce
+    if (s.includes('ecommerce') || s.includes('e-commerce') || s.includes('shop')) return KB.projects.ecommerce
     if (s.includes('3d') || s.includes('metaverse') || s.includes('virtual')) return KB.projects.metaverse
     if (s.includes('game') || s.includes('multiplayer')) return KB.projects.game
     if (s.includes('portfolio')) return KB.projects.portfolio
     return KB.projects.all
   }
+
+  /* ── Experience ── */
+  if (s.includes('how many years') || (s.includes('years') && s.includes('experience'))) return KB.experience.years
+  if (s.includes('worked with companies') || s.includes('worked with a company')) return KB.experience.companies
+  if (s.includes('is he a freelancer') || s.includes('are you a freelancer')) return KB.experience.freelance
+  if (s.includes('industries')) return KB.experience.industries
   if (s.includes('experience') || s.includes('career') || s.includes('job') || s.includes('work at')) {
     if (s.includes('creative') || s.includes('agency')) return KB.experience.company1
     if (s.includes('startup')) return KB.experience.company2
     if (s.includes('3d') || s.includes('graphics') || s.includes('procedural')) return KB.experience.company3
     return KB.experience.all
   }
-  if (s.includes('contact') || s.includes('email') || s.includes('reach') || s.includes('phone')) {
-    if (s.includes('email')) return KB.contact.email
-    if (s.includes('phone') || s.includes('call') || s.includes('whatsapp')) return KB.contact.phone
-    if (s.includes('location') || s.includes('where') || s.includes('based')) return KB.contact.location
-    return KB.contact.all
-  }
-  if (s.includes('education') || s.includes('degree') || s.includes('study')) {
-    if (s.includes('degree') || s.includes('university')) return KB.education.degree
+
+  /* ── Education ── */
+  if (s.includes('education') || s.includes('degree') || s.includes('study') || s.includes('qualification')) {
+    if (s.includes('qualification')) return KB.education.qualification
+    if (s.includes('degree') || s.includes('university') || s.includes('where did')) return KB.education.degree
     if (s.includes('cert') || s.includes('course')) return KB.education.certifications
     return KB.education.all
   }
-  if (s.includes('available') || s.includes('hire') || s.includes('freelance') || s.includes('work with')) {
+
+  /* ── Contact ── */
+  if (s.includes('whatsapp')) return KB.contact.whatsapp
+  if (s.includes('contact') || s.includes('email') || s.includes('reach') || s.includes('phone')) {
+    if (s.includes('email')) return KB.contact.email
+    if (s.includes('phone') || s.includes('call')) return KB.contact.phone
+    if (s.includes('location') || s.includes('where') || s.includes('based')) return KB.contact.location
+    return KB.contact.all
+  }
+
+  /* ── Social links / navigation ── */
+  if (s.includes('github')) return KB.social.github
+  if (s.includes('linkedin')) return KB.social.linkedin
+  if (s.includes('download') && (s.includes('cv') || s.includes('resume'))) return KB.social.cv
+  if (s.includes('cv') || s.includes('resume')) return KB.social.cv
+  if (s.includes('show portfolio') || s.includes('open portfolio')) return KB.social.portfolio
+  if (s.includes('open projects') || s.includes('go to skills') || s.includes('show contact') || s.includes('scroll to about') || s.includes('open services') || s.includes('show testimonials') || s.includes('open github'))
+    return "I can guide you there — use the navigation menu at the top of the portfolio, and I'll be right here if you have questions along the way."
+
+  /* ── Hiring / availability ── */
+  if (s.includes('remote')) return KB.availability.remote
+  if (s.includes('how much') || s.includes('charge') || s.includes('rate') || s.includes('cost') || s.includes('price'))
+    return KB.availability.rate
+  if (s.includes('is muhire available') || s.includes('can i hire') || s.includes('open for freelance') || s.includes('available') || s.includes('hire') || s.includes('freelance') || s.includes('work with')) {
     if (s.includes('hour') || s.includes('time')) return KB.availability.hours
     return KB.availability.all
   }
-  if (s.includes('hello') || s.includes('hi') || s.includes('hey'))
-    return "Hey there! I'm Muhire Dieudonne — Fullstack Developer from Kigali, Rwanda. Ask me anything about my skills, projects, or how we can work together!"
-  if (s.includes('how are you'))
-    return "I'm doing great, thanks for asking! As a Fullstack Developer based in Kigali, I'm always excited to talk about tech and development. What would you like to know?"
-  if (s.includes('thank'))
-    return "You're very welcome! As a developer from Rwanda, I really appreciate your interest. Feel free to ask anything else!"
-  if (s.includes('bye') || s.includes('goodbye'))
-    return "Goodbye! It was great talking. Remember, I'm Muhire Dieudonne, Fullstack Developer from Kigali. Reach out anytime!"
-  return "I'm Muhire Dieudonne, a Fullstack Developer from Kigali, Rwanda. I can tell you about my skills, projects, experience, or how to contact me. What interests you most?"
+
+  /* ── Small talk ── */
+  if (s.includes('thank')) return "You're very welcome! As a developer from Rwanda, I really appreciate your interest. Feel free to ask anything else!"
+  if (s.includes("you're amazing") || s.includes('good job') || s.includes('well done'))
+    return "Thank you so much — that means a lot! Let me know if there's anything else you'd like to explore."
+  if (s.includes('joke'))
+    return "Why do programmers prefer dark mode? Because light attracts bugs! 😄"
+  if (s.includes('inspire me'))
+    return "Great things are built one commit at a time — keep showing up, keep shipping, and progress compounds."
+  if (s.includes('see you later') || s.includes('have a nice day') || s.includes('bye') || s.includes('goodbye'))
+    return "Goodbye! It was great talking. Remember, I'm Nova, here for Muhire Dieudonne, Fullstack Developer from Kigali. Reach out anytime!"
+
+  return "I'm Nova, Muhire Dieudonne's AI assistant. I can tell you about his skills, projects, experience, education, or how to contact him. What interests you most?"
 }
 
 const SUGGESTIONS = [
