@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { useMagneticEffect } from '../hooks/useMagneticEffect'
-import { FiHome, FiUser, FiZap, FiBriefcase, FiTrendingUp, FiMail, FiVolume2, FiVolumeX, FiSun, FiMoon, FiX } from 'react-icons/fi'
+import { FiHome, FiUser, FiZap, FiBriefcase, FiTrendingUp, FiMail, FiSun, FiMoon, FiX } from 'react-icons/fi'
 import profilePhoto from '../images/Muhire_dieudonne.JPG'
 
 /* ─────────────────────────────────────────────
@@ -48,59 +48,6 @@ const PREMIUM_STYLES = `
   .nv-root ::-webkit-scrollbar { width: 3px; }
   .nv-root ::-webkit-scrollbar-track { background: transparent; }
   .nv-root ::-webkit-scrollbar-thumb { background: var(--nv-border-hi); border-radius: 4px; }
-
-  /* ── Thumbnail menu button ── */
-  .nv-thumb-btn {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-    cursor: pointer;
-    border: none;
-    padding: 0;
-    background: transparent;
-    flex-shrink: 0;
-  }
-  .nv-thumb-btn img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.35s ease;
-  }
-  /* Gold ring when open */
-  .nv-thumb-btn::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
-    pointer-events: none;
-  }
-  .nv-thumb-btn[data-open="true"]::after {
-    border-color: var(--nv-gold);
-    box-shadow: 0 0 14px rgba(212,175,85,0.45);
-  }
-  .nv-thumb-btn:hover img { transform: scale(1.1); }
-
-  /* ── Close "×" overlay on top of photo when open ── */
-  .nv-thumb-close {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.55);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
-  }
-  .nv-thumb-btn[data-open="true"] .nv-thumb-close {
-    opacity: 1;
-  }
 `
 
 // ─── 3D Floating Elements ──────────────────────────────────────────────
@@ -140,6 +87,9 @@ const Card3D = ({ children, className = '', delay = 0, ...rest }) => (
 )
 
 // ─── Sound hook ───────────────────────────────────────────────────────
+// Sound toggle UI has been removed from the navbar, so this hook is
+// invoked with enabled=false below (no-op playback). Kept in place in
+// case click/hover sound is reintroduced later.
 const useSound = (enabled) => {
   const clickSound = useRef(null)
   const hoverSound = useRef(null)
@@ -182,19 +132,17 @@ const Navbar = () => {
   const [lastScrollY, setLastScrollY] = useState(0)
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
-  const [soundEnabled, setSoundEnabled] = useState(false)
   const [scrollPercent, setScrollPercent] = useState(0)
   const [compact, setCompact] = useState(false)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0, activeIndex: -1 })
   const [isDarkMode, setIsDarkMode] = useState(true)
 
   const magneticLogo = useMagneticEffect()
-  const magneticSound = useMagneticEffect()
   const magneticTheme = useMagneticEffect()
 
   const navRef = useRef(null)
   const linkRefs = useRef([])
-  const { playClick, playHover } = useSound(soundEnabled)
+  const { playClick, playHover } = useSound(false)
 
   const { scrollYProgress } = useScroll()
   const navOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0.95])
@@ -283,8 +231,6 @@ const Navbar = () => {
     playHover()
   }
   const handleLinkMouseLeave = () => setMousePos({ x: 0, y: 0, activeIndex: -1 })
-
-  const toggleSound = () => { setSoundEnabled(!soundEnabled); if (!soundEnabled) playClick() }
 
   const applyTheme = (isDark) => {
     document.documentElement.classList.toggle('dark-mode', isDark)
@@ -406,24 +352,6 @@ const Navbar = () => {
                 </div>
               ))}
 
-              {/* Sound toggle */}
-              <Card3D delay={0.9}>
-                <motion.button
-                  ref={magneticSound}
-                  onClick={toggleSound}
-                  onMouseEnter={playHover}
-                  className="ml-2 p-2 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
-                  aria-label="Toggle sound"
-                  whileHover={{ scale: 1.1, rotateZ: 15, translateZ: 10 }}
-                  whileTap={{ scale: 0.9, rotateZ: -15 }}
-                  style={{ transformStyle: 'preserve-3d', boxShadow: '0 4px 15px rgba(99,102,241,0.3)' }}
-                >
-                  <motion.span animate={{ rotateY: soundEnabled ? 360 : 0 }} transition={{ duration: 0.6 }} style={{ transform: 'translateZ(5px)' }}>
-                    {soundEnabled ? <FiVolume2 className="w-4 h-4 lg:w-5 lg:h-5 text-light" /> : <FiVolumeX className="w-4 h-4 lg:w-5 lg:h-5 text-light" />}
-                  </motion.span>
-                </motion.button>
-              </Card3D>
-
               {/* Theme toggle */}
               <Card3D delay={1.0}>
                 <motion.button
@@ -445,19 +373,6 @@ const Navbar = () => {
 
             {/* ── Mobile Right Side ── */}
             <div className="flex items-center gap-2 md:hidden">
-              {/* Sound */}
-              <Card3D delay={0.9}>
-                <motion.button
-                  onClick={toggleSound}
-                  className="p-2 bg-primary/10 rounded-full"
-                  aria-label="Toggle sound"
-                  whileHover={{ scale: 1.1, rotateZ: 15 }} whileTap={{ scale: 0.9 }}
-                  style={{ transformStyle: 'preserve-3d' }}
-                >
-                  {soundEnabled ? <FiVolume2 className="w-4 h-4 text-light" /> : <FiVolumeX className="w-4 h-4 text-light" />}
-                </motion.button>
-              </Card3D>
-
               {/* Theme */}
               <Card3D delay={1.0}>
                 <motion.button
@@ -473,9 +388,10 @@ const Navbar = () => {
                 </motion.button>
               </Card3D>
 
-              {/* ── MOBILE MENU ICON BUTTON ── */}
+              {/* ── MOBILE MENU ICON BUTTON (hamburger) ── */}
               <motion.button
-                onClick={() => { setIsOpen(!isOpen); playClick() }}
+                onClick={() => { setIsOpen((prev) => !prev); playClick() }}
+                onMouseEnter={playHover}
                 aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
                 aria-expanded={isOpen}
                 whileHover={{ scale: 1.08 }}
@@ -514,23 +430,21 @@ const Navbar = () => {
                   ) : (
                     <motion.span
                       key="open"
-                      initial={{ rotate: 90, opacity: 0, scale: 0.6 }}
-                      animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                      exit={{ rotate: -90, opacity: 0, scale: 0.6 }}
+                      initial={{ scale: 0.6, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.6, opacity: 0 }}
                       transition={{ duration: 0.2 }}
                       style={{
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        gap: 5,
+                        gap: 4,
                       }}
                     >
-                      {/* top line — full width */}
-                      <span style={{ display: 'block', width: 20, height: 2.5, borderRadius: 2, background: '#f5eed8' }} />
-                      {/* middle line — half width, centered */}
-                      <span style={{ display: 'block', width: 10, height: 2.5, borderRadius: 2, background: '#d4af55' }} />
-                      {/* bottom line — full width */}
-                      <span style={{ display: 'block', width: 20, height: 2.5, borderRadius: 2, background: '#f5eed8' }} />
+                      {/* rounded-cap bars, matches uploaded icon */}
+                      <span style={{ display: 'block', width: 20, height: 3, borderRadius: 4, background: '#f5eed8' }} />
+                      <span style={{ display: 'block', width: 20, height: 3, borderRadius: 4, background: '#f5eed8' }} />
+                      <span style={{ display: 'block', width: 20, height: 3, borderRadius: 4, background: '#f5eed8' }} />
                     </motion.span>
                   )}
                 </AnimatePresence>
