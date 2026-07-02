@@ -28,12 +28,22 @@ const PREMIUM_STYLES = `
     box-sizing: border-box; margin: 0; padding: 0;
   }
 
+  /* ── Centering fix: make the root a full-viewport flex box so the
+     content is centered both horizontally and vertically no matter
+     what Tailwind config / breakpoint is active. ── */
   .ld-root {
     font-family: var(--ld-body);
     background: var(--ld-bg);
     color: var(--ld-cream);
     -webkit-font-smoothing: antialiased;
-    position: relative; overflow: hidden;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
   }
 
   .ld-root::before {
@@ -46,6 +56,18 @@ const PREMIUM_STYLES = `
   .ld-root ::-webkit-scrollbar { width: 3px; }
   .ld-root ::-webkit-scrollbar-track { background: transparent; }
   .ld-root ::-webkit-scrollbar-thumb { background: var(--ld-border-hi); border-radius: 4px; }
+
+  /* Content wrapper: centered block, capped width, safe margins on
+     small screens so it never sticks to an edge. */
+  .ld-content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    text-align: center;
+  }
 `
 
 const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
@@ -118,7 +140,7 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="ld-root fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+          className="ld-root fixed inset-0 z-50"
         >
           <style>{PREMIUM_STYLES}{lightModeStyles}</style>
           {/* Animated Background Elements */}
@@ -151,8 +173,8 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
             />
           </div>
 
-          {/* Main Loading Content */}
-          <div className="relative z-10 text-center max-w-2xl mx-auto px-6">
+          {/* Main Loading Content — centered via .ld-content */}
+          <div className="ld-content">
             {/* Profile Image */}
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
@@ -177,7 +199,7 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
                 />
                 
                 {/* Profile Image Container */}
-                <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-primary/50 shadow-2xl">
+                <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-primary/50 shadow-2xl mx-auto">
                   <img
                     src="/images/muhire-dieudonne.jpg"
                     alt="Muhire Dieudonne"
@@ -235,7 +257,7 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
               transition={{ delay: 0.5, duration: 0.8 }}
               className="mb-8"
             >
-              <h1 className="text-2xl sm:text-3xl font-bold text-light mb-4 flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold text-light mb-4 flex items-center justify-center gap-3">
                 <img
                   src="/images/muhire-dieudonne.jpg"
                   alt="Muhire Dieudonne"
@@ -250,12 +272,12 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
               </h1>
               
               <motion.div
-                className="relative"
+                className="relative mx-auto"
                 initial={{ width: 0 }}
                 animate={{ width: '100%' }}
                 transition={{ delay: 1, duration: 1.5, ease: 'easeOut' }}
               >
-                <p className="text-lg sm:text-xl text-light/80 font-medium leading-relaxed">
+                <p className="text-lg sm:text-xl text-light/80 font-medium leading-relaxed text-center">
                   The creative and innovative creator and innovator in 
                   <span className="text-primary font-semibold"> software development</span> and 
                   <span className="text-secondary font-semibold"> machine learning</span>
@@ -263,7 +285,7 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
                 
                 {/* Typing Effect Underline */}
                 <motion.div
-                  className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-primary to-secondary"
+                  className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-primary to-secondary mx-auto"
                   initial={{ width: 0 }}
                   animate={{ width: '100%' }}
                   transition={{ delay: 2, duration: 0.8 }}
@@ -288,7 +310,7 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                   />
                 </div>
-                <p className={`text-sm mt-2 ${isDarkMode ? 'text-light/60' : 'text-dark/60'}`}>{Math.round(progress)}%</p>
+                <p className={`text-sm mt-2 text-center ${isDarkMode ? 'text-light/60' : 'text-dark/60'}`}>{Math.round(progress)}%</p>
               </div>
 
               {/* Loading Text */}
