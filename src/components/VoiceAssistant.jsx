@@ -5,14 +5,15 @@ import {
   FiMic, FiVolume2, FiVolumeX, FiUser,
   FiTrash2, FiX, FiMinimize2, FiMaximize2,
   FiBriefcase, FiCode, FiMail, FiGlobe,
-  FiAward, FiChevronDown, FiChevronUp
+  FiAward, FiChevronDown, FiChevronUp, FiMoreHorizontal
 } from 'react-icons/fi'
 import { FaRobot, FaMicrophone, FaStop, FaPaperPlane } from 'react-icons/fa'
 
 /* ─────────────────────────────────────────────
    DESIGN TOKENS — "Signal" console aesthetic
    A developer's instrument panel, not a chat-bot
-   cliché. Mint signal accent on near-black slate,
+   cliché. Mint signal accent + violet→magenta
+   "visitor" gradient on near-black slate,
    monospace status language, VU-meter ring as the
    one signature motif.
 ───────────────────────────────────────────── */
@@ -27,7 +28,9 @@ const style = `
     --sig-line-bright: rgba(94,234,212,0.30);
     --sig-mint: #5eead4;
     --sig-mint-dim: rgba(94,234,212,0.14);
-    --sig-indigo: #818cf8;
+    --sig-user-a: #8b5cf6;
+    --sig-user-b: #ec4899;
+    --sig-user-grad: linear-gradient(135deg, var(--sig-user-a), var(--sig-user-b));
     --sig-rose: #fb7185;
     --sig-ink: #eef1f6;
     --sig-dim: rgba(238,241,246,0.52);
@@ -92,10 +95,16 @@ const style = `
   .sig-chip { transition: background 0.18s, border-color 0.18s, transform 0.15s; touch-action: manipulation; }
   .sig-chip:hover { background: var(--sig-mint-dim) !important; border-color: var(--sig-line-bright) !important; transform: translateX(2px); }
 
+  .sig-persona { transition: background 0.18s, border-color 0.18s, color 0.18s; touch-action: manipulation; white-space: nowrap; }
+  .sig-persona:hover { border-color: rgba(255,255,255,0.22) !important; }
+
   .sig-input { -webkit-appearance: none; font-size: 16px; }
   .sig-input:focus { outline: none; border-color: var(--sig-mint); box-shadow: 0 0 0 3px rgba(94,234,212,0.12); }
 
   .sig-toolbtn { transition: background 0.18s, color 0.18s, border-color 0.18s; }
+
+  .sig-jump { transition: opacity 0.2s, transform 0.2s; }
+  .sig-jump:hover { transform: translateY(-1px); }
 
   @media (max-width: 380px) {
     .sig-tight { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
@@ -144,15 +153,41 @@ const StatusDot = ({ listening, speaking }) => {
   )
 }
 
+/* Plain circular avatars — quiet dark ring for Nova, solid violet→magenta
+   for the visitor, no glyphs inside (matches the reference look). */
 const Avatar = ({ isUser }) => (
-  <div className="w-7 h-7 rounded-md flex-shrink-0 flex items-center justify-center"
+  <div className="w-7 h-7 rounded-full flex-shrink-0"
     style={{
-      background: isUser ? 'var(--sig-indigo)' : 'rgba(94,234,212,0.12)',
-      border: isUser ? 'none' : '1px solid var(--sig-line-bright)',
-    }}>
-    {isUser ? <FiUser size={12} color="#fff" /> : <FaRobot size={11} color="var(--sig-mint)" />}
-  </div>
+      background: isUser ? 'var(--sig-user-grad)' : 'rgba(255,255,255,0.06)',
+      border: isUser ? 'none' : '1px solid var(--sig-line)',
+    }}
+  />
 )
+
+/* ─────────────────────────────────────────────
+   PERSONAS — the "live switch" — changes Nova's
+   framing and greeting without changing the facts
+───────────────────────────────────────────── */
+const PERSONAS = [
+  {
+    key: 'visitor',
+    label: 'Visitor',
+    mode: 'visitor mode',
+    welcome: "Hi, I'm Nova — Muhire's guide to this portfolio. Ask me about his skills, projects, or how to reach him.",
+  },
+  {
+    key: 'recruiter',
+    label: 'Recruiter',
+    mode: 'recruiter mode',
+    welcome: "Hello, I'm Nova — here to walk you through Muhire's background as a software developer. Ask about impact, experience, or availability.",
+  },
+  {
+    key: 'developer',
+    label: 'Developer',
+    mode: 'developer mode',
+    welcome: "Hey, fellow builder. I'm Nova — ask me about Muhire's stack, architecture choices, or how something on this site was built.",
+  },
+]
 
 /* ─────────────────────────────────────────────
    KNOWLEDGE BASE
@@ -404,12 +439,18 @@ const VoiceAssistant = () => {
   const [autoVoice, setAutoVoice]             = useState(true)
   const [voiceSpeed, setVoiceSpeed]           = useState(0.93)
   const [voicePitch, setVoicePitch]           = useState(1.08)
+  const [persona, setPersona]                 = useState('visitor')
+  const [personaTouched, setPersonaTouched]   = useState(false)
+  const [showJump, setShowJump]               = useState(false)
 
   const recognitionRef    = useRef(null)
   const synthRef          = useRef(window.speechSynthesis)
   const messagesEndRef    = useRef(null)
+  const messagesBoxRef    = useRef(null)
   const inputRef          = useRef(null)
   const hasAutoSpokenRef  = useRef(false)
+
+  const activePersona = PERSONAS.find(p => p.key === persona) || PERSONAS[0]
 
   /* ── ESC to close ── */
   useEffect(() => {
@@ -453,7 +494,7 @@ const VoiceAssistant = () => {
   /* ── Auto-welcome ── */
   useEffect(() => {
     if (!isOpen || welcomeDone) return
-    const welcome = "Hey there! I'm Nova, your AI assistant for Muhire Dieudonne. Muhire is a Fullstack Developer from Kigali, Rwanda. I can tell you all about his skills, projects, and experience. Just press the mic or type below!"
+    const welcome = activePersona.welcome
     setConversation([{
       type: 'assistant', text: welcome,
       timestamp: new Date(), isTyping: false
@@ -472,6 +513,18 @@ const VoiceAssistant = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [conversation, isTypingIndicator])
+
+  /* ── Track scroll position for "jump to latest" affordance ── */
+  const handleMessagesScroll = () => {
+    const el = messagesBoxRef.current
+    if (!el) return
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+    setShowJump(distanceFromBottom > 90)
+  }
+  const scrollToLatest = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    setShowJump(false)
+  }
 
   /* ── Unread badge ── */
   useEffect(() => {
@@ -558,51 +611,58 @@ const VoiceAssistant = () => {
     setIsMuted(m => !m)
   }
 
+  /* ── Persona live-switch: reframes Nova's greeting, doesn't wipe the facts ── */
+  const switchPersona = (key) => {
+    if (key === persona) return
+    setPersona(key)
+    setPersonaTouched(true)
+    const next = PERSONAS.find(p => p.key === key)
+    synthRef.current?.cancel()
+    setConversation(prev => [...prev, {
+      type: 'assistant', text: next.welcome,
+      timestamp: new Date(), isTyping: false
+    }])
+    if (!isMuted && autoVoice) speak(next.welcome)
+  }
+
   /* ─────────────── RENDER ─────────────── */
   return (
     <div className="sig-wrap">
       <style>{style}</style>
 
       {/* ── FAB ── */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            key="fab"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.06 }}
-            whileTap={{ scale: 0.94 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed z-[9999] w-14 h-14 rounded-2xl border-none cursor-pointer flex items-center justify-center"
-            style={{
-              bottom: 'max(1rem, env(safe-area-inset-bottom))',
-              right: 'max(1rem, env(safe-area-inset-right))',
-              background: 'var(--sig-surface)',
-              border: '1px solid var(--sig-line-bright)',
-              boxShadow: '0 12px 30px rgba(0,0,0,0.55), 0 0 0 1px rgba(94,234,212,0.08), 0 0 24px rgba(94,234,212,0.12)',
-            }}
+      <motion.button
+        key="fab"
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.94 }}
+        onClick={() => setIsOpen(o => !o)}
+        className="fixed z-[9999] w-14 h-14 rounded-2xl border-none cursor-pointer flex items-center justify-center"
+        style={{
+          bottom: 'max(1rem, env(safe-area-inset-bottom))',
+          right: 'max(1rem, env(safe-area-inset-right))',
+          background: 'var(--sig-surface)',
+          border: '1px solid var(--sig-line-bright)',
+          boxShadow: '0 12px 30px rgba(0,0,0,0.55), 0 0 0 1px rgba(94,234,212,0.08), 0 0 24px rgba(94,234,212,0.12)',
+        }}
+      >
+        <motion.span
+          animate={{ scale: [1, 1.6, 1], opacity: [0.35, 0, 0.35] }}
+          transition={{ duration: 2.4, repeat: Infinity }}
+          className="absolute inset-2 rounded-xl"
+          style={{ border: '1px solid var(--sig-mint)' }}
+        />
+        {isOpen ? <FiX size={18} color="var(--sig-mint)" /> : <Meter active count={4} h={16} />}
+        {!isOpen && unreadCount > 0 && (
+          <motion.span
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center border-2"
+            style={{ background: 'var(--sig-rose)', color: '#0a0c10', borderColor: 'var(--sig-bg)', fontFamily: 'var(--sig-font-mono)' }}
           >
-            <motion.span
-              animate={{ scale: [1, 1.6, 1], opacity: [0.35, 0, 0.35] }}
-              transition={{ duration: 2.4, repeat: Infinity }}
-              className="absolute inset-2 rounded-xl"
-              style={{ border: '1px solid var(--sig-mint)' }}
-            />
-            <Meter active count={4} h={16} />
-            {unreadCount > 0 && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center border-2"
-                style={{ background: 'var(--sig-rose)', color: '#0a0c10', borderColor: 'var(--sig-bg)', fontFamily: 'var(--sig-font-mono)' }}
-              >
-                {unreadCount}
-              </motion.span>
-            )}
-          </motion.button>
+            {unreadCount}
+          </motion.span>
         )}
-      </AnimatePresence>
+      </motion.button>
 
       {/* ── MAIN WINDOW ── */}
       <AnimatePresence>
@@ -615,9 +675,9 @@ const VoiceAssistant = () => {
             transition={{ type: 'spring', stiffness: 360, damping: 32 }}
             className="sig-scan sig-panel fixed z-[9998] w-[calc(100vw-1.5rem)] sm:w-[calc(100vw-2rem)] max-w-sm sm:max-w-md lg:max-w-lg rounded-xl flex flex-col"
             style={{
-              bottom: 'max(0.75rem, env(safe-area-inset-bottom))',
+              bottom: 'calc(max(1rem, env(safe-area-inset-bottom)) + 4.25rem)',
               right: 'max(0.75rem, env(safe-area-inset-right))',
-              maxHeight: 'min(680px, calc(100dvh - 1.5rem))',
+              maxHeight: 'min(680px, calc(100dvh - 6.5rem))',
               background: 'var(--sig-surface)',
               border: '1px solid var(--sig-line)',
               boxShadow: 'var(--sig-shadow)',
@@ -625,65 +685,103 @@ const VoiceAssistant = () => {
               overflowX: 'hidden',
             }}
           >
-            {/* ── HEADER ── */}
-            <div className="sig-tight flex items-center gap-3 px-3 py-3 sm:p-4 border-b relative z-10 sticky top-0"
-              style={{ background: 'var(--sig-surface)', borderColor: 'var(--sig-line)' }}
+            {/* ── IDENTITY BLOCK ── */}
+            <div className="sig-tight px-3 pt-3.5 sm:px-4 sm:pt-4 pb-1 relative z-10 sticky top-0"
+              style={{ background: 'var(--sig-surface)' }}
             >
-              <div className="relative flex-shrink-0 w-10 h-10 flex items-center justify-center">
-                <SignalRing listening={isListening} speaking={isSpeaking} />
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ background: 'rgba(94,234,212,0.10)', border: '1px solid var(--sig-line-bright)' }}
-                >
-                  <FaRobot size={13} color="var(--sig-mint)" />
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-base sm:text-lg truncate" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)', letterSpacing: '-0.01em' }}>
+                    Muhire Dieudonne
+                  </h3>
+                  <p className="text-[10.5px] mt-0.5 truncate" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
+                    fullstack developer · kigali, rwanda
+                  </p>
                 </div>
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 font-semibold text-sm sm:text-base min-w-0" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)', letterSpacing: '-0.01em' }}>
-                  <span className="truncate">Muhire Dieudonne</span>
-                  <span className="hidden sm:inline-flex flex-shrink-0 text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded border uppercase"
-                    style={{ background: 'transparent', color: 'var(--sig-mint)', borderColor: 'var(--sig-line-bright)', fontFamily: 'var(--sig-font-mono)' }}
+                <div className="flex gap-1.5 flex-shrink-0">
+                  <button onClick={toggleMute} title={isMuted ? 'Unmute' : 'Mute'}
+                    className="sig-toolbtn w-8 h-8 rounded-lg border flex items-center justify-center active:scale-95"
+                    style={{
+                      background: isMuted ? 'rgba(251,113,133,0.07)' : 'var(--sig-glass)',
+                      borderColor: isMuted ? 'rgba(251,113,133,0.35)' : 'var(--sig-line)',
+                      color: isMuted ? 'var(--sig-rose)' : 'var(--sig-dim)',
+                    }}
                   >
-                    Fullstack
-                  </span>
-                </div>
-                <div className="text-[11px] mt-0.5 flex items-center gap-1.5 truncate" style={{ color: 'var(--sig-dim)', fontFamily: 'var(--sig-font-mono)' }}>
-                  <StatusDot listening={isListening} speaking={isSpeaking} />
-                  {isListening ? (
-                    <span style={{ color: 'var(--sig-rose)' }}>recording_input…</span>
-                  ) : isSpeaking ? (
-                    <span style={{ color: 'var(--sig-mint)' }}>speaking_output…</span>
-                  ) : (
-                    <span>online · kigali_rw</span>
-                  )}
+                    {isMuted ? <FiVolumeX size={13} /> : <FiVolume2 size={13} />}
+                  </button>
+                  <button onClick={() => setIsMinimized(m => !m)} title={isMinimized ? 'Expand' : 'Minimise'}
+                    className="sig-toolbtn hidden sm:flex w-8 h-8 rounded-lg border items-center justify-center active:scale-95"
+                    style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)', color: 'var(--sig-dim)' }}
+                  >
+                    {isMinimized ? <FiMaximize2 size={13} /> : <FiMinimize2 size={13} />}
+                  </button>
+                  <button
+                    onClick={() => { setIsOpen(false); synthRef.current?.cancel() }}
+                    title="Close (ESC)"
+                    className="sig-toolbtn w-8 h-8 rounded-lg border flex items-center justify-center active:scale-95"
+                    style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)', color: 'var(--sig-dim)' }}
+                  >
+                    <FiMoreHorizontal size={15} strokeWidth={2} />
+                  </button>
                 </div>
               </div>
 
-              <div className="flex gap-1.5 flex-shrink-0">
-                <button onClick={toggleMute} title={isMuted ? 'Unmute' : 'Mute'}
-                  className="sig-toolbtn w-9 h-9 rounded-lg border flex items-center justify-center active:scale-95"
-                  style={{
-                    background: isMuted ? 'rgba(251,113,133,0.07)' : 'var(--sig-glass)',
-                    borderColor: isMuted ? 'rgba(251,113,133,0.35)' : 'var(--sig-line)',
-                    color: isMuted ? 'var(--sig-rose)' : 'var(--sig-dim)',
-                  }}
+              {/* ── NOVA BAR ── */}
+              <div className="mt-3 rounded-lg border flex items-center gap-2.5 px-2.5 py-2"
+                style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)' }}
+              >
+                <div className="relative flex-shrink-0 w-9 h-9 flex items-center justify-center">
+                  <SignalRing listening={isListening} speaking={isSpeaking} />
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center"
+                    style={{ background: 'rgba(94,234,212,0.10)', border: '1px solid var(--sig-line-bright)' }}
+                  >
+                    <FaRobot size={10} color="var(--sig-mint)" />
+                  </div>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-[13px]" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
+                    Nova
+                  </div>
+                  <div className="text-[10.5px] mt-0.5 flex items-center gap-1.5 truncate" style={{ color: 'var(--sig-dim)', fontFamily: 'var(--sig-font-mono)' }}>
+                    <StatusDot listening={isListening} speaking={isSpeaking} />
+                    {isListening ? (
+                      <span style={{ color: 'var(--sig-rose)' }}>recording_input…</span>
+                    ) : isSpeaking ? (
+                      <span style={{ color: 'var(--sig-mint)' }}>speaking_output…</span>
+                    ) : (
+                      <span>online · {activePersona.mode}</span>
+                    )}
+                  </div>
+                </div>
+
+                <span className="flex-shrink-0 text-[9.5px] font-semibold tracking-wider px-2 py-1 rounded-full border uppercase"
+                  style={{ color: 'var(--sig-mint)', borderColor: 'var(--sig-line-bright)', fontFamily: 'var(--sig-font-mono)' }}
                 >
-                  {isMuted ? <FiVolumeX size={14} /> : <FiVolume2 size={14} />}
-                </button>
-                <button onClick={() => setIsMinimized(m => !m)} title={isMinimized ? 'Expand' : 'Minimise'}
-                  className="sig-toolbtn hidden sm:flex w-9 h-9 rounded-lg border items-center justify-center active:scale-95"
-                  style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)', color: 'var(--sig-dim)' }}
-                >
-                  {isMinimized ? <FiMaximize2 size={14} /> : <FiMinimize2 size={14} />}
-                </button>
-                <button
-                  onClick={() => { setIsOpen(false); synthRef.current?.cancel() }}
-                  title="Close (ESC)"
-                  className="sig-toolbtn w-9 h-9 rounded-lg border flex items-center justify-center active:scale-95"
-                  style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)', color: 'var(--sig-dim)' }}
-                >
-                  <FiX size={17} strokeWidth={2} />
-                </button>
+                  Fullstack AI
+                </span>
+              </div>
+
+              {/* ── PERSONA TABS ── */}
+              <div className="flex gap-1.5 mt-2.5 overflow-x-auto pb-0.5">
+                {PERSONAS.map(p => {
+                  const activeTab = p.key === persona
+                  return (
+                    <button
+                      key={p.key}
+                      onClick={() => switchPersona(p.key)}
+                      className="sig-persona px-3 py-1.5 rounded-full border text-[11px] font-medium"
+                      style={{
+                        background: activeTab ? 'rgba(255,255,255,0.09)' : 'transparent',
+                        borderColor: activeTab ? 'rgba(255,255,255,0.22)' : 'var(--sig-line)',
+                        color: activeTab ? 'var(--sig-ink)' : 'var(--sig-dim)',
+                        fontFamily: 'var(--sig-font-mono)',
+                      }}
+                    >
+                      {p.label}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
@@ -699,76 +797,96 @@ const VoiceAssistant = () => {
                   className="overflow-hidden"
                 >
                   {/* ── MESSAGES ── */}
-                  <div className="sig-tight sig-messages h-[min(42dvh,300px)] sm:h-[340px] overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 flex flex-col gap-2.5 relative z-10"
-                    style={{ background: 'rgba(0,0,0,0.18)' }}
-                  >
-                    {conversation.length === 0 && (
-                      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-                        className="text-center mx-auto mt-8"
-                      >
-                        <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center border"
-                          style={{ background: 'rgba(94,234,212,0.06)', borderColor: 'var(--sig-line-bright)' }}
+                  <div className="relative">
+                    <div
+                      ref={messagesBoxRef}
+                      onScroll={handleMessagesScroll}
+                      className="sig-tight sig-messages h-[min(42dvh,300px)] sm:h-[340px] overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 flex flex-col gap-2.5 relative z-10 mt-2.5"
+                      style={{ background: 'rgba(0,0,0,0.18)' }}
+                    >
+                      {conversation.length === 0 && (
+                        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                          className="text-center mx-auto mt-8"
                         >
-                          <FaRobot size={18} style={{ color: 'var(--sig-mint)' }} />
-                        </div>
-                        <p className="font-semibold text-sm" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
-                          Ask about Muhire Dieudonne
-                        </p>
-                        <p className="text-xs mt-1.5" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
-                          fullstack · kigali, rwanda
-                        </p>
-                      </motion.div>
-                    )}
-
-                    {conversation.map((msg, idx) => (
-                      <motion.div key={idx}
-                        initial={{ opacity: 0, x: msg.type === 'user' ? 14 : -14 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.22 }}
-                        className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div className={`flex gap-2 max-w-[88%] sm:max-w-[84%] ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'} items-end`}>
-                          <Avatar isUser={msg.type === 'user'} />
-                          <div className="px-3 py-2 sm:py-2.5 rounded-lg"
-                            style={{
-                              background: msg.type === 'user' ? 'var(--sig-indigo)' : 'var(--sig-glass)',
-                              border: msg.type === 'user' ? 'none' : '1px solid var(--sig-line)',
-                              borderLeft: msg.type === 'user' ? 'none' : '2px solid var(--sig-mint)',
-                              borderRadius: msg.type === 'user' ? '10px 10px 2px 10px' : '2px 10px 10px 10px',
-                            }}
+                          <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center border"
+                            style={{ background: 'rgba(94,234,212,0.06)', borderColor: 'var(--sig-line-bright)' }}
                           >
-                            <p className="text-[13px] leading-relaxed whitespace-pre-wrap"
-                              style={{ color: msg.type === 'user' ? '#fff' : 'var(--sig-ink)' }}
-                            >
-                              {msg.text}
-                              {msg.isTyping && (
-                                <span className="sig-dot inline-block w-1 h-3 ml-1 align-middle" style={{ background: 'var(--sig-mint)' }} />
-                              )}
-                            </p>
-                            <p className="text-[9.5px] mt-1.5" style={{ color: msg.type === 'user' ? 'rgba(255,255,255,0.45)' : 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)', textAlign: msg.type === 'user' ? 'right' : 'left' }}>
-                              {msg.timestamp?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
+                            <FaRobot size={18} style={{ color: 'var(--sig-mint)' }} />
                           </div>
-                        </div>
-                      </motion.div>
-                    ))}
-
-                    <AnimatePresence>
-                      {isTypingIndicator && (
-                        <motion.div key="typing" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                          className="flex gap-2 items-end"
-                        >
-                          <Avatar isUser={false} />
-                          <div className="px-3.5 py-2.5 rounded-lg flex gap-1.5 items-center"
-                            style={{ background: 'var(--sig-glass)', border: '1px solid var(--sig-line)', borderLeft: '2px solid var(--sig-mint)', borderRadius: '2px 10px 10px 10px' }}
-                          >
-                            {[0, 1, 2].map(i => <div key={i} className="type-dot" />)}
-                          </div>
+                          <p className="font-semibold text-sm" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
+                            Ask about Muhire Dieudonne
+                          </p>
+                          <p className="text-xs mt-1.5" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
+                            fullstack · kigali, rwanda
+                          </p>
                         </motion.div>
                       )}
-                    </AnimatePresence>
 
-                    <div ref={messagesEndRef} />
+                      {conversation.map((msg, idx) => (
+                        <motion.div key={idx}
+                          initial={{ opacity: 0, x: msg.type === 'user' ? 14 : -14 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.22 }}
+                          className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div className={`flex gap-2 max-w-[88%] sm:max-w-[84%] ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'} items-end`}>
+                            <Avatar isUser={msg.type === 'user'} />
+                            <div
+                              className={msg.type === 'user' ? 'px-4 py-2.5 rounded-full' : 'px-3 py-2 sm:py-2.5 rounded-lg'}
+                              style={{
+                                background: msg.type === 'user' ? 'var(--sig-user-grad)' : 'var(--sig-glass)',
+                                border: msg.type === 'user' ? 'none' : '1px solid var(--sig-line)',
+                                borderLeft: msg.type === 'user' ? 'none' : '2px solid var(--sig-mint)',
+                                borderRadius: msg.type === 'user' ? '999px' : '2px 10px 10px 10px',
+                              }}
+                            >
+                              <p className="text-[13px] leading-relaxed whitespace-pre-wrap"
+                                style={{ color: msg.type === 'user' ? '#fff' : 'var(--sig-ink)' }}
+                              >
+                                {msg.text}
+                                {msg.isTyping && (
+                                  <span className="sig-dot inline-block w-1 h-3 ml-1 align-middle" style={{ background: 'var(--sig-mint)' }} />
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+
+                      <AnimatePresence>
+                        {isTypingIndicator && (
+                          <motion.div key="typing" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                            className="flex gap-2 items-end"
+                          >
+                            <Avatar isUser={false} />
+                            <div className="px-3.5 py-2.5 rounded-lg flex gap-1.5 items-center"
+                              style={{ background: 'var(--sig-glass)', border: '1px solid var(--sig-line)', borderLeft: '2px solid var(--sig-mint)', borderRadius: '2px 10px 10px 10px' }}
+                            >
+                              {[0, 1, 2].map(i => <div key={i} className="type-dot" />)}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* ── JUMP TO LATEST ── */}
+                    <AnimatePresence>
+                      {showJump && (
+                        <motion.button
+                          initial={{ opacity: 0, y: 6, scale: 0.9 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 6, scale: 0.9 }}
+                          onClick={scrollToLatest}
+                          className="sig-jump absolute bottom-2.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full border flex items-center justify-center z-20"
+                          style={{ background: 'var(--sig-surface)', borderColor: 'var(--sig-line-bright)', boxShadow: '0 6px 16px rgba(0,0,0,0.45)' }}
+                          title="Jump to latest"
+                        >
+                          <FiChevronDown size={13} color="var(--sig-mint)" />
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   {/* ── LIVE TRANSCRIPT ── */}
@@ -918,7 +1036,13 @@ const VoiceAssistant = () => {
                   >
                     {isSpeaking && <Meter active count={4} h={10} />}
                     <span className="text-[9.5px] tracking-wide truncate" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
-                      {isSpeaking ? 'output_active' : isListening ? 'input_active' : 'muhire · fullstack · kigali'}
+                      {isSpeaking
+                        ? 'output_active'
+                        : isListening
+                        ? 'input_active'
+                        : !personaTouched
+                        ? 'tap a persona above to see the live switch'
+                        : 'muhire · fullstack · kigali'}
                     </span>
                   </div>
                 </motion.div>
@@ -932,7 +1056,7 @@ const VoiceAssistant = () => {
                   <div className="flex items-center gap-1.5 min-w-0">
                     <StatusDot listening={isListening} speaking={isSpeaking} />
                     <span className="text-xs font-semibold truncate" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
-                      Muhire · Fullstack
+                      Nova · {activePersona.label}
                     </span>
                     {unreadCount > 0 && (
                       <span className="px-1.5 py-0.5 rounded text-[10px] font-bold flex-shrink-0" style={{ background: 'var(--sig-rose)', color: '#0a0c10', fontFamily: 'var(--sig-font-mono)' }}>
