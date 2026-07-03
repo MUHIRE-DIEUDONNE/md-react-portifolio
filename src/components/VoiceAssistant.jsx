@@ -5,126 +5,107 @@ import {
   FiMic, FiVolume2, FiVolumeX, FiUser,
   FiTrash2, FiX, FiMinimize2, FiMaximize2,
   FiBriefcase, FiCode, FiMail, FiGlobe,
-  FiAward, FiChevronDown, FiChevronUp, FiDownload
+  FiAward, FiChevronDown, FiChevronUp
 } from 'react-icons/fi'
-import { FaStop, FaPaperPlane } from 'react-icons/fa'
-
-import { PROFILE, downloadCV, scrollToSection } from '../lib/knowledgeBase'
-import {
-  PERSONAS, DEFAULT_PERSONA, detectLanguage, detectEmotion, SPEECH_LOCALES,
-  parseVoiceCommand, loadMemory, saveMemory, clearMemory, sendMessage,
-} from '../lib/aiAssistant'
+import { FaRobot, FaMicrophone, FaStop, FaPaperPlane } from 'react-icons/fa'
 
 /* ─────────────────────────────────────────────
-   DESIGN TOKENS — "Aurora Core" glass aesthetic
-   (unchanged visual language from the previous pass — see Core avatar,
-   drifting aurora field, glass panels, neon gradient accents.)
+   DESIGN TOKENS — "Signal" console aesthetic
+   A developer's instrument panel, not a chat-bot
+   cliché. Mint signal accent on near-black slate,
+   monospace status language, VU-meter ring as the
+   one signature motif.
 ───────────────────────────────────────────── */
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
   :root {
-    --au-bg-0: #05060d;
-    --au-bg-1: #0a0c18;
-    --au-surface: rgba(12,13,24,0.72);
-    --au-glass: rgba(255,255,255,0.055);
-    --au-glass-strong: rgba(255,255,255,0.10);
-    --au-border: rgba(255,255,255,0.13);
-    --au-border-bright: rgba(167,139,250,0.45);
-    --au-cyan: #5eead4;
-    --au-violet: #a78bfa;
-    --au-pink: #f472b6;
-    --au-ink: #f5f3fb;
-    --au-dim: rgba(245,243,251,0.60);
-    --au-faint: rgba(245,243,251,0.26);
-    --au-shadow: 0 30px 80px rgba(2,3,10,0.72), 0 0 0 1px rgba(255,255,255,0.06), 0 0 70px rgba(167,139,250,0.14);
-    --au-font-display: 'Space Grotesk', sans-serif;
-    --au-font-body: 'Inter', sans-serif;
-    --au-font-mono: 'JetBrains Mono', monospace;
+    --sig-bg: #0a0c10;
+    --sig-surface: rgba(15,17,22,0.98);
+    --sig-glass: rgba(255,255,255,0.035);
+    --sig-line: rgba(255,255,255,0.08);
+    --sig-line-bright: rgba(94,234,212,0.30);
+    --sig-mint: #5eead4;
+    --sig-mint-dim: rgba(94,234,212,0.14);
+    --sig-indigo: #818cf8;
+    --sig-rose: #fb7185;
+    --sig-ink: #eef1f6;
+    --sig-dim: rgba(238,241,246,0.52);
+    --sig-faint: rgba(238,241,246,0.24);
+    --sig-shadow: 0 28px 70px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.05);
+    --sig-font-display: 'Space Grotesk', sans-serif;
+    --sig-font-body: 'Inter', sans-serif;
+    --sig-font-mono: 'JetBrains Mono', monospace;
   }
 
-  .au-wrap * { box-sizing: border-box; margin: 0; padding: 0; }
-  .au-wrap { font-family: var(--au-font-body); -webkit-font-smoothing: antialiased; }
+  .sig-wrap * { box-sizing: border-box; margin: 0; padding: 0; }
+  .sig-wrap { font-family: var(--sig-font-body); -webkit-font-smoothing: antialiased; }
 
-  .au-messages { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
-  .au-messages::-webkit-scrollbar { width: 3px; }
-  .au-messages::-webkit-scrollbar-track { background: transparent; }
-  .au-messages::-webkit-scrollbar-thumb { background: var(--au-border-bright); border-radius: 10px; }
-  .au-panel { overscroll-behavior: contain; backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%); }
+  .sig-messages { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+  .sig-messages::-webkit-scrollbar { width: 3px; }
+  .sig-messages::-webkit-scrollbar-track { background: transparent; }
+  .sig-messages::-webkit-scrollbar-thumb { background: var(--sig-line-bright); border-radius: 10px; }
+  .sig-panel { overscroll-behavior: contain; }
 
-  @keyframes drift-a { 0%,100% { transform: translate(-6%,-4%) scale(1); } 50% { transform: translate(8%,6%) scale(1.15); } }
-  @keyframes drift-b { 0%,100% { transform: translate(6%,4%) scale(1.05); } 50% { transform: translate(-8%,-8%) scale(0.95); } }
-  @keyframes drift-c { 0%,100% { transform: translate(0%,8%) scale(1); } 50% { transform: translate(-6%,-10%) scale(1.1); } }
-  .au-aurora { position: absolute; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
-  .au-aurora span { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.32; }
-  .au-aurora span:nth-child(1) { width: 220px; height: 220px; top: -40px; left: -30px; background: var(--au-cyan); animation: drift-a 14s ease-in-out infinite; }
-  .au-aurora span:nth-child(2) { width: 200px; height: 200px; bottom: -50px; right: -30px; background: var(--au-violet); animation: drift-b 17s ease-in-out infinite; }
-  .au-aurora span:nth-child(3) { width: 160px; height: 160px; bottom: 30%; left: 10%; background: var(--au-pink); animation: drift-c 20s ease-in-out infinite; opacity: 0.20; }
+  /* faint scanline texture for the "instrument" feel */
+  .sig-scan::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background: repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+  }
 
-  @keyframes meter { 0%,100% { height: 30%; opacity: 0.5; } 50% { height: 100%; opacity: 1; } }
-  .meter-bar { width: 2.5px; border-radius: 1px; background: var(--au-cyan); animation: meter 0.85s ease-in-out infinite; transition: background 0.25s; }
+  @keyframes meter {
+    0%, 100% { height: 30%; opacity: 0.5; }
+    50% { height: 100%; opacity: 1; }
+  }
+  .meter-bar { width: 2.5px; border-radius: 1px; background: var(--sig-mint); animation: meter 0.85s ease-in-out infinite; transition: background 0.25s; }
   .meter-bar:nth-child(2) { animation-delay: 0.10s; }
   .meter-bar:nth-child(3) { animation-delay: 0.20s; }
   .meter-bar:nth-child(4) { animation-delay: 0.06s; }
   .meter-bar:nth-child(5) { animation-delay: 0.16s; }
 
-  @keyframes core-spin { to { transform: rotate(360deg); } }
-  @keyframes core-spin-rev { to { transform: rotate(-360deg); } }
-  .au-core-ring-slow { animation: core-spin 10s linear infinite; }
-  .au-core-ring-fast { animation: core-spin-rev 3.4s linear infinite; }
+  @keyframes ring-spin { to { transform: rotate(360deg); } }
+  .sig-ring { animation: ring-spin 6s linear infinite; }
 
-  @keyframes core-glow-idle { 0%,100% { opacity: 0.35; } 50% { opacity: 0.6; } }
-  @keyframes core-glow-active { 0%,100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
-  .au-core-glow-idle { animation: core-glow-idle 3.2s ease-in-out infinite; }
-  .au-core-glow-active { animation: core-glow-active 1.1s ease-in-out infinite; }
+  @keyframes pulse-soft {
+    0%, 100% { transform: scale(1); opacity: 0.55; }
+    50% { transform: scale(1.5); opacity: 0; }
+  }
 
-  @keyframes core-blink { 0%, 90%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.12); } }
-  .au-core-eye { animation: core-blink 4.6s ease-in-out infinite; transform-origin: center; }
+  @keyframes blink {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.25; }
+  }
+  .sig-dot { animation: blink 1.6s ease-in-out infinite; }
 
-  @keyframes pulse-soft { 0%,100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(1.6); opacity: 0; } }
-  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
-  .au-dot { animation: blink 1.6s ease-in-out infinite; }
-
-  @keyframes typedot { 0%,80%,100% { transform: translateY(0); opacity: 0.35; } 40% { transform: translateY(-4px); opacity: 1; } }
-  .type-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--au-violet); animation: typedot 1.1s ease-in-out infinite; }
+  @keyframes typedot {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
+    40% { transform: translateY(-4px); opacity: 1; }
+  }
+  .type-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--sig-mint); animation: typedot 1.1s ease-in-out infinite; }
   .type-dot:nth-child(2) { animation-delay: 0.14s; }
   .type-dot:nth-child(3) { animation-delay: 0.28s; }
 
-  .au-mic-btn { position: relative; overflow: hidden; transition: transform 0.18s ease, box-shadow 0.25s ease, border-color 0.25s ease; touch-action: manipulation; }
-  .au-mic-btn:hover { transform: translateY(-1px); box-shadow: 0 0 0 4px rgba(167,139,250,0.10); }
-  .au-mic-btn:active { transform: translateY(1px) scale(0.97); }
-  .au-mic-btn.is-listening { box-shadow: 0 0 22px rgba(244,114,182,0.45), 0 0 0 4px rgba(244,114,182,0.12); }
+  .sig-mic-btn { position: relative; overflow: hidden; transition: transform 0.18s ease, box-shadow 0.25s ease; touch-action: manipulation; }
+  .sig-mic-btn:hover { transform: translateY(-1px); }
+  .sig-mic-btn:active { transform: translateY(1px) scale(0.97); }
 
-  .au-chip { transition: background 0.18s, border-color 0.18s, transform 0.15s, box-shadow 0.25s; touch-action: manipulation; }
-  .au-chip:hover { background: rgba(167,139,250,0.12) !important; border-color: var(--au-border-bright) !important; transform: translateX(2px); box-shadow: 0 0 18px rgba(167,139,250,0.18); }
+  .sig-chip { transition: background 0.18s, border-color 0.18s, transform 0.15s; touch-action: manipulation; }
+  .sig-chip:hover { background: var(--sig-mint-dim) !important; border-color: var(--sig-line-bright) !important; transform: translateX(2px); }
 
-  .au-bubble { transition: transform 0.18s ease, box-shadow 0.25s ease; }
-  .au-bubble:hover { transform: translateY(-1px); }
+  .sig-input { -webkit-appearance: none; font-size: 16px; }
+  .sig-input:focus { outline: none; border-color: var(--sig-mint); box-shadow: 0 0 0 3px rgba(94,234,212,0.12); }
 
-  .au-input { -webkit-appearance: none; font-size: 16px; }
-  .au-input:focus { outline: none; border-color: var(--au-violet); box-shadow: 0 0 0 3px rgba(167,139,250,0.16); }
-
-  .au-toolbtn { transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.25s, transform 0.15s; }
-  .au-toolbtn:hover { box-shadow: 0 0 16px rgba(167,139,250,0.18); transform: translateY(-1px); }
-
-  .au-send:not(:disabled):hover { box-shadow: 0 0 24px rgba(94,234,212,0.45); transform: translateY(-1px) scale(1.03); }
-
-  .au-persona-row::-webkit-scrollbar { display: none; }
+  .sig-toolbtn { transition: background 0.18s, color 0.18s, border-color 0.18s; }
 
   @media (max-width: 380px) {
-    .au-tight { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .au-core-ring-slow, .au-core-ring-fast, .au-core-eye, .au-core-glow-idle, .au-core-glow-active,
-    .au-aurora span, .meter-bar, .type-dot, .au-dot { animation: none !important; }
+    .sig-tight { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
   }
 `
 
 /* ─────────────────────────────────────────────
    MINI COMPONENTS
 ───────────────────────────────────────────── */
-const Meter = ({ active, color = 'var(--au-cyan)', count = 5, h = 14 }) => (
+const Meter = ({ active, color = 'var(--sig-mint)', count = 5, h = 14 }) => (
   <div className="flex items-end gap-[3px]" style={{ height: h }}>
     {Array.from({ length: count }).map((_, i) => (
       <div key={i} className="meter-bar" style={{ background: color, animationPlayState: active ? 'running' : 'paused', height: active ? undefined : '30%' }} />
@@ -132,145 +113,267 @@ const Meter = ({ active, color = 'var(--au-cyan)', count = 5, h = 14 }) => (
   </div>
 )
 
-const stateColor = {
-  listening: 'var(--au-pink)',
-  thinking: 'var(--au-violet)',
-  speaking: 'var(--au-cyan)',
-  idle: 'var(--au-faint)',
-}
-
-/* Signature element: THE CORE — blinking, waveform-ringed AI avatar that
-   visibly shifts for listening / thinking / speaking. */
-const Core = ({ state = 'idle', size = 46 }) => {
-  const color = stateColor[state] || stateColor.idle
-  const active = state !== 'idle'
-  const bars = 22
+/* Signature element: instrument ring around the avatar — ticks like a VU dial,
+   sweeping arc when listening/speaking, otherwise idle. */
+const SignalRing = ({ listening, speaking }) => {
+  const active = listening || speaking
+  const color = listening ? 'var(--sig-rose)' : speaking ? 'var(--sig-mint)' : 'var(--sig-faint)'
   return (
-    <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
-      <div className={`absolute inset-0 rounded-full ${active ? 'au-core-glow-active' : 'au-core-glow-idle'}`}
-        style={{ background: `radial-gradient(circle, ${color} 0%, transparent 70%)`, filter: 'blur(6px)' }} />
-      <svg width={size} height={size} viewBox="0 0 46 46" className="absolute inset-0">
-        <defs>
-          <linearGradient id="au-core-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="var(--au-cyan)" />
-            <stop offset="50%" stopColor="var(--au-violet)" />
-            <stop offset="100%" stopColor="var(--au-pink)" />
-          </linearGradient>
-        </defs>
-        <circle cx="23" cy="23" r="20.5" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-        <g className={active ? (state === 'speaking' ? 'au-core-ring-fast' : 'au-core-ring-slow') : 'au-core-ring-slow'} style={{ transformOrigin: '23px 23px', opacity: active ? 1 : 0.5 }}>
-          {Array.from({ length: bars }).map((_, i) => {
-            const a = (i / bars) * Math.PI * 2
-            const wobble = active ? (i % 3 === 0 ? 3.4 : i % 2 === 0 ? 2.1 : 1.2) : 0
-            const r1 = 20.5, r2 = 17.6 - wobble
-            const x1 = 23 + r1 * Math.cos(a), y1 = 23 + r1 * Math.sin(a)
-            const x2 = 23 + r2 * Math.cos(a), y2 = 23 + r2 * Math.sin(a)
-            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={active ? 'url(#au-core-grad)' : color} strokeWidth="1.5" strokeLinecap="round" opacity={active ? (i % 3 === 0 ? 1 : 0.45) : 0.28} />
-          })}
-        </g>
-        <g className="au-core-eye">
-          <circle cx="23" cy="23" r="4.2" fill={active ? 'url(#au-core-grad)' : 'rgba(245,243,251,0.5)'} opacity={active ? 0.9 : 0.55} />
-        </g>
-      </svg>
-    </div>
+    <svg width="46" height="46" viewBox="0 0 46 46" className="absolute -inset-[3px] pointer-events-none">
+      <circle cx="23" cy="23" r="20.5" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+      <g className={active ? 'sig-ring' : ''} style={{ transformOrigin: '23px 23px' }}>
+        {Array.from({ length: 18 }).map((_, i) => {
+          const a = (i / 18) * Math.PI * 2
+          const r1 = 20.5, r2 = 17.8
+          const x1 = 23 + r1 * Math.cos(a), y1 = 23 + r1 * Math.sin(a)
+          const x2 = 23 + r2 * Math.cos(a), y2 = 23 + r2 * Math.sin(a)
+          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth="1.4" opacity={active ? (i % 3 === 0 ? 0.9 : 0.35) : 0.25} />
+        })}
+      </g>
+    </svg>
   )
 }
 
-const StatusDot = ({ state }) => {
-  const color = stateColor[state] || '#34d399'
+const StatusDot = ({ listening, speaking }) => {
+  const color = listening ? 'var(--sig-rose)' : speaking ? 'var(--sig-mint)' : '#34d399'
   return (
     <span className="relative inline-flex w-1.5 h-1.5 flex-shrink-0">
-      <span className="absolute inset-0 rounded-full" style={{ background: color, opacity: 0.5, animation: state !== 'idle' ? 'pulse-soft 1.3s ease-out infinite' : 'none' }} />
-      <span className="w-1.5 h-1.5 rounded-full" style={{ background: state === 'idle' ? '#34d399' : color }} />
+      <span className="absolute inset-0 rounded-full" style={{ background: color, opacity: 0.5, animation: (listening || speaking) ? 'pulse-soft 1.3s ease-out infinite' : 'none' }} />
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
     </span>
   )
 }
 
-const Avatar = ({ isUser, auraState }) => {
-  if (!isUser) return <Core state={auraState} size={26} />
-  return (
-    <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center"
-      style={{ background: 'linear-gradient(135deg, var(--au-violet), var(--au-pink))' }}>
-      <FiUser size={12} color="#fff" />
-    </div>
-  )
-}
-
-const StatusPanel = ({ auraState }) => {
-  const items = [
-    { key: 'listening', label: 'Listening' },
-    { key: 'thinking', label: 'Thinking' },
-    { key: 'speaking', label: 'Speaking' },
-  ]
-  return (
-    <div className="flex gap-1.5">
-      {items.map(it => {
-        const on = auraState === it.key
-        const color = stateColor[it.key]
-        return (
-          <div key={it.key} className="flex items-center gap-1.5 px-2 py-1 rounded-full border"
-            style={{
-              background: on ? `${color}1f` : 'var(--au-glass)',
-              borderColor: on ? color : 'var(--au-border)',
-              transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
-              boxShadow: on ? `0 0 14px ${color}55` : 'none',
-            }}>
-            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: on ? color : 'var(--au-faint)', animation: on ? 'pulse-soft 1.2s ease-out infinite' : 'none' }} />
-            <span className="text-[9.5px] tracking-wide" style={{ color: on ? color : 'var(--au-faint)', fontFamily: 'var(--au-font-mono)' }}>{it.label}</span>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-/* Persona switcher + live language / mood readout */
-const PersonaRow = ({ persona, onSwitch, language, emotion }) => (
-  <div className="au-tight au-persona-row px-3 sm:px-4 py-2 border-b flex items-center gap-2 overflow-x-auto relative z-10"
-    style={{ borderColor: 'var(--au-border)', background: 'rgba(10,11,20,0.45)' }}
-  >
-    <div className="flex gap-1.5 flex-shrink-0">
-      {Object.entries(PERSONAS).map(([key, p]) => (
-        <button key={key} onClick={() => onSwitch(key)}
-          className="au-toolbtn px-2.5 py-1 rounded-full border text-[10px] whitespace-nowrap flex-shrink-0"
-          style={{
-            background: persona === key ? 'linear-gradient(90deg, rgba(94,234,212,0.20), rgba(167,139,250,0.20))' : 'var(--au-glass)',
-            borderColor: persona === key ? 'var(--au-border-bright)' : 'var(--au-border)',
-            color: persona === key ? 'var(--au-ink)' : 'var(--au-dim)',
-            fontFamily: 'var(--au-font-mono)',
-          }}
-        >
-          {p.label}
-        </button>
-      ))}
-    </div>
-    <div className="flex-1 min-w-[6px]" />
-    <span className="text-[9.5px] px-2 py-1 rounded-full border flex-shrink-0 whitespace-nowrap"
-      style={{ borderColor: 'var(--au-border)', color: 'var(--au-faint)', fontFamily: 'var(--au-font-mono)' }}
-    >
-      {language.toUpperCase()} · {emotion}
-    </span>
+const Avatar = ({ isUser }) => (
+  <div className="w-7 h-7 rounded-md flex-shrink-0 flex items-center justify-center"
+    style={{
+      background: isUser ? 'var(--sig-indigo)' : 'rgba(94,234,212,0.12)',
+      border: isUser ? 'none' : '1px solid var(--sig-line-bright)',
+    }}>
+    {isUser ? <FiUser size={12} color="#fff" /> : <FaRobot size={11} color="var(--sig-mint)" />}
   </div>
 )
 
 /* ─────────────────────────────────────────────
-   OFFLINE FALLBACK
-   Used only when the AI backend is unreachable/not configured, so the
-   assistant degrades gracefully instead of going silent.
+   KNOWLEDGE BASE
 ───────────────────────────────────────────── */
-function localFallbackResponse(input) {
+const KB = {
+  introduction: {
+    name: "My name is Muhire Dieudonne, a passionate Fullstack Developer from Kigali, Rwanda.",
+    role: "I am a Fullstack Developer specializing in React, Next.js, Node.js, and modern web technologies.",
+    location: "I'm based in Kigali, Rwanda — the heart of Africa's tech innovation.",
+    all: "I'm Muhire Dieudonne, a Fullstack Developer from Kigali, Rwanda. I build amazing web applications with cutting-edge technologies."
+  },
+  skills: {
+    frontend: "I specialise in React, Next.js, and TypeScript with 95% proficiency in React and 98% in JavaScript.",
+    backend: "For back-end I work with Node.js, GraphQL, and Python — building RESTful APIs and GraphQL servers.",
+    styling: "Expert in Tailwind CSS, SCSS, and Styled Components. I create responsive, beautiful designs.",
+    animation: "I use Framer Motion, GSAP, and Three.js for stunning 3-D animations and interactive experiences.",
+    threejs: "88% proficiency in Three.js — 3-D product showcases, interactive planets, procedural terrain generation.",
+    fullstack: "As a Fullstack Developer, I handle both frontend and backend seamlessly — from database design to UI/UX implementation.",
+    laravel: "Yes, I work with Laravel too — building clean, well-structured PHP backends and APIs.",
+    php: "I know PHP well, including modern Laravel-based development for server-side applications.",
+    node: "Definitely — Node.js is one of my core backend tools for building fast, scalable APIs and services.",
+    firebase: "I use Firebase for authentication, real-time databases, and quick backend prototyping.",
+    mysql: "Yes, I work with MySQL for structured, relational data storage in many of my projects.",
+    mongodb: "I use MongoDB frequently for flexible, document-based data storage in full-stack apps.",
+    apis: "Absolutely — I design and build RESTful and GraphQL APIs that are secure, documented, and easy to consume.",
+    all: "React 95 · JavaScript 98 · TypeScript 88 · Next.js 85 · Three.js 88 · Framer Motion 92 · GSAP 90 · Tailwind 96 · Node.js 85 · GraphQL 75 · Laravel · PHP · Firebase · MySQL · MongoDB."
+  },
+  projects: {
+    ecommerce: "Full-stack e-commerce platform with React, Node.js, and MongoDB — real-time inventory, payments, admin dashboard.",
+    metaverse: "A 3-D metaverse in Three.js where users explore virtual spaces, interact with objects, and chat in real time.",
+    portfolio: "This 3-D portfolio! Interactive 3-D elements, smooth animations, fully responsive design.",
+    game: "Multiplayer browser-based 3-D game using Three.js and WebSocket with real-time physics and particle effects.",
+    cooperative: "Yes — I've built a cooperative management system to help groups track members, savings, and shared resources digitally.",
+    school: "I've built school management systems covering student records, grading, attendance, and admin dashboards.",
+    latest: "My latest project builds on everything I've learned — combining clean full-stack architecture with polished, interactive UI.",
+    all: "Top projects: 3-D Interactive Portfolio · E-commerce Platform · Real-time Collaboration Tool · Metaverse · Multiplayer 3-D Game · Procedural Terrain Generator · Cooperative Management System · School Management System."
+  },
+  experience: {
+    company1: "Lead Frontend Developer at Creative Agency (2022–Present), leading a team of 5 and delivering 25+ projects.",
+    company2: "Senior React Developer at Tech Startup (2020–2022), cutting bundle size 35% and shipping real-time features.",
+    company3: "3-D Graphics Developer at Procedural Worlds Lab (2021–Present), building terrain-gen systems and interactive worlds.",
+    years: "I have 5+ years of hands-on experience building web applications across different industries.",
+    companies: "Yes, I've worked with agencies, startups, and independent clients on a range of full-stack and 3-D projects.",
+    freelance: "Yes, I take on freelance work alongside my ongoing roles — I enjoy the variety it brings.",
+    industries: "I've worked across tech startups, creative agencies, e-commerce, education, and cooperative/community platforms.",
+    all: "5+ years across global companies — 50+ projects delivered, 30+ happy clients worldwide."
+  },
+  contact: {
+    email: "Reach me at muhiredieu7@gmail.com — I reply within 24 hours.",
+    phone: "+250 798 728 379 — call or WhatsApp any time.",
+    whatsapp: "Yes, WhatsApp works too — just message +250 798 728 379.",
+    location: "Based in Kigali, Rwanda — available for remote work worldwide.",
+    all: "muhiredieu7@gmail.com · +250 798 728 379 · Kigali, Rwanda · remote-friendly globally."
+  },
+  social: {
+    github: "You can check out my code and open-source work on GitHub — just ask and I'll point you there.",
+    linkedin: "I'm on LinkedIn too, where I share my professional journey and connect with other developers.",
+    portfolio: "You're already exploring it — this 3-D interactive site is my portfolio!",
+    cv: "I have an up-to-date CV/resume available — just let me know and I can point you to the download link.",
+  },
+  education: {
+    degree: "BSc Computer Science, focus on Web Development and 3-D Graphics.",
+    certifications: "Certified in React Advanced Patterns, Three.js Journey, and Full-Stack Development.",
+    qualification: "I hold a BSc in Computer Science along with several specialized certifications in web and 3-D development.",
+    all: "CS degree plus ongoing certifications in React, Three.js, and full-stack development."
+  },
+  availability: {
+    status: "Currently available for freelance and full-time opportunities — 24-hour response time.",
+    hours: "Flexible hours, comfortable with any time zone. Most active UTC+2 business hours (Kigali time).",
+    remote: "Yes, I work remotely with clients and teams around the world.",
+    rate: "My rates depend on project scope — reach out with your project details and I'll get you a clear estimate.",
+    all: "Open to freelance, full-time, or consultation — let's talk about your project!"
+  },
+  technical: {
+    react: "React is a JavaScript library for building user interfaces from reusable components — it's one of my core tools.",
+    laravel: "Laravel is a PHP framework known for elegant syntax, making backend development faster and more structured.",
+    firebase: "Firebase is Google's platform for backend services like authentication, real-time databases, and hosting.",
+    node: "Node.js lets you run JavaScript on the server, making it great for building fast, scalable backend APIs.",
+    restapi: "A REST API is a way for applications to communicate over HTTP using standard methods like GET, POST, PUT, and DELETE.",
+    mongodb: "MongoDB is a NoSQL, document-based database that stores data in flexible, JSON-like structures.",
+    mysqlVsMongo: "MySQL is a relational database using structured tables, while MongoDB is document-based and schema-flexible — I use both depending on the project's needs.",
+  }
+}
+
+function generateResponse(input) {
   const s = input.toLowerCase()
-  if (/\b(hi|hello|hey)\b/.test(s))
-    return `Hi! I'm Nova. I'm having trouble reaching my full AI brain right now, but I can still tell you the basics: ${PROFILE.name} is a ${PROFILE.title} based in ${PROFILE.location}.`
-  if (s.includes('skill'))
-    return "Muhire works across HTML5, CSS3, JavaScript, React.js, PHP & Laravel, Node.js, MySQL, MongoDB, and Firebase — full-stack, end to end."
-  if (s.includes('project'))
-    return "Some highlights: a Cooperative Management System, a School Management System, and this AI-powered portfolio itself."
-  if (s.includes('contact') || s.includes('email'))
-    return `Reach Muhire at ${PROFILE.email} or ${PROFILE.phone}.`
-  if (s.includes('cv') || s.includes('resume'))
-    return "You can say 'download the CV' and I'll grab it for you, even offline."
-  return "I'm running on a limited offline mode right now — ask about skills, projects, or contact info, or try again in a moment for the full AI experience."
+
+  /* ── Greetings ── */
+  if (/\b(hi|hello|hey|good morning|good afternoon|good evening|what'?s up|nice to meet you|welcome)\b/.test(s) && !s.includes('how'))
+    return "Hello! 👋 Welcome to Muhire Dieudonne's portfolio. I'm Nova, your AI assistant. I can answer questions about Muhire's skills, projects, experience, education, and contact information. How can I help you today?"
+  if (s.includes('how are you') || s.includes("how's your day") || s.includes('how is your day'))
+    return "I'm doing great, thank you! I'm here and ready to help you learn more about Muhire Dieudonne and his projects. What would you like to know?"
+
+  /* ── About the Assistant ── */
+  if (s.includes('who are you') && !s.includes('muhire'))
+    return "I'm Nova, an AI-powered assistant built for Muhire Dieudonne's portfolio. I can talk with you by voice or text about his skills, projects, and experience."
+  if (s.includes('what can you do'))
+    return "I can introduce Muhire, explain his skills, showcase his projects, provide contact details, answer software development questions, and help you navigate this portfolio using voice or text."
+  if (s.includes('how do i use you') || s.includes('how do you work'))
+    return "Just press the microphone icon to speak, or type your question below. I'll respond with voice and text — ask me anything about Muhire!"
+  if (s.includes('are you an ai') || s.includes('are you a bot') || s.includes('are you human'))
+    return "Yes, I'm an AI assistant built into this portfolio to make exploring Muhire's work more interactive."
+  if (s.includes('can you speak'))
+    return "Yes! I can respond with voice using speech synthesis — you'll hear me talk as well as read my replies."
+  if (s.includes('can you hear me'))
+    return "Yes, I can listen through your microphone using speech recognition. Just tap the mic button and start talking."
+  if (s.includes('what language') && (s.includes('support') || s.includes('speak')))
+    return "Right now I communicate in English, but I'm always improving!"
+
+  /* ── About Muhire ── */
+  if (s.includes('who is muhire') || s.includes('introduce muhire') || s.includes('tell me about muhire') || s.includes('introduce') || s.includes('tell me about yourself'))
+    return "I'm Muhire Dieudonne, a Fullstack Developer from Kigali, Rwanda. I specialize in building modern web applications with React, Next.js, Node.js, and Three.js. I'm passionate about creating immersive digital experiences that combine beautiful design with powerful functionality."
+  if (s.includes('how old'))
+    return "I'd rather let my work speak for itself! What I can tell you is that I bring 5+ years of hands-on development experience."
+  if (s.includes('what does muhire do') || s.includes('what do you do'))
+    return "As a Fullstack Developer, I work on both frontend and backend development. I create complete web applications from database design to UI implementation. My tech stack includes React, Next.js, Node.js, TypeScript, and various modern frameworks."
+  if (s.includes('what makes muhire different') || s.includes('why hire') || s.includes('why choose'))
+    return "I combine strong full-stack fundamentals with a passion for 3-D and interactive experiences — so the products I build aren't just functional, they're memorable."
+  if (s.includes('where are you from') || s.includes('where is muhire') || s.includes('location') || s.includes('kigali') || s.includes('rwanda'))
+    return "I'm based in Kigali, Rwanda — a beautiful country in East Africa known as the land of a thousand hills. Kigali is an emerging tech hub, and I'm proud to be part of its growing developer community."
+  if (s.includes('fullstack') || s.includes('full-stack') || s.includes('full stack'))
+    return KB.introduction.all
+
+  /* ── Skills ── */
+  if (s.includes('laravel')) return s.includes('what is') ? KB.technical.laravel : KB.skills.laravel
+  if (s.includes('php')) return KB.skills.php
+  if (s.includes('firebase')) return s.includes('what is') ? KB.technical.firebase : KB.skills.firebase
+  if (s.includes('mysql') && s.includes('mongodb')) return KB.technical.mysqlVsMongo
+  if (s.includes('mysql')) return KB.skills.mysql
+  if (s.includes('mongodb')) return s.includes('what is') ? KB.technical.mongodb : KB.skills.mongodb
+  if (s.includes('rest api') || s.includes('restful')) return s.includes('what is') || s.includes('explain') ? KB.technical.restapi : KB.skills.apis
+  if (s.includes('build api') || s.includes('build apis') || (s.includes('api') && s.includes('can')))
+    return KB.skills.apis
+  if (s.includes('node.js') || s.includes('nodejs') || s.includes('node js')) {
+    if (s.includes('what is') || s.includes('explain')) return KB.technical.node
+    return KB.skills.node
+  }
+  if (s.includes('what is react') || s.includes('explain react')) return KB.technical.react
+  if (s.includes('skill') || s.includes('technology') || s.includes('tech stack') || s.includes('programming language')) {
+    if (s.includes('frontend') || s.includes('react')) return KB.skills.frontend
+    if (s.includes('backend')) return KB.skills.backend
+    if (s.includes('animation') || s.includes('gsap') || s.includes('motion')) return KB.skills.animation
+    if (s.includes('three') || s.includes('3d') || s.includes('webgl')) return KB.skills.threejs
+    if (s.includes('css') || s.includes('tailwind') || s.includes('style')) return KB.skills.styling
+    if (s.includes('fullstack') || s.includes('full-stack')) return KB.skills.fullstack
+    return KB.skills.all
+  }
+
+  /* ── Projects ── */
+  if (s.includes('cooperative')) return KB.projects.cooperative
+  if (s.includes('school management') || s.includes('school system')) return KB.projects.school
+  if (s.includes('latest project')) return KB.projects.latest
+  if (s.includes('best project') || s.includes('show me his best'))
+    return KB.projects.portfolio
+  if (s.includes('project') || s.includes('build') || s.includes('built')) {
+    if (s.includes('ecommerce') || s.includes('e-commerce') || s.includes('shop')) return KB.projects.ecommerce
+    if (s.includes('3d') || s.includes('metaverse') || s.includes('virtual')) return KB.projects.metaverse
+    if (s.includes('game') || s.includes('multiplayer')) return KB.projects.game
+    if (s.includes('portfolio')) return KB.projects.portfolio
+    return KB.projects.all
+  }
+
+  /* ── Experience ── */
+  if (s.includes('how many years') || (s.includes('years') && s.includes('experience'))) return KB.experience.years
+  if (s.includes('worked with companies') || s.includes('worked with a company')) return KB.experience.companies
+  if (s.includes('is he a freelancer') || s.includes('are you a freelancer')) return KB.experience.freelance
+  if (s.includes('industries')) return KB.experience.industries
+  if (s.includes('experience') || s.includes('career') || s.includes('job') || s.includes('work at')) {
+    if (s.includes('creative') || s.includes('agency')) return KB.experience.company1
+    if (s.includes('startup')) return KB.experience.company2
+    if (s.includes('3d') || s.includes('graphics') || s.includes('procedural')) return KB.experience.company3
+    return KB.experience.all
+  }
+
+  /* ── Education ── */
+  if (s.includes('education') || s.includes('degree') || s.includes('study') || s.includes('qualification')) {
+    if (s.includes('qualification')) return KB.education.qualification
+    if (s.includes('degree') || s.includes('university') || s.includes('where did')) return KB.education.degree
+    if (s.includes('cert') || s.includes('course')) return KB.education.certifications
+    return KB.education.all
+  }
+
+  /* ── Contact ── */
+  if (s.includes('whatsapp')) return KB.contact.whatsapp
+  if (s.includes('contact') || s.includes('email') || s.includes('reach') || s.includes('phone')) {
+    if (s.includes('email')) return KB.contact.email
+    if (s.includes('phone') || s.includes('call')) return KB.contact.phone
+    if (s.includes('location') || s.includes('where') || s.includes('based')) return KB.contact.location
+    return KB.contact.all
+  }
+
+  /* ── Social links / navigation ── */
+  if (s.includes('github')) return KB.social.github
+  if (s.includes('linkedin')) return KB.social.linkedin
+  if (s.includes('download') && (s.includes('cv') || s.includes('resume'))) return KB.social.cv
+  if (s.includes('cv') || s.includes('resume')) return KB.social.cv
+  if (s.includes('show portfolio') || s.includes('open portfolio')) return KB.social.portfolio
+  if (s.includes('open projects') || s.includes('go to skills') || s.includes('show contact') || s.includes('scroll to about') || s.includes('open services') || s.includes('show testimonials') || s.includes('open github'))
+    return "I can guide you there — use the navigation menu at the top of the portfolio, and I'll be right here if you have questions along the way."
+
+  /* ── Hiring / availability ── */
+  if (s.includes('remote')) return KB.availability.remote
+  if (s.includes('how much') || s.includes('charge') || s.includes('rate') || s.includes('cost') || s.includes('price'))
+    return KB.availability.rate
+  if (s.includes('is muhire available') || s.includes('can i hire') || s.includes('open for freelance') || s.includes('available') || s.includes('hire') || s.includes('freelance') || s.includes('work with')) {
+    if (s.includes('hour') || s.includes('time')) return KB.availability.hours
+    return KB.availability.all
+  }
+
+  /* ── Small talk ── */
+  if (s.includes('thank')) return "You're very welcome! As a developer from Rwanda, I really appreciate your interest. Feel free to ask anything else!"
+  if (s.includes("you're amazing") || s.includes('good job') || s.includes('well done'))
+    return "Thank you so much — that means a lot! Let me know if there's anything else you'd like to explore."
+  if (s.includes('joke'))
+    return "Why do programmers prefer dark mode? Because light attracts bugs! 😄"
+  if (s.includes('inspire me'))
+    return "Great things are built one commit at a time — keep showing up, keep shipping, and progress compounds."
+  if (s.includes('see you later') || s.includes('have a nice day') || s.includes('bye') || s.includes('goodbye'))
+    return "Goodbye! It was great talking. Remember, I'm Nova, here for Muhire Dieudonne, Fullstack Developer from Kigali. Reach out anytime!"
+
+  return "I'm Nova, Muhire Dieudonne's AI assistant. I can tell you about his skills, projects, experience, education, or how to contact him. What interests you most?"
 }
 
 const SUGGESTIONS = [
@@ -279,14 +382,8 @@ const SUGGESTIONS = [
   { text: "Tell me about your projects", icon: FiBriefcase },
   { text: "What is your experience?", icon: FiAward },
   { text: "How can I contact you?", icon: FiMail },
-  { text: "Download your CV", icon: FiDownload },
+  { text: "Are you available for work?", icon: FiGlobe },
 ]
-
-const WELCOME_MESSAGES = {
-  visitor: "Hey there! I'm Nova, an AI assistant for Muhire Dieudonne. Ask me anything about his work, or say things like \"open projects\" or \"download the CV\" and I'll take care of it.",
-  recruiter: "Hello — I'm Nova, here to walk you through Muhire Dieudonne's background as a Software Developer. Ask about impact, experience, or availability, or say \"download the CV\" any time.",
-  developer: "Hey, I'm Nova. Happy to go deep on Muhire's stack and how his projects are built — React, Laravel, Node, MongoDB, the works. What do you want to dig into?",
-}
 
 /* ─────────────────────────────────────────────
    MAIN COMPONENT
@@ -308,17 +405,11 @@ const VoiceAssistant = () => {
   const [voiceSpeed, setVoiceSpeed]           = useState(0.93)
   const [voicePitch, setVoicePitch]           = useState(1.08)
 
-  const [persona, setPersona]                 = useState(DEFAULT_PERSONA)
-  const [detectedLanguage, setDetectedLanguage] = useState('en')
-  const [detectedEmotion, setDetectedEmotion] = useState('neutral')
-
   const recognitionRef    = useRef(null)
   const synthRef          = useRef(window.speechSynthesis)
   const messagesEndRef    = useRef(null)
   const inputRef          = useRef(null)
   const hasAutoSpokenRef  = useRef(false)
-
-  const auraState = isListening ? 'listening' : isTypingIndicator ? 'thinking' : isSpeaking ? 'speaking' : 'idle'
 
   /* ── ESC to close ── */
   useEffect(() => {
@@ -357,37 +448,25 @@ const VoiceAssistant = () => {
     }
 
     recognitionRef.current = rec
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  /* ── Restore memory or show a fresh, persona-tuned welcome ── */
+  /* ── Auto-welcome ── */
   useEffect(() => {
     if (!isOpen || welcomeDone) return
-    const mem = loadMemory()
-    if (mem?.messages?.length) {
-      setConversation(mem.messages.map(m => ({ ...m, timestamp: new Date(m.timestamp) })))
-      setPersona(mem.persona || DEFAULT_PERSONA)
-      setWelcomeDone(true)
-      return
-    }
-    const welcome = WELCOME_MESSAGES[persona] || WELCOME_MESSAGES.visitor
-    setConversation([{ type: 'assistant', text: welcome, timestamp: new Date(), isTyping: false }])
+    const welcome = "Hey there! I'm Nova, your AI assistant for Muhire Dieudonne. Muhire is a Fullstack Developer from Kigali, Rwanda. I can tell you all about his skills, projects, and experience. Just press the mic or type below!"
+    setConversation([{
+      type: 'assistant', text: welcome,
+      timestamp: new Date(), isTyping: false
+    }])
     setWelcomeDone(true)
     const t = setTimeout(() => {
       if (!isMuted && autoVoice && !hasAutoSpokenRef.current) {
         hasAutoSpokenRef.current = true
-        speak(welcome, 'en')
+        speak(welcome)
       }
     }, 400)
     return () => clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
-
-  /* ── Persist conversation memory ── */
-  useEffect(() => {
-    if (conversation.length === 0) return
-    saveMemory({ messages: conversation.filter(m => !m.isTyping), persona })
-  }, [conversation, persona])
 
   /* ── Scroll to bottom ── */
   useEffect(() => {
@@ -405,23 +484,19 @@ const VoiceAssistant = () => {
 
   useEffect(() => { if (isOpen) setUnreadCount(0) }, [isOpen])
 
-  /* ── Speak (language-aware voice selection) ── */
-  const speak = useCallback((text, language = 'en') => {
+  /* ── Speak ── */
+  const speak = useCallback((text) => {
     if (!synthRef.current || isMuted) return
     synthRef.current.cancel()
     const u = new SpeechSynthesisUtterance(text.replace(/[*•·]/g, ''))
     u.rate = voiceSpeed; u.pitch = voicePitch; u.volume = 1
-    u.lang = SPEECH_LOCALES[language] || 'en-US'
-    const voices = synthRef.current.getVoices?.() || []
-    const match = voices.find(v => v.lang?.toLowerCase().startsWith(u.lang.split('-')[0].toLowerCase()))
-    if (match) u.voice = match
     u.onstart = () => setIsSpeaking(true)
     u.onend   = () => setIsSpeaking(false)
     u.onerror = () => setIsSpeaking(false)
     synthRef.current.speak(u)
   }, [isMuted, voiceSpeed, voicePitch])
 
-  /* ── Typing animation for assistant replies ── */
+  /* ── Typing animation ── */
   const addAssistantMessage = useCallback((text) => {
     setConversation(prev => [...prev, {
       type: 'assistant', text: '',
@@ -442,97 +517,39 @@ const VoiceAssistant = () => {
     }, 18)
   }, [])
 
-  /* ── Local intent handling (navigation, CV download, persona switch) ── */
-  const handleCommand = useCallback((command) => {
-    switch (command.type) {
-      case 'download_cv':
-        downloadCV()
-        return "Sending you the CV now — check your downloads folder."
-      case 'open_link':
-        window.open(command.payload, '_blank', 'noopener')
-        return "Opening that in a new tab for you."
-      case 'navigate': {
-        const ok = scrollToSection(command.payload)
-        return ok
-          ? `Here's the ${command.payload} section.`
-          : `I'd take you to the ${command.payload} section, but I can't find it on this page.`
-      }
-      case 'switch_persona': {
-        setPersona(command.payload)
-        const p = PERSONAS[command.payload]
-        return `Switched to ${p.label} mode — ${p.tagline.toLowerCase()}.`
-      }
-      default:
-        return "Got it."
-    }
-  }, [])
-
-  /* ── Process input: intercept commands, otherwise call the AI ── */
-  const processUserInput = useCallback(async (input) => {
+  /* ── Process input ── */
+  const processUserInput = useCallback((input) => {
     if (!input.trim()) return
     synthRef.current?.cancel()
-    const text = input.trim()
-    const language = detectLanguage(text)
-    const emotion = detectEmotion(text)
-    setDetectedLanguage(language)
-    setDetectedEmotion(emotion)
-
-    const userMessage = { type: 'user', text, timestamp: new Date(), isTyping: false }
-    setConversation(prev => [...prev, userMessage])
+    setConversation(prev => [...prev, {
+      type: 'user', text: input.trim(),
+      timestamp: new Date(), isTyping: false
+    }])
     setInputText('')
-
-    const command = parseVoiceCommand(text)
-    if (command) {
-      setIsTypingInd(true)
-      setTimeout(() => {
-        setIsTypingInd(false)
-        const reply = handleCommand(command)
-        addAssistantMessage(reply)
-        if (!isMuted && autoVoice) speak(reply, language)
-      }, 300)
-      return
-    }
-
     setIsTypingInd(true)
-    try {
-      const history = [...conversation, userMessage]
-        .filter(m => !m.isTyping)
-        .slice(-16)
-        .map(m => ({ role: m.type === 'user' ? 'user' : 'assistant', content: m.text }))
-
-      const { reply, language: replyLang } = await sendMessage({ messages: history, persona, language, emotion })
+    setTimeout(() => {
+      const res = generateResponse(input)
       setIsTypingInd(false)
-      addAssistantMessage(reply)
-      if (!isMuted && autoVoice) speak(reply, replyLang || language)
-    } catch (err) {
-      console.warn('Nova: AI backend unavailable, using offline fallback —', err.message)
-      const reply = localFallbackResponse(text)
-      setIsTypingInd(false)
-      addAssistantMessage(reply)
-      if (!isMuted && autoVoice) speak(reply, language)
-    }
-  }, [conversation, isMuted, autoVoice, persona, speak, addAssistantMessage, handleCommand])
+      addAssistantMessage(res)
+      if (!isMuted && autoVoice) speak(res)
+    }, 600)
+  }, [isMuted, autoVoice, speak, addAssistantMessage])
 
-  /* ── Toggle listening (uses last detected language's recognition locale) ── */
+  /* ── Toggle listening ── */
   const toggleListening = () => {
     if (!recognitionRef.current) {
       alert('Speech recognition not supported. Please use Chrome, Edge, or Safari.')
       return
     }
-    if (isListening) {
-      recognitionRef.current.stop()
-    } else {
-      recognitionRef.current.lang = SPEECH_LOCALES[detectedLanguage] || 'en-US'
-      recognitionRef.current.start()
-    }
+    if (isListening) recognitionRef.current.stop()
+    else recognitionRef.current.start()
   }
 
-  /* ── Clear (wipes both UI and persisted memory) ── */
+  /* ── Clear ── */
   const clearConversation = () => {
-    clearMemory()
-    const msg = WELCOME_MESSAGES[persona] || WELCOME_MESSAGES.visitor
+    const msg = "Conversation cleared! I'm Muhire Dieudonne, Fullstack Developer from Kigali, Rwanda. Ask me anything about my work!"
     setConversation([{ type: 'assistant', text: msg, timestamp: new Date(), isTyping: false }])
-    if (!isMuted && autoVoice) speak(msg, 'en')
+    if (!isMuted && autoVoice) speak(msg)
   }
 
   /* ── Mute ── */
@@ -543,7 +560,7 @@ const VoiceAssistant = () => {
 
   /* ─────────────── RENDER ─────────────── */
   return (
-    <div className="au-wrap">
+    <div className="sig-wrap">
       <style>{style}</style>
 
       {/* ── FAB ── */}
@@ -557,29 +574,28 @@ const VoiceAssistant = () => {
             whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.94 }}
             onClick={() => setIsOpen(true)}
-            className="fixed z-[9999] w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center"
+            className="fixed z-[9999] w-14 h-14 rounded-2xl border-none cursor-pointer flex items-center justify-center"
             style={{
               bottom: 'max(1rem, env(safe-area-inset-bottom))',
               right: 'max(1rem, env(safe-area-inset-right))',
-              background: 'linear-gradient(160deg, rgba(15,16,28,0.95), rgba(10,11,20,0.95))',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid var(--au-border-bright)',
-              boxShadow: '0 14px 34px rgba(0,0,0,0.6), 0 0 0 1px rgba(167,139,250,0.10), 0 0 30px rgba(167,139,250,0.22)',
+              background: 'var(--sig-surface)',
+              border: '1px solid var(--sig-line-bright)',
+              boxShadow: '0 12px 30px rgba(0,0,0,0.55), 0 0 0 1px rgba(94,234,212,0.08), 0 0 24px rgba(94,234,212,0.12)',
             }}
           >
             <motion.span
-              animate={{ scale: [1, 1.6, 1], opacity: [0.4, 0, 0.4] }}
+              animate={{ scale: [1, 1.6, 1], opacity: [0.35, 0, 0.35] }}
               transition={{ duration: 2.4, repeat: Infinity }}
-              className="absolute inset-1.5 rounded-full"
-              style={{ border: '1px solid var(--au-violet)' }}
+              className="absolute inset-2 rounded-xl"
+              style={{ border: '1px solid var(--sig-mint)' }}
             />
-            <Core state="idle" size={34} />
+            <Meter active count={4} h={16} />
             {unreadCount > 0 && (
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center border-2"
-                style={{ background: 'var(--au-pink)', color: '#0a0c18', borderColor: 'var(--au-bg-0)', fontFamily: 'var(--au-font-mono)' }}
+                className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center border-2"
+                style={{ background: 'var(--sig-rose)', color: '#0a0c10', borderColor: 'var(--sig-bg)', fontFamily: 'var(--sig-font-mono)' }}
               >
                 {unreadCount}
               </motion.span>
@@ -597,95 +613,78 @@ const VoiceAssistant = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 24 }}
             transition={{ type: 'spring', stiffness: 360, damping: 32 }}
-            className="au-panel fixed z-[9998] w-[calc(100vw-1.5rem)] sm:w-[calc(100vw-2rem)] max-w-sm sm:max-w-md lg:max-w-lg rounded-2xl flex flex-col relative"
+            className="sig-scan sig-panel fixed z-[9998] w-[calc(100vw-1.5rem)] sm:w-[calc(100vw-2rem)] max-w-sm sm:max-w-md lg:max-w-lg rounded-xl flex flex-col"
             style={{
               bottom: 'max(0.75rem, env(safe-area-inset-bottom))',
               right: 'max(0.75rem, env(safe-area-inset-right))',
               maxHeight: 'min(680px, calc(100dvh - 1.5rem))',
-              background: 'var(--au-surface)',
-              border: '1px solid var(--au-border)',
-              boxShadow: 'var(--au-shadow)',
+              background: 'var(--sig-surface)',
+              border: '1px solid var(--sig-line)',
+              boxShadow: 'var(--sig-shadow)',
               overflowY: 'auto',
               overflowX: 'hidden',
             }}
           >
-            <div className="au-aurora"><span /><span /><span /></div>
-
             {/* ── HEADER ── */}
-            <div className="au-tight flex items-center gap-3 px-3 py-3 sm:p-4 border-b relative z-10 sticky top-0"
-              style={{ background: 'rgba(10,11,20,0.75)', backdropFilter: 'blur(18px)', borderColor: 'var(--au-border)' }}
+            <div className="sig-tight flex items-center gap-3 px-3 py-3 sm:p-4 border-b relative z-10 sticky top-0"
+              style={{ background: 'var(--sig-surface)', borderColor: 'var(--sig-line)' }}
             >
-              <div className="relative flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full"
-                style={{ background: 'var(--au-glass)', border: '1px solid var(--au-border-bright)' }}
-              >
-                <Core state={auraState} size={38} />
+              <div className="relative flex-shrink-0 w-10 h-10 flex items-center justify-center">
+                <SignalRing listening={isListening} speaking={isSpeaking} />
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{ background: 'rgba(94,234,212,0.10)', border: '1px solid var(--sig-line-bright)' }}
+                >
+                  <FaRobot size={13} color="var(--sig-mint)" />
+                </div>
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 font-semibold text-sm sm:text-base min-w-0" style={{ color: 'var(--au-ink)', fontFamily: 'var(--au-font-display)', letterSpacing: '-0.01em' }}>
+                <div className="flex items-center gap-2 font-semibold text-sm sm:text-base min-w-0" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)', letterSpacing: '-0.01em' }}>
                   <span className="truncate">Muhire Dieudonne</span>
-                  <span className="hidden sm:inline-flex flex-shrink-0 text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded-full border uppercase"
-                    style={{
-                      background: 'linear-gradient(90deg, rgba(94,234,212,0.12), rgba(167,139,250,0.12))',
-                      color: 'var(--au-cyan)', borderColor: 'var(--au-border-bright)', fontFamily: 'var(--au-font-mono)'
-                    }}
+                  <span className="hidden sm:inline-flex flex-shrink-0 text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded border uppercase"
+                    style={{ background: 'transparent', color: 'var(--sig-mint)', borderColor: 'var(--sig-line-bright)', fontFamily: 'var(--sig-font-mono)' }}
                   >
-                    Fullstack AI
+                    Fullstack
                   </span>
                 </div>
-                <div className="text-[11px] mt-0.5 flex items-center gap-1.5 truncate" style={{ color: 'var(--au-dim)', fontFamily: 'var(--au-font-mono)' }}>
-                  <StatusDot state={auraState} />
-                  {auraState === 'listening' ? (
-                    <span style={{ color: 'var(--au-pink)' }}>listening…</span>
-                  ) : auraState === 'thinking' ? (
-                    <span style={{ color: 'var(--au-violet)' }}>thinking…</span>
-                  ) : auraState === 'speaking' ? (
-                    <span style={{ color: 'var(--au-cyan)' }}>speaking…</span>
+                <div className="text-[11px] mt-0.5 flex items-center gap-1.5 truncate" style={{ color: 'var(--sig-dim)', fontFamily: 'var(--sig-font-mono)' }}>
+                  <StatusDot listening={isListening} speaking={isSpeaking} />
+                  {isListening ? (
+                    <span style={{ color: 'var(--sig-rose)' }}>recording_input…</span>
+                  ) : isSpeaking ? (
+                    <span style={{ color: 'var(--sig-mint)' }}>speaking_output…</span>
                   ) : (
-                    <span>online · {PERSONAS[persona].label.toLowerCase()} mode</span>
+                    <span>online · kigali_rw</span>
                   )}
                 </div>
               </div>
 
               <div className="flex gap-1.5 flex-shrink-0">
                 <button onClick={toggleMute} title={isMuted ? 'Unmute' : 'Mute'}
-                  className="au-toolbtn w-9 h-9 rounded-full border flex items-center justify-center active:scale-95"
+                  className="sig-toolbtn w-9 h-9 rounded-lg border flex items-center justify-center active:scale-95"
                   style={{
-                    background: isMuted ? 'rgba(244,114,182,0.08)' : 'var(--au-glass)',
-                    borderColor: isMuted ? 'rgba(244,114,182,0.4)' : 'var(--au-border)',
-                    color: isMuted ? 'var(--au-pink)' : 'var(--au-dim)',
+                    background: isMuted ? 'rgba(251,113,133,0.07)' : 'var(--sig-glass)',
+                    borderColor: isMuted ? 'rgba(251,113,133,0.35)' : 'var(--sig-line)',
+                    color: isMuted ? 'var(--sig-rose)' : 'var(--sig-dim)',
                   }}
                 >
                   {isMuted ? <FiVolumeX size={14} /> : <FiVolume2 size={14} />}
                 </button>
                 <button onClick={() => setIsMinimized(m => !m)} title={isMinimized ? 'Expand' : 'Minimise'}
-                  className="au-toolbtn hidden sm:flex w-9 h-9 rounded-full border items-center justify-center active:scale-95"
-                  style={{ background: 'var(--au-glass)', borderColor: 'var(--au-border)', color: 'var(--au-dim)' }}
+                  className="sig-toolbtn hidden sm:flex w-9 h-9 rounded-lg border items-center justify-center active:scale-95"
+                  style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)', color: 'var(--sig-dim)' }}
                 >
                   {isMinimized ? <FiMaximize2 size={14} /> : <FiMinimize2 size={14} />}
                 </button>
                 <button
                   onClick={() => { setIsOpen(false); synthRef.current?.cancel() }}
                   title="Close (ESC)"
-                  className="au-toolbtn w-9 h-9 rounded-full border flex items-center justify-center active:scale-95"
-                  style={{ background: 'var(--au-glass)', borderColor: 'var(--au-border)', color: 'var(--au-dim)' }}
+                  className="sig-toolbtn w-9 h-9 rounded-lg border flex items-center justify-center active:scale-95"
+                  style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)', color: 'var(--sig-dim)' }}
                 >
                   <FiX size={17} strokeWidth={2} />
                 </button>
               </div>
-            </div>
-
-            {/* ── PERSONA SWITCHER + LANGUAGE/MOOD READOUT ── */}
-            <PersonaRow persona={persona} onSwitch={setPersona} language={detectedLanguage} emotion={detectedEmotion} />
-
-            {/* ── LIVE STATUS PANEL ── */}
-            <div className="au-tight px-3 sm:px-4 py-2 border-b relative z-10 flex items-center justify-between gap-2"
-              style={{ background: 'rgba(10,11,20,0.55)', borderColor: 'var(--au-border)' }}
-            >
-              <StatusPanel auraState={auraState} />
-              {(isSpeaking || isListening) && (
-                <Meter active count={4} h={12} color={isListening ? 'var(--au-pink)' : 'var(--au-cyan)'} />
-              )}
             </div>
 
             {/* ── BODY ── */}
@@ -697,25 +696,25 @@ const VoiceAssistant = () => {
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.22 }}
-                  className="overflow-hidden relative z-10"
+                  className="overflow-hidden"
                 >
                   {/* ── MESSAGES ── */}
-                  <div className="au-tight au-messages h-[min(42dvh,300px)] sm:h-[340px] overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 flex flex-col gap-2.5 relative z-10"
-                    style={{ background: 'rgba(0,0,0,0.20)' }}
+                  <div className="sig-tight sig-messages h-[min(42dvh,300px)] sm:h-[340px] overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 flex flex-col gap-2.5 relative z-10"
+                    style={{ background: 'rgba(0,0,0,0.18)' }}
                   >
                     {conversation.length === 0 && (
                       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
                         className="text-center mx-auto mt-8"
                       >
-                        <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center border"
-                          style={{ background: 'var(--au-glass)', borderColor: 'var(--au-border-bright)' }}
+                        <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center border"
+                          style={{ background: 'rgba(94,234,212,0.06)', borderColor: 'var(--sig-line-bright)' }}
                         >
-                          <Core state="idle" size={30} />
+                          <FaRobot size={18} style={{ color: 'var(--sig-mint)' }} />
                         </div>
-                        <p className="font-semibold text-sm" style={{ color: 'var(--au-ink)', fontFamily: 'var(--au-font-display)' }}>
+                        <p className="font-semibold text-sm" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
                           Ask about Muhire Dieudonne
                         </p>
-                        <p className="text-xs mt-1.5" style={{ color: 'var(--au-faint)', fontFamily: 'var(--au-font-mono)' }}>
+                        <p className="text-xs mt-1.5" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
                           fullstack · kigali, rwanda
                         </p>
                       </motion.div>
@@ -729,28 +728,24 @@ const VoiceAssistant = () => {
                         className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div className={`flex gap-2 max-w-[88%] sm:max-w-[84%] ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'} items-end`}>
-                          <Avatar isUser={msg.type === 'user'} auraState={idx === conversation.length - 1 ? auraState : 'idle'} />
-                          <div className="au-bubble px-3.5 py-2.5 rounded-2xl"
+                          <Avatar isUser={msg.type === 'user'} />
+                          <div className="px-3 py-2 sm:py-2.5 rounded-lg"
                             style={{
-                              background: msg.type === 'user'
-                                ? 'linear-gradient(135deg, var(--au-violet), var(--au-pink))'
-                                : 'var(--au-glass)',
-                              backdropFilter: msg.type === 'user' ? 'none' : 'blur(10px)',
-                              border: msg.type === 'user' ? 'none' : '1px solid var(--au-border)',
-                              borderLeft: msg.type === 'user' ? 'none' : '2px solid var(--au-cyan)',
-                              borderRadius: msg.type === 'user' ? '14px 14px 3px 14px' : '3px 14px 14px 14px',
-                              boxShadow: msg.type === 'user' ? '0 8px 24px rgba(167,139,250,0.25)' : 'none',
+                              background: msg.type === 'user' ? 'var(--sig-indigo)' : 'var(--sig-glass)',
+                              border: msg.type === 'user' ? 'none' : '1px solid var(--sig-line)',
+                              borderLeft: msg.type === 'user' ? 'none' : '2px solid var(--sig-mint)',
+                              borderRadius: msg.type === 'user' ? '10px 10px 2px 10px' : '2px 10px 10px 10px',
                             }}
                           >
                             <p className="text-[13px] leading-relaxed whitespace-pre-wrap"
-                              style={{ color: msg.type === 'user' ? '#fff' : 'var(--au-ink)' }}
+                              style={{ color: msg.type === 'user' ? '#fff' : 'var(--sig-ink)' }}
                             >
                               {msg.text}
                               {msg.isTyping && (
-                                <span className="au-dot inline-block w-1 h-3 ml-1 align-middle" style={{ background: 'var(--au-cyan)' }} />
+                                <span className="sig-dot inline-block w-1 h-3 ml-1 align-middle" style={{ background: 'var(--sig-mint)' }} />
                               )}
                             </p>
-                            <p className="text-[9.5px] mt-1.5" style={{ color: msg.type === 'user' ? 'rgba(255,255,255,0.5)' : 'var(--au-faint)', fontFamily: 'var(--au-font-mono)', textAlign: msg.type === 'user' ? 'right' : 'left' }}>
+                            <p className="text-[9.5px] mt-1.5" style={{ color: msg.type === 'user' ? 'rgba(255,255,255,0.45)' : 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)', textAlign: msg.type === 'user' ? 'right' : 'left' }}>
                               {msg.timestamp?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
                           </div>
@@ -763,9 +758,9 @@ const VoiceAssistant = () => {
                         <motion.div key="typing" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                           className="flex gap-2 items-end"
                         >
-                          <Avatar isUser={false} auraState="thinking" />
-                          <div className="px-3.5 py-2.5 rounded-2xl flex gap-1.5 items-center"
-                            style={{ background: 'var(--au-glass)', border: '1px solid var(--au-border)', borderLeft: '2px solid var(--au-violet)', borderRadius: '3px 14px 14px 14px' }}
+                          <Avatar isUser={false} />
+                          <div className="px-3.5 py-2.5 rounded-lg flex gap-1.5 items-center"
+                            style={{ background: 'var(--sig-glass)', border: '1px solid var(--sig-line)', borderLeft: '2px solid var(--sig-mint)', borderRadius: '2px 10px 10px 10px' }}
                           >
                             {[0, 1, 2].map(i => <div key={i} className="type-dot" />)}
                           </div>
@@ -782,10 +777,10 @@ const VoiceAssistant = () => {
                       <motion.div
                         initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                         className="px-3 sm:px-4 py-2 border-t flex items-center gap-2 overflow-hidden"
-                        style={{ background: 'rgba(244,114,182,0.06)', borderColor: 'var(--au-border)' }}
+                        style={{ background: 'rgba(251,113,133,0.05)', borderColor: 'var(--sig-line)' }}
                       >
-                        <Meter active count={4} color="var(--au-pink)" h={12} />
-                        <p className="text-xs truncate" style={{ color: 'var(--au-pink)', fontFamily: 'var(--au-font-mono)' }}>
+                        <Meter active count={4} color="var(--sig-rose)" h={12} />
+                        <p className="text-xs truncate" style={{ color: 'var(--sig-rose)', fontFamily: 'var(--sig-font-mono)' }}>
                           {transcript}
                         </p>
                       </motion.div>
@@ -793,32 +788,32 @@ const VoiceAssistant = () => {
                   </AnimatePresence>
 
                   {/* ── INPUT AREA ── */}
-                  <div className="au-tight px-3 py-3 sm:px-4 border-t" style={{ background: 'rgba(10,11,20,0.55)', borderColor: 'var(--au-border)' }}>
+                  <div className="sig-tight px-3 py-3 sm:px-4 border-t" style={{ background: 'var(--sig-surface)', borderColor: 'var(--sig-line)' }}>
                     <div className="flex gap-2 items-center">
                       <button
-                        className={`au-mic-btn w-11 h-11 rounded-full border flex items-center justify-center flex-shrink-0 ${isListening ? 'is-listening' : ''}`}
+                        className="sig-mic-btn w-11 h-11 rounded-lg border flex items-center justify-center flex-shrink-0"
                         onClick={toggleListening}
                         title={isListening ? 'Stop' : 'Speak'}
                         style={{
-                          background: isListening ? 'rgba(244,114,182,0.14)' : 'var(--au-glass)',
-                          borderColor: isListening ? 'var(--au-pink)' : 'var(--au-border)',
+                          background: isListening ? 'rgba(251,113,133,0.12)' : 'var(--sig-glass)',
+                          borderColor: isListening ? 'var(--sig-rose)' : 'var(--sig-line)',
                         }}
                       >
-                        {isListening ? <FaStop size={13} color="var(--au-pink)" /> : <FiMic size={16} style={{ color: 'var(--au-cyan)' }} />}
+                        {isListening ? <FaStop size={13} color="var(--sig-rose)" /> : <FaMicrophone size={15} style={{ color: 'var(--sig-mint)' }} />}
                       </button>
 
                       <input
                         ref={inputRef}
-                        className="au-input flex-1 min-w-0 h-11 px-4 rounded-full border"
+                        className="sig-input flex-1 min-w-0 h-11 px-4 rounded-lg border"
                         type="text"
                         value={inputText}
                         onChange={e => setInputText(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && !e.shiftKey && processUserInput(inputText)}
                         placeholder="Ask about Muhire's work…"
                         style={{
-                          border: '1px solid var(--au-border)',
-                          background: 'rgba(255,255,255,0.035)',
-                          color: 'var(--au-ink)',
+                          border: '1px solid var(--sig-line)',
+                          background: 'rgba(255,255,255,0.025)',
+                          color: 'var(--sig-ink)',
                         }}
                       />
 
@@ -826,14 +821,14 @@ const VoiceAssistant = () => {
                         whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.94 }}
                         onClick={() => processUserInput(inputText)}
                         disabled={!inputText.trim()}
-                        className="au-send w-11 h-11 rounded-full border flex items-center justify-center flex-shrink-0"
+                        className="w-11 h-11 rounded-lg border flex items-center justify-center flex-shrink-0"
                         style={{
-                          background: inputText.trim() ? 'linear-gradient(135deg, var(--au-cyan), var(--au-violet))' : 'var(--au-glass)',
-                          borderColor: inputText.trim() ? 'transparent' : 'var(--au-border)',
+                          background: inputText.trim() ? 'var(--sig-mint)' : 'var(--sig-glass)',
+                          borderColor: inputText.trim() ? 'var(--sig-mint)' : 'var(--sig-line)',
                           cursor: inputText.trim() ? 'pointer' : 'not-allowed',
                         }}
                       >
-                        <FaPaperPlane size={13} color={inputText.trim() ? '#0a0c18' : 'var(--au-faint)'} />
+                        <FaPaperPlane size={13} color={inputText.trim() ? '#0a0c10' : 'var(--sig-faint)'} />
                       </motion.button>
                     </div>
 
@@ -858,12 +853,12 @@ const VoiceAssistant = () => {
                         },
                       ].map((btn, i) => (
                         <button key={i} onClick={btn.onClick}
-                          className="au-toolbtn flex-1 py-1.5 px-1.5 sm:px-2 rounded-full border text-[10px] flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95"
+                          className="sig-toolbtn flex-1 py-1.5 px-1.5 sm:px-2 rounded-md border text-[10px] flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95"
                           style={{
-                            background: btn.accent ? 'rgba(94,234,212,0.10)' : btn.danger ? 'rgba(244,114,182,0.07)' : 'var(--au-glass)',
-                            borderColor: btn.accent ? 'var(--au-border-bright)' : btn.danger ? 'rgba(244,114,182,0.28)' : 'var(--au-border)',
-                            color: btn.accent ? 'var(--au-cyan)' : btn.danger ? 'var(--au-pink)' : 'var(--au-dim)',
-                            fontFamily: 'var(--au-font-mono)',
+                            background: btn.accent ? 'var(--sig-mint-dim)' : btn.danger ? 'rgba(251,113,133,0.06)' : 'var(--sig-glass)',
+                            borderColor: btn.accent ? 'var(--sig-line-bright)' : btn.danger ? 'rgba(251,113,133,0.25)' : 'var(--sig-line)',
+                            color: btn.accent ? 'var(--sig-mint)' : btn.danger ? 'var(--sig-rose)' : 'var(--sig-dim)',
+                            fontFamily: 'var(--sig-font-mono)',
                           }}
                         >
                           <btn.icon size={11} />
@@ -873,13 +868,13 @@ const VoiceAssistant = () => {
                     </div>
 
                     <div className="flex items-center gap-2 mt-2.5">
-                      <span className="text-[10px]" style={{ color: 'var(--au-faint)', fontFamily: 'var(--au-font-mono)' }}>rate</span>
+                      <span className="text-[10px]" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>rate</span>
                       <input type="range" min={0.5} max={1.5} step={0.05} value={voiceSpeed}
                         onChange={e => setVoiceSpeed(parseFloat(e.target.value))}
                         className="flex-1 h-1 rounded-full cursor-pointer"
-                        style={{ accentColor: 'var(--au-violet)' }}
+                        style={{ accentColor: 'var(--sig-mint)' }}
                       />
-                      <span className="text-[10px] w-9 text-right" style={{ color: 'var(--au-faint)', fontFamily: 'var(--au-font-mono)' }}>{voiceSpeed.toFixed(2)}×</span>
+                      <span className="text-[10px] w-9 text-right" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>{voiceSpeed.toFixed(2)}×</span>
                     </div>
                   </div>
 
@@ -893,22 +888,22 @@ const VoiceAssistant = () => {
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         className="border-t overflow-hidden"
-                        style={{ background: 'rgba(0,0,0,0.18)', borderColor: 'var(--au-border)' }}
+                        style={{ background: 'rgba(0,0,0,0.15)', borderColor: 'var(--sig-line)' }}
                       >
-                        <div className="au-tight px-3 py-3 sm:px-4">
-                          <p className="text-[10px] tracking-wider uppercase mb-2" style={{ color: 'var(--au-faint)', fontFamily: 'var(--au-font-mono)' }}>
+                        <div className="sig-tight px-3 py-3 sm:px-4">
+                          <p className="text-[10px] tracking-wider uppercase mb-2" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
                             quick_prompts
                           </p>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                             {SUGGESTIONS.map((s, i) => (
-                              <motion.button key={i} className="au-chip px-3 py-2 rounded-xl border text-left flex items-center gap-2"
+                              <motion.button key={i} className="sig-chip px-3 py-2 rounded-md border text-left flex items-center gap-2"
                                 initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.03 }}
                                 onClick={() => processUserInput(s.text)}
-                                style={{ background: 'var(--au-glass)', borderColor: 'var(--au-border)' }}
+                                style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)' }}
                               >
-                                <s.icon size={11} style={{ color: 'var(--au-cyan)', flexShrink: 0 }} />
-                                <span className="text-[11.5px] truncate" style={{ color: 'var(--au-ink)' }}>{s.text}</span>
+                                <s.icon size={11} style={{ color: 'var(--sig-mint)', flexShrink: 0 }} />
+                                <span className="text-[11.5px] truncate" style={{ color: 'var(--sig-ink)' }}>{s.text}</span>
                               </motion.button>
                             ))}
                           </div>
@@ -919,10 +914,10 @@ const VoiceAssistant = () => {
 
                   {/* ── FOOTER ── */}
                   <div className="px-3 py-2 sm:px-4 border-t flex items-center justify-center gap-2"
-                    style={{ background: 'rgba(10,11,20,0.6)', borderColor: 'var(--au-border)' }}
+                    style={{ background: 'var(--sig-surface)', borderColor: 'var(--sig-line)' }}
                   >
                     {isSpeaking && <Meter active count={4} h={10} />}
-                    <span className="text-[9.5px] tracking-wide truncate" style={{ color: 'var(--au-faint)', fontFamily: 'var(--au-font-mono)' }}>
+                    <span className="text-[9.5px] tracking-wide truncate" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
                       {isSpeaking ? 'output_active' : isListening ? 'input_active' : 'muhire · fullstack · kigali'}
                     </span>
                   </div>
@@ -932,29 +927,29 @@ const VoiceAssistant = () => {
 
             {/* ── MINIMISED BODY ── */}
             {isMinimized && (
-              <div className="px-4 py-3 relative z-10" style={{ background: 'rgba(10,11,20,0.4)' }}>
+              <div className="px-4 py-3" style={{ background: 'var(--sig-surface)' }}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <StatusDot state={auraState} />
-                    <span className="text-xs font-semibold truncate" style={{ color: 'var(--au-ink)', fontFamily: 'var(--au-font-display)' }}>
+                    <StatusDot listening={isListening} speaking={isSpeaking} />
+                    <span className="text-xs font-semibold truncate" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
                       Muhire · Fullstack
                     </span>
                     {unreadCount > 0 && (
-                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0" style={{ background: 'var(--au-pink)', color: '#0a0c18', fontFamily: 'var(--au-font-mono)' }}>
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold flex-shrink-0" style={{ background: 'var(--sig-rose)', color: '#0a0c10', fontFamily: 'var(--sig-font-mono)' }}>
                         {unreadCount}
                       </span>
                     )}
                   </div>
                   <button
                     onClick={() => setIsMinimized(false)}
-                    className="w-8 h-8 rounded-full border flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'var(--au-glass)', borderColor: 'var(--au-border)', color: 'var(--au-dim)' }}
+                    className="w-8 h-8 rounded-lg border flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)', color: 'var(--sig-dim)' }}
                   >
                     <FiMaximize2 size={14} />
                   </button>
                 </div>
                 {conversation.length > 0 && (
-                  <p className="text-[11px] truncate mt-1.5" style={{ color: 'var(--au-dim)' }}>
+                  <p className="text-[11px] truncate mt-1.5" style={{ color: 'var(--sig-dim)' }}>
                     {conversation[conversation.length - 1].text}
                   </p>
                 )}
