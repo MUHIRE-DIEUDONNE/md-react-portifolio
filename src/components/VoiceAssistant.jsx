@@ -10,12 +10,7 @@ import {
 import { FaRobot, FaMicrophone, FaStop, FaPaperPlane } from 'react-icons/fa'
 
 /* ─────────────────────────────────────────────
-   DESIGN TOKENS — "Signal" console aesthetic
-   A developer's instrument panel, not a chat-bot
-   cliché. Mint signal accent + violet→magenta
-   "visitor" gradient on near-black slate,
-   monospace status language, VU-meter ring as the
-   one signature motif.
+   DESIGN TOKENS — refined for the screenshot look
 ───────────────────────────────────────────── */
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -50,7 +45,6 @@ const style = `
   .sig-messages::-webkit-scrollbar-thumb { background: var(--sig-line-bright); border-radius: 10px; }
   .sig-panel { overscroll-behavior: contain; }
 
-  /* faint scanline texture for the "instrument" feel */
   .sig-scan::before {
     content: '';
     position: absolute; inset: 0; pointer-events: none; z-index: 0;
@@ -122,8 +116,6 @@ const Meter = ({ active, color = 'var(--sig-mint)', count = 5, h = 14 }) => (
   </div>
 )
 
-/* Signature element: instrument ring around the avatar — ticks like a VU dial,
-   sweeping arc when listening/speaking, otherwise idle. */
 const SignalRing = ({ listening, speaking }) => {
   const active = listening || speaking
   const color = listening ? 'var(--sig-rose)' : speaking ? 'var(--sig-mint)' : 'var(--sig-faint)'
@@ -153,8 +145,6 @@ const StatusDot = ({ listening, speaking }) => {
   )
 }
 
-/* Plain circular avatars — quiet dark ring for Nova, solid violet→magenta
-   for the visitor, no glyphs inside (matches the reference look). */
 const Avatar = ({ isUser }) => (
   <div className="w-7 h-7 rounded-full flex-shrink-0"
     style={{
@@ -165,8 +155,7 @@ const Avatar = ({ isUser }) => (
 )
 
 /* ─────────────────────────────────────────────
-   PERSONAS — the "live switch" — changes Nova's
-   framing and greeting without changing the facts
+   PERSONAS — live switch
 ───────────────────────────────────────────── */
 const PERSONAS = [
   {
@@ -190,7 +179,7 @@ const PERSONAS = [
 ]
 
 /* ─────────────────────────────────────────────
-   KNOWLEDGE BASE
+   KNOWLEDGE BASE (unchanged)
 ───────────────────────────────────────────── */
 const KB = {
   introduction: {
@@ -275,13 +264,11 @@ const KB = {
 function generateResponse(input) {
   const s = input.toLowerCase()
 
-  /* ── Greetings ── */
   if (/\b(hi|hello|hey|good morning|good afternoon|good evening|what'?s up|nice to meet you|welcome)\b/.test(s) && !s.includes('how'))
     return "Hello! 👋 Welcome to Muhire Dieudonne's portfolio. I'm Nova, your AI assistant. I can answer questions about Muhire's skills, projects, experience, education, and contact information. How can I help you today?"
   if (s.includes('how are you') || s.includes("how's your day") || s.includes('how is your day'))
     return "I'm doing great, thank you! I'm here and ready to help you learn more about Muhire Dieudonne and his projects. What would you like to know?"
 
-  /* ── About the Assistant ── */
   if (s.includes('who are you') && !s.includes('muhire'))
     return "I'm Nova, an AI-powered assistant built for Muhire Dieudonne's portfolio. I can talk with you by voice or text about his skills, projects, and experience."
   if (s.includes('what can you do'))
@@ -297,7 +284,6 @@ function generateResponse(input) {
   if (s.includes('what language') && (s.includes('support') || s.includes('speak')))
     return "Right now I communicate in English, but I'm always improving!"
 
-  /* ── About Muhire ── */
   if (s.includes('who is muhire') || s.includes('introduce muhire') || s.includes('tell me about muhire') || s.includes('introduce') || s.includes('tell me about yourself'))
     return "I'm Muhire Dieudonne, a Fullstack Developer from Kigali, Rwanda. I specialize in building modern web applications with React, Next.js, Node.js, and Three.js. I'm passionate about creating immersive digital experiences that combine beautiful design with powerful functionality."
   if (s.includes('how old'))
@@ -311,7 +297,6 @@ function generateResponse(input) {
   if (s.includes('fullstack') || s.includes('full-stack') || s.includes('full stack'))
     return KB.introduction.all
 
-  /* ── Skills ── */
   if (s.includes('laravel')) return s.includes('what is') ? KB.technical.laravel : KB.skills.laravel
   if (s.includes('php')) return KB.skills.php
   if (s.includes('firebase')) return s.includes('what is') ? KB.technical.firebase : KB.skills.firebase
@@ -336,7 +321,6 @@ function generateResponse(input) {
     return KB.skills.all
   }
 
-  /* ── Projects ── */
   if (s.includes('cooperative')) return KB.projects.cooperative
   if (s.includes('school management') || s.includes('school system')) return KB.projects.school
   if (s.includes('latest project')) return KB.projects.latest
@@ -350,7 +334,6 @@ function generateResponse(input) {
     return KB.projects.all
   }
 
-  /* ── Experience ── */
   if (s.includes('how many years') || (s.includes('years') && s.includes('experience'))) return KB.experience.years
   if (s.includes('worked with companies') || s.includes('worked with a company')) return KB.experience.companies
   if (s.includes('is he a freelancer') || s.includes('are you a freelancer')) return KB.experience.freelance
@@ -362,7 +345,6 @@ function generateResponse(input) {
     return KB.experience.all
   }
 
-  /* ── Education ── */
   if (s.includes('education') || s.includes('degree') || s.includes('study') || s.includes('qualification')) {
     if (s.includes('qualification')) return KB.education.qualification
     if (s.includes('degree') || s.includes('university') || s.includes('where did')) return KB.education.degree
@@ -370,7 +352,6 @@ function generateResponse(input) {
     return KB.education.all
   }
 
-  /* ── Contact ── */
   if (s.includes('whatsapp')) return KB.contact.whatsapp
   if (s.includes('contact') || s.includes('email') || s.includes('reach') || s.includes('phone')) {
     if (s.includes('email')) return KB.contact.email
@@ -379,7 +360,6 @@ function generateResponse(input) {
     return KB.contact.all
   }
 
-  /* ── Social links / navigation ── */
   if (s.includes('github')) return KB.social.github
   if (s.includes('linkedin')) return KB.social.linkedin
   if (s.includes('download') && (s.includes('cv') || s.includes('resume'))) return KB.social.cv
@@ -388,7 +368,6 @@ function generateResponse(input) {
   if (s.includes('open projects') || s.includes('go to skills') || s.includes('show contact') || s.includes('scroll to about') || s.includes('open services') || s.includes('show testimonials') || s.includes('open github'))
     return "I can guide you there — use the navigation menu at the top of the portfolio, and I'll be right here if you have questions along the way."
 
-  /* ── Hiring / availability ── */
   if (s.includes('remote')) return KB.availability.remote
   if (s.includes('how much') || s.includes('charge') || s.includes('rate') || s.includes('cost') || s.includes('price'))
     return KB.availability.rate
@@ -397,7 +376,6 @@ function generateResponse(input) {
     return KB.availability.all
   }
 
-  /* ── Small talk ── */
   if (s.includes('thank')) return "You're very welcome! As a developer from Rwanda, I really appreciate your interest. Feel free to ask anything else!"
   if (s.includes("you're amazing") || s.includes('good job') || s.includes('well done'))
     return "Thank you so much — that means a lot! Let me know if there's anything else you'd like to explore."
@@ -411,6 +389,7 @@ function generateResponse(input) {
   return "I'm Nova, Muhire Dieudonne's AI assistant. I can tell you about his skills, projects, experience, education, or how to contact him. What interests you most?"
 }
 
+// Quick suggestion chips – includes the "What's he built recently?" from screenshot
 const SUGGESTIONS = [
   { text: "Who are you?", icon: FiUser },
   { text: "What are your skills?", icon: FiCode },
@@ -421,7 +400,7 @@ const SUGGESTIONS = [
 ]
 
 /* ─────────────────────────────────────────────
-   MAIN COMPONENT
+   MAIN COMPONENT — refined layout
 ───────────────────────────────────────────── */
 const VoiceAssistant = () => {
   const [isOpen, setIsOpen]                   = useState(false)
@@ -439,7 +418,7 @@ const VoiceAssistant = () => {
   const [autoVoice, setAutoVoice]             = useState(true)
   const [voiceSpeed, setVoiceSpeed]           = useState(0.93)
   const [voicePitch, setVoicePitch]           = useState(1.08)
-  const [persona, setPersona]                 = useState('visitor')
+  const [persona, setPersona]                 = useState('recruiter') // default to recruiter to match screenshot
   const [personaTouched, setPersonaTouched]   = useState(false)
   const [showJump, setShowJump]               = useState(false)
 
@@ -452,7 +431,6 @@ const VoiceAssistant = () => {
 
   const activePersona = PERSONAS.find(p => p.key === persona) || PERSONAS[0]
 
-  /* ── ESC to close ── */
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
@@ -464,7 +442,6 @@ const VoiceAssistant = () => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen])
 
-  /* ── Speech recognition setup ── */
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SR) return
@@ -491,7 +468,6 @@ const VoiceAssistant = () => {
     recognitionRef.current = rec
   }, [])
 
-  /* ── Auto-welcome ── */
   useEffect(() => {
     if (!isOpen || welcomeDone) return
     const welcome = activePersona.welcome
@@ -509,12 +485,10 @@ const VoiceAssistant = () => {
     return () => clearTimeout(t)
   }, [isOpen])
 
-  /* ── Scroll to bottom ── */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [conversation, isTypingIndicator])
 
-  /* ── Track scroll position for "jump to latest" affordance ── */
   const handleMessagesScroll = () => {
     const el = messagesBoxRef.current
     if (!el) return
@@ -526,7 +500,6 @@ const VoiceAssistant = () => {
     setShowJump(false)
   }
 
-  /* ── Unread badge ── */
   useEffect(() => {
     if (!isOpen && conversation.length > 0) {
       const last = conversation[conversation.length - 1]
@@ -537,7 +510,6 @@ const VoiceAssistant = () => {
 
   useEffect(() => { if (isOpen) setUnreadCount(0) }, [isOpen])
 
-  /* ── Speak ── */
   const speak = useCallback((text) => {
     if (!synthRef.current || isMuted) return
     synthRef.current.cancel()
@@ -549,7 +521,6 @@ const VoiceAssistant = () => {
     synthRef.current.speak(u)
   }, [isMuted, voiceSpeed, voicePitch])
 
-  /* ── Typing animation ── */
   const addAssistantMessage = useCallback((text) => {
     setConversation(prev => [...prev, {
       type: 'assistant', text: '',
@@ -570,7 +541,6 @@ const VoiceAssistant = () => {
     }, 18)
   }, [])
 
-  /* ── Process input ── */
   const processUserInput = useCallback((input) => {
     if (!input.trim()) return
     synthRef.current?.cancel()
@@ -588,7 +558,6 @@ const VoiceAssistant = () => {
     }, 600)
   }, [isMuted, autoVoice, speak, addAssistantMessage])
 
-  /* ── Toggle listening ── */
   const toggleListening = () => {
     if (!recognitionRef.current) {
       alert('Speech recognition not supported. Please use Chrome, Edge, or Safari.')
@@ -598,20 +567,17 @@ const VoiceAssistant = () => {
     else recognitionRef.current.start()
   }
 
-  /* ── Clear ── */
   const clearConversation = () => {
     const msg = "Conversation cleared! I'm Muhire Dieudonne, Fullstack Developer from Kigali, Rwanda. Ask me anything about my work!"
     setConversation([{ type: 'assistant', text: msg, timestamp: new Date(), isTyping: false }])
     if (!isMuted && autoVoice) speak(msg)
   }
 
-  /* ── Mute ── */
   const toggleMute = () => {
     if (!isMuted) { synthRef.current?.cancel(); setIsSpeaking(false) }
     setIsMuted(m => !m)
   }
 
-  /* ── Persona live-switch: reframes Nova's greeting, doesn't wipe the facts ── */
   const switchPersona = (key) => {
     if (key === persona) return
     setPersona(key)
