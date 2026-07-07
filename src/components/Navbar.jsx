@@ -70,17 +70,17 @@ const Floating3DElement = ({ delay, duration, size = 20, color = '#6366f1', styl
 )
 
 // ─── 3D Card Component ───────────────────────────────────────────────
-const Card3D = ({ children, className = '', delay = 0, ...rest }) => (
+const Card3D = ({ children, className = '', delay = 0, disableMobile3D = false, ...rest }) => (
   <motion.div
     initial={{ opacity: 0, rotateX: -15, y: 30 }}
     animate={{ opacity: 1, rotateX: 0, y: 0 }}
-    whileHover={{ rotateX: 15, scale: 1.05 }}
+    whileHover={!disableMobile3D ? { rotateX: 15, scale: 1.05 } : {}}
     transition={{ delay, duration: 0.6, type: 'spring', stiffness: 100 }}
     className={`relative ${className}`}
     style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}
     {...rest}
   >
-    <div style={{ transform: 'translateZ(30px)', backfaceVisibility: 'hidden' }}>
+    <div style={disableMobile3D ? {} : { transform: 'translateZ(30px)', backfaceVisibility: 'hidden' }}>
       {children}
     </div>
   </motion.div>
@@ -147,7 +147,7 @@ const Navbar = () => {
 
   const navItems = [
     { id: 'home', label: 'Home', icon: <FiHome /> },
-    { id: 'about', label: 'About', icon: <FiUser /> }, // Correctly restored target identity
+    { id: 'about', label: 'About', icon: <FiUser /> },
     { id: 'skills', label: 'Skills', icon: <FiZap /> },
     { id: 'projects', label: 'Projects', icon: <FiBriefcase /> },
     { id: 'experience', label: 'Experience', icon: <FiTrendingUp /> },
@@ -212,11 +212,22 @@ const Navbar = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // 💡 ENHANCED SCROLL ENGINE FOR MOBILE ACCURACY
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId)
     if (element) {
       const navHeight = navRef.current?.offsetHeight || 80
-      window.scrollTo({ top: element.offsetTop - navHeight, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+      
+      // Calculate real absolute coordinates, ignoring parent offsets or overlay height drops
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY
+      const offsetPosition = elementPosition - navHeight
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: prefersReducedMotion ? 'auto' : 'smooth'
+      })
+
+      // Gracefully close layout wrappers
       setIsOpen(false)
       window.dispatchEvent(new CustomEvent('nav-menu-toggle', { detail: false }))
       playClick()
@@ -292,7 +303,7 @@ const Navbar = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-3 sm:py-4">
 
-            {/* ── Logo (desktop) ── */}
+            {/* ── Logo ── */}
             <Card3D delay={0.2} className="cursor-pointer" onClick={() => scrollToSection('home')} onMouseEnter={playHover}>
               <motion.div
                 ref={magneticLogo}
@@ -378,7 +389,7 @@ const Navbar = () => {
               </Card3D>
             </div>
 
-            {/* ── Mobile Right Side ── */}
+            {/* ── Mobile UI Controls ── */}
             <div className="flex items-center gap-2 md:hidden">
               {/* Theme */}
               <Card3D delay={1.0}>
@@ -395,7 +406,7 @@ const Navbar = () => {
                 </motion.button>
               </Card3D>
 
-              {/* ── MOBILE MENU ICON BUTTON (hamburger) ── */}
+              {/* Hamburger Toggle */}
               <motion.button
                 onClick={handleHamburgerClick}
                 onMouseEnter={playHover}
@@ -413,12 +424,8 @@ const Navbar = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: isOpen
-                    ? 'rgba(212,175,85,0.18)'
-                    : 'rgba(255,255,255,0.06)',
-                  boxShadow: isOpen
-                    ? '0 0 0 1.5px rgba(212,175,85,0.5), 0 4px 16px rgba(212,175,85,0.2)'
-                    : '0 0 0 1px rgba(255,255,255,0.1)',
+                  background: isOpen ? 'rgba(212,175,85,0.18)' : 'rgba(255,255,255,0.06)',
+                  boxShadow: isOpen ? '0 0 0 1.5px rgba(212,175,85,0.5), 0 4px 16px rgba(212,175,85,0.2)' : '0 0 0 1px rgba(255,255,255,0.1)',
                   transition: 'background 0.25s, box-shadow 0.25s',
                 }}
               >
@@ -441,12 +448,7 @@ const Navbar = () => {
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.6, opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 4,
-                      }}
+                      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}
                     >
                       <span style={{ display: 'block', width: 20, height: 3, borderRadius: 4, background: '#f5eed8' }} />
                       <span style={{ display: 'block', width: 20, height: 3, borderRadius: 4, background: '#f5eed8' }} />
@@ -459,7 +461,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* ── Mobile Menu ── */}
+        {/* ── Mobile Menu Layer ── */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -472,32 +474,32 @@ const Navbar = () => {
               <div className="container mx-auto px-4 py-4">
                 <div className="grid grid-cols-2 gap-2">
                   {navItems.map((item, index) => (
-                    <Card3D key={item.id} delay={0.1 + index * 0.05}>
-                      <motion.button
-                        initial={{ x: -20, opacity: 0, rotateY: -90 }}
-                        animate={{ x: 0, opacity: 1, rotateY: 0 }}
-                        transition={{ delay: index * 0.05, duration: 0.6 }}
-                        onClick={() => scrollToSection(item.id)}
-                        onMouseEnter={playHover}
-                        whileHover={{ scale: 1.05, rotateX: 10, translateZ: 15 }}
-                        whileTap={{ scale: 0.95, rotateX: -5 }}
+                    /* 💡 Touch-Safe Mobile Card Wrapper */
+                    <Card3D 
+                      key={item.id} 
+                      delay={0.1 + index * 0.05} 
+                      disableMobile3D={true} // Bypasses translateZ touch-breaking offsets on phone displays
+                      onClick={() => scrollToSection(item.id)} // Captures absolute container taps immediately
+                      className="cursor-pointer"
+                    >
+                      <motion.div
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: index * 0.05, duration: 0.4 }}
                         className={`flex flex-col items-center p-4 rounded-xl transition-all ${
                           activeSection === item.id
                             ? 'bg-primary/20 text-primary'
                             : 'bg-dark/50 text-light/70 hover:bg-primary/10'
                         }`}
                         style={{
-                          transformStyle: 'preserve-3d',
                           boxShadow: activeSection === item.id
                             ? '0 8px 25px rgba(99,102,241,0.4)'
                             : '0 4px 15px rgba(0,0,0,0.2)',
                         }}
                       >
-                        <motion.span className="text-2xl mb-1" style={{ transform: 'translateZ(10px)' }} whileHover={{ rotateZ: 360 }} transition={{ duration: 0.6 }}>
-                          {item.icon}
-                        </motion.span>
-                        <span className="text-xs font-medium" style={{ transform: 'translateZ(5px)' }}>{item.label}</span>
-                      </motion.button>
+                        <span className="text-2xl mb-1">{item.icon}</span>
+                        <span className="text-xs font-medium">{item.label}</span>
+                      </motion.div>
                     </Card3D>
                   ))}
                 </div>
@@ -531,11 +533,11 @@ const Navbar = () => {
           >
             <div className="flex space-x-2">
               {navItems.map((item, index) => (
-                <Card3D key={item.id} delay={0.1 + index * 0.05}>
+                <Card3D key={item.id} delay={0.1 + index * 0.05} disableMobile3D={true}>
                   <motion.button
                     onClick={() => scrollToSection(item.id)}
                     onMouseEnter={playHover}
-                    whileHover={{ scale: 1.1, rotateZ: 15, translateZ: 10 }}
+                    whileHover={{ scale: 1.1, rotateZ: 15 }}
                     whileTap={{ scale: 0.9, rotateZ: -15 }}
                     className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                       activeSection === item.id
@@ -546,15 +548,12 @@ const Navbar = () => {
                     }`}
                     title={item.label}
                     style={{
-                      transformStyle: 'preserve-3d',
                       boxShadow: activeSection === item.id
                         ? '0 6px 20px rgba(99,102,241,0.5)'
                         : '0 3px 10px rgba(0,0,0,0.3)',
                     }}
                   >
-                    <motion.span className="text-sm" style={{ transform: 'translateZ(5px)' }} whileHover={{ rotateZ: 360 }} transition={{ duration: 0.6 }}>
-                      {item.icon}
-                    </motion.span>
+                    <span className="text-sm">{item.icon}</span>
                   </motion.button>
                 </Card3D>
               ))}
