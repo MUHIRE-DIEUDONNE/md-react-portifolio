@@ -5,13 +5,13 @@ import {
   FiVolume2, FiVolumeX, FiUser,
   FiTrash2, FiX, FiMinimize2, FiMaximize2,
   FiBriefcase, FiCode, FiMail, FiGlobe,
-  FiAward, FiChevronDown, FiChevronUp
+  FiAward, FiChevronDown, FiChevronUp,
+  FiMessageSquare, FiHelpCircle, FiStar, FiCpu
 } from 'react-icons/fi'
 import { FaStop, FaPaperPlane, FaMicrophone } from 'react-icons/fa'
 
 /* ─────────────────────────────────────────────
    DESIGN TOKENS — aurora-glass palette
-   (teal / purple / pink), matching the showcase
 ───────────────────────────────────────────── */
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -48,7 +48,6 @@ const style = `
   .sig-messages::-webkit-scrollbar-thumb { background: var(--sig-line-bright); border-radius: 10px; }
   .sig-panel { overscroll-behavior: contain; }
 
-  /* ambient blurred aurora blobs, matching showcase drift */
   @keyframes drift1 { 0%, 100% { transform: translate(-6%, -4%); } 50% { transform: translate(8%, 6%); } }
   @keyframes drift2 { 0%, 100% { transform: translate(6%, 4%); } 50% { transform: translate(-8%, -8%); } }
   @keyframes drift3 { 0%, 100% { transform: translate(0, 8%); } 50% { transform: translate(-6%, -10%); } }
@@ -126,7 +125,6 @@ const Meter = ({ active, color = 'var(--sig-teal)', count = 5, h = 14 }) => (
   </div>
 )
 
-/* Gradient avatar ring — mirrors the showcase's core-ring SVG (teal → purple → pink) */
 const SignalRing = ({ listening, speaking }) => {
   const active = listening || speaking
   return (
@@ -172,7 +170,6 @@ const Avatar = ({ isUser }) => (
   />
 )
 
-/* Ambient background aurora blobs behind the panel */
 const AuroraBackdrop = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
     <div className="sig-blob-1 absolute rounded-full" style={{ width: 220, height: 220, top: -40, left: -30, background: '#5eead4', filter: 'blur(70px)', opacity: 0.22 }} />
@@ -182,31 +179,31 @@ const AuroraBackdrop = () => (
 )
 
 /* ─────────────────────────────────────────────
-   PERSONAS — live switch
+   PERSONAS
 ───────────────────────────────────────────── */
 const PERSONAS = [
   {
     key: 'visitor',
-    label: 'Visitor',
+    label: '👤 Visitor',
     mode: 'visitor mode',
     welcome: "Hi, I'm Nova — Muhire's guide to this portfolio. Ask me about his skills, projects, or how to reach him.",
   },
   {
     key: 'recruiter',
-    label: 'Recruiter',
+    label: '🎯 Recruiter',
     mode: 'recruiter mode',
     welcome: "Hello, I'm Nova — here to walk you through Muhire's background as a software developer. Ask about impact, experience, or availability.",
   },
   {
     key: 'developer',
-    label: 'Developer',
+    label: '💻 Developer',
     mode: 'developer mode',
     welcome: "Hey, fellow builder. I'm Nova — ask me about Muhire's stack, architecture choices, or how something on this site was built.",
   },
 ]
 
 /* ─────────────────────────────────────────────
-   KNOWLEDGE BASE (unchanged)
+   KNOWLEDGE BASE
 ───────────────────────────────────────────── */
 const KB = {
   introduction: {
@@ -288,56 +285,62 @@ const KB = {
   }
 }
 
+/* ─────────────────────────────────────────────
+   ENHANCED RESPONSE GENERATOR
+───────────────────────────────────────────── */
 function generateResponse(input) {
-  const s = input.toLowerCase()
+  const s = input.toLowerCase().trim()
 
-  if (/\b(hi|hello|hey|good morning|good afternoon|good evening|what'?s up|nice to meet you|welcome)\b/.test(s) && !s.includes('how'))
-    return "Hello! 👋 Welcome to Muhire Dieudonne's portfolio. I'm Nova, your AI assistant. I can answer questions about Muhire's skills, projects, experience, education, and contact information. How can I help you today?"
-  if (s.includes('how are you') || s.includes("how's your day") || s.includes('how is your day'))
-    return "I'm doing great, thank you! I'm here and ready to help you learn more about Muhire Dieudonne and his projects. What would you like to know?"
-
-  if (s.includes('who are you') && !s.includes('muhire'))
-    return "I'm Nova, an AI-powered assistant built for Muhire Dieudonne's portfolio. I can talk with you by voice or text about his skills, projects, and experience."
-  if (s.includes('what can you do'))
-    return "I can introduce Muhire, explain his skills, showcase his projects, provide contact details, answer software development questions, and help you navigate this portfolio using voice or text."
-  if (s.includes('how do i use you') || s.includes('how do you work'))
-    return "Just press the microphone icon to speak, or type your question below. I'll respond with voice and text — ask me anything about Muhire!"
-  if (s.includes('are you an ai') || s.includes('are you a bot') || s.includes('are you human'))
-    return "Yes, I'm an AI assistant built into this portfolio to make exploring Muhire's work more interactive."
-  if (s.includes('can you speak'))
-    return "Yes! I can respond with voice using speech synthesis — you'll hear me talk as well as read my replies."
-  if (s.includes('can you hear me'))
-    return "Yes, I can listen through your microphone using speech recognition. Just tap the mic button and start talking."
-  if (s.includes('what language') && (s.includes('support') || s.includes('speak')))
-    return "Right now I communicate in English, but I'm always improving!"
-
-  if (s.includes('who is muhire') || s.includes('introduce muhire') || s.includes('tell me about muhire') || s.includes('introduce') || s.includes('tell me about yourself'))
-    return "I'm Muhire Dieudonne, a Fullstack Developer from Kigali, Rwanda. I specialize in building modern web applications with React, Next.js, Node.js, and Three.js. I'm passionate about creating immersive digital experiences that combine beautiful design with powerful functionality."
-  if (s.includes('how old'))
-    return "I'd rather let my work speak for itself! What I can tell you is that I bring 5+ years of hands-on development experience."
-  if (s.includes('what does muhire do') || s.includes('what do you do'))
-    return "As a Fullstack Developer, I work on both frontend and backend development. I create complete web applications from database design to UI implementation. My tech stack includes React, Next.js, Node.js, TypeScript, and various modern frameworks."
-  if (s.includes('what makes muhire different') || s.includes('why hire') || s.includes('why choose'))
-    return "I combine strong full-stack fundamentals with a passion for 3-D and interactive experiences — so the products I build aren't just functional, they're memorable."
-  if (s.includes('where are you from') || s.includes('where is muhire') || s.includes('location') || s.includes('kigali') || s.includes('rwanda'))
-    return "I'm based in Kigali, Rwanda — a beautiful country in East Africa known as the land of a thousand hills. Kigali is an emerging tech hub, and I'm proud to be part of its growing developer community."
-  if (s.includes('fullstack') || s.includes('full-stack') || s.includes('full stack'))
-    return KB.introduction.all
-
-  if (s.includes('laravel')) return s.includes('what is') ? KB.technical.laravel : KB.skills.laravel
-  if (s.includes('php')) return KB.skills.php
-  if (s.includes('firebase')) return s.includes('what is') ? KB.technical.firebase : KB.skills.firebase
-  if (s.includes('mysql') && s.includes('mongodb')) return KB.technical.mysqlVsMongo
-  if (s.includes('mysql')) return KB.skills.mysql
-  if (s.includes('mongodb')) return s.includes('what is') ? KB.technical.mongodb : KB.skills.mongodb
-  if (s.includes('rest api') || s.includes('restful')) return s.includes('what is') || s.includes('explain') ? KB.technical.restapi : KB.skills.apis
-  if (s.includes('build api') || s.includes('build apis') || (s.includes('api') && s.includes('can')))
-    return KB.skills.apis
-  if (s.includes('node.js') || s.includes('nodejs') || s.includes('node js')) {
-    if (s.includes('what is') || s.includes('explain')) return KB.technical.node
-    return KB.skills.node
+  // ── Greetings and casual conversation ──
+  if (s === 'hi' || s === 'hello' || s === 'hey') {
+    return "Hi there! 👋 Welcome to Muhire Dieudonne's portfolio. I'm Nova, your AI assistant. How can I help you today?"
   }
-  if (s.includes('what is react') || s.includes('explain react')) return KB.technical.react
+  if (s.includes('good morning')) {
+    return "Good morning! 🌅 What a beautiful day to explore Muhire Dieudonne's portfolio. I'm Nova, ready to assist you. What would you like to know about Muhire?"
+  }
+  if (s.includes('good afternoon')) {
+    return "Good afternoon! ☀️ Great to see you exploring Muhire Dieudonne's work. I'm Nova, and I'm here to help. What questions do you have about Muhire's skills or projects?"
+  }
+  if (s.includes('good evening')) {
+    return "Good evening! 🌙 Welcome to Muhire Dieudonne's portfolio. I'm Nova, your AI guide. How can I assist you in learning more about Muhire's work?"
+  }
+  if (s.includes('how are you') || s.includes("how's your day") || s.includes('how is your day')) {
+    return "I'm doing great, thank you! 🌟 I'm here and ready to help you learn more about Muhire Dieudonne and his projects. What would you like to know?"
+  }
+  if (s.includes('nice to meet you')) {
+    return "Nice to meet you too! 😊 I'm Nova, Muhire's AI assistant. I'm excited to show you around his portfolio. What interests you most about Muhire's work?"
+  }
+  if (s.includes('what\'s up') || s.includes('whats up')) {
+    return "Hey! 👋 Just here helping visitors learn about Muhire Dieudonne, a talented Fullstack Developer from Kigali. What brings you to his portfolio today?"
+  }
+  if (s.includes('thank you') || s.includes('thanks')) {
+    return "You're very welcome! 🙏 As a developer from Rwanda, Muhire really appreciates your interest. Feel free to ask anything else!"
+  }
+  if (s.includes('bye') || s.includes('goodbye') || s.includes('see you')) {
+    return "Goodbye! 👋 It was great talking. Remember, I'm Nova, here for Muhire Dieudonne, Fullstack Developer from Kigali. Reach out anytime! 🇷🇼"
+  }
+
+  // ── Location and origin ──
+  if (s.includes('where is muhire') || s.includes('muhire location') || 
+      s.includes('where are you located') || s.includes('where do you live') ||
+      s.includes('muhire is from') || s.includes('from where')) {
+    return "Muhire Dieudonne is based in Kigali, Rwanda 🇷🇼 — the beautiful land of a thousand hills. Kigali is a growing tech hub in East Africa, and Muhire is proud to be part of its vibrant developer community. He works remotely with clients worldwide."
+  }
+  if (s.includes('rwanda') || s.includes('kigali')) {
+    return "Kigali, Rwanda 🇷🇼! It's a beautiful city with a thriving tech scene. Muhire is based there, working as a Fullstack Developer and contributing to Africa's growing digital economy."
+  }
+
+  // ── Who is Muhire ──
+  if (s.includes('who is muhire') || s.includes('introduce muhire') || 
+      s.includes('tell me about muhire') || s.includes('introduce') || 
+      s.includes('tell me about yourself') || s.includes('about muhire')) {
+    return "I'm Muhire Dieudonne, a Fullstack Developer from Kigali, Rwanda 🇷🇼. I specialize in building modern web applications with React, Next.js, Node.js, and Three.js. I'm passionate about creating immersive digital experiences that combine beautiful design with powerful functionality. I have 5+ years of experience and work with clients worldwide."
+  }
+  if (s.includes('what does muhire do') || s.includes('what do you do') || s.includes('what is your job')) {
+    return "As a Fullstack Developer, I work on both frontend and backend development. I create complete web applications from database design to UI implementation. My tech stack includes React, Next.js, Node.js, TypeScript, and various modern frameworks. I'm based in Kigali, Rwanda 🇷🇼 and work with clients globally."
+  }
+
+  // ── Skills and tech ──
   if (s.includes('skill') || s.includes('technology') || s.includes('tech stack') || s.includes('programming language')) {
     if (s.includes('frontend') || s.includes('react')) return KB.skills.frontend
     if (s.includes('backend')) return KB.skills.backend
@@ -347,11 +350,24 @@ function generateResponse(input) {
     if (s.includes('fullstack') || s.includes('full-stack')) return KB.skills.fullstack
     return KB.skills.all
   }
+  if (s.includes('laravel')) return s.includes('what is') ? KB.technical.laravel : KB.skills.laravel
+  if (s.includes('php')) return KB.skills.php
+  if (s.includes('firebase')) return s.includes('what is') ? KB.technical.firebase : KB.skills.firebase
+  if (s.includes('mysql') && s.includes('mongodb')) return KB.technical.mysqlVsMongo
+  if (s.includes('mysql')) return KB.skills.mysql
+  if (s.includes('mongodb')) return s.includes('what is') ? KB.technical.mongodb : KB.skills.mongodb
+  if (s.includes('rest api') || s.includes('restful')) return s.includes('what is') || s.includes('explain') ? KB.technical.restapi : KB.skills.apis
+  if (s.includes('node.js') || s.includes('nodejs') || s.includes('node js')) {
+    if (s.includes('what is') || s.includes('explain')) return KB.technical.node
+    return KB.skills.node
+  }
+  if (s.includes('what is react') || s.includes('explain react')) return KB.technical.react
 
+  // ── Projects ──
   if (s.includes('cooperative')) return KB.projects.cooperative
   if (s.includes('school management') || s.includes('school system')) return KB.projects.school
   if (s.includes('latest project')) return KB.projects.latest
-  if (s.includes('best project') || s.includes('show me his best'))
+  if (s.includes('best project') || s.includes('show me his best') || s.includes('favorite project'))
     return KB.projects.portfolio
   if (s.includes('project') || s.includes('build') || s.includes('built')) {
     if (s.includes('ecommerce') || s.includes('e-commerce') || s.includes('shop')) return KB.projects.ecommerce
@@ -361,6 +377,7 @@ function generateResponse(input) {
     return KB.projects.all
   }
 
+  // ── Experience ──
   if (s.includes('how many years') || (s.includes('years') && s.includes('experience'))) return KB.experience.years
   if (s.includes('worked with companies') || s.includes('worked with a company')) return KB.experience.companies
   if (s.includes('is he a freelancer') || s.includes('are you a freelancer')) return KB.experience.freelance
@@ -372,6 +389,7 @@ function generateResponse(input) {
     return KB.experience.all
   }
 
+  // ── Education ──
   if (s.includes('education') || s.includes('degree') || s.includes('study') || s.includes('qualification')) {
     if (s.includes('qualification')) return KB.education.qualification
     if (s.includes('degree') || s.includes('university') || s.includes('where did')) return KB.education.degree
@@ -379,86 +397,155 @@ function generateResponse(input) {
     return KB.education.all
   }
 
+  // ── Contact ──
   if (s.includes('whatsapp')) return KB.contact.whatsapp
-  if (s.includes('contact') || s.includes('email') || s.includes('reach') || s.includes('phone')) {
+  if (s.includes('contact') || s.includes('email') || s.includes('reach') || s.includes('phone') || s.includes('call')) {
     if (s.includes('email')) return KB.contact.email
     if (s.includes('phone') || s.includes('call')) return KB.contact.phone
     if (s.includes('location') || s.includes('where') || s.includes('based')) return KB.contact.location
     return KB.contact.all
   }
 
+  // ── Social media ──
   if (s.includes('github')) return KB.social.github
   if (s.includes('linkedin')) return KB.social.linkedin
   if (s.includes('download') && (s.includes('cv') || s.includes('resume'))) return KB.social.cv
   if (s.includes('cv') || s.includes('resume')) return KB.social.cv
-  if (s.includes('show portfolio') || s.includes('open portfolio')) return KB.social.portfolio
-  if (s.includes('open projects') || s.includes('go to skills') || s.includes('show contact') || s.includes('scroll to about') || s.includes('open services') || s.includes('show testimonials') || s.includes('open github'))
-    return "I can guide you there — use the navigation menu at the top of the portfolio, and I'll be right here if you have questions along the way."
 
+  // ── Availability ──
   if (s.includes('remote')) return KB.availability.remote
   if (s.includes('how much') || s.includes('charge') || s.includes('rate') || s.includes('cost') || s.includes('price'))
     return KB.availability.rate
-  if (s.includes('is muhire available') || s.includes('can i hire') || s.includes('open for freelance') || s.includes('available') || s.includes('hire') || s.includes('freelance') || s.includes('work with')) {
+  if (s.includes('is muhire available') || s.includes('can i hire') || s.includes('open for freelance') || 
+      s.includes('available') || s.includes('hire') || s.includes('freelance') || s.includes('work with')) {
     if (s.includes('hour') || s.includes('time')) return KB.availability.hours
     return KB.availability.all
   }
 
-  if (s.includes('thank')) return "You're very welcome! As a developer from Rwanda, I really appreciate your interest. Feel free to ask anything else!"
-  if (s.includes("you're amazing") || s.includes('good job') || s.includes('well done'))
-    return "Thank you so much — that means a lot! Let me know if there's anything else you'd like to explore."
-  if (s.includes('joke'))
-    return "Why do programmers prefer dark mode? Because light attracts bugs! 😄"
-  if (s.includes('inspire me'))
-    return "Great things are built one commit at a time — keep showing up, keep shipping, and progress compounds."
-  if (s.includes('see you later') || s.includes('have a nice day') || s.includes('bye') || s.includes('goodbye'))
-    return "Goodbye! It was great talking. Remember, I'm Nova, here for Muhire Dieudonne, Fullstack Developer from Kigali. Reach out anytime!"
+  // ── About Nova ──
+  if (s.includes('who are you') && !s.includes('muhire'))
+    return "I'm Nova ✨, an AI-powered assistant built for Muhire Dieudonne's portfolio. I can talk with you by voice or text about his skills, projects, and experience. I'm based in this site but originally from Kigali, Rwanda 🇷🇼 — just like Muhire!"
+  if (s.includes('what can you do') || s.includes('how do you work') || s.includes('how do i use you'))
+    return "I can introduce Muhire, explain his skills, showcase his projects, provide contact details, answer software development questions, and help you navigate this portfolio using voice or text. Just press the microphone icon to speak, or type your question below! 🎤"
+  if (s.includes('are you an ai') || s.includes('are you a bot') || s.includes('are you human'))
+    return "Yes, I'm an AI assistant 🤖 built into this portfolio to make exploring Muhire's work more interactive. But I'm designed to be friendly and helpful — like a virtual guide from Kigali!"
+  if (s.includes('can you speak') || s.includes('can you talk'))
+    return "Yes! 🗣️ I can respond with voice using speech synthesis — you'll hear me talk as well as read my replies. Just make sure your volume is turned up!"
+  if (s.includes('can you hear me'))
+    return "Yes, I can listen through your microphone using speech recognition. Just tap the mic button and start talking. I'm all ears! 👂"
 
-  return "I'm Nova, Muhire Dieudonne's AI assistant. I can tell you about his skills, projects, experience, education, or how to contact him. What interests you most?"
+  // ── Fun responses ──
+  if (s.includes('joke') || s.includes('funny'))
+    return "Why do programmers prefer dark mode? Because light attracts bugs! 😄 And speaking of bugs, Muhire's code is mostly bug-free — he's been fixing them for 5+ years!"
+  if (s.includes('inspire me') || s.includes('motivation') || s.includes('motivate'))
+    return "Great things are built one commit at a time — keep showing up, keep shipping, and progress compounds. 💪 That's the philosophy Muhire follows in Kigali!"
+  if (s.includes('weather') || s.includes('climate'))
+    return "In Kigali, Rwanda 🇷🇼, it's usually pleasant with moderate temperatures year-round. But I'm not a weather bot — I'm here to talk about Muhire's amazing work! ☀️"
+
+  // ── Navigation help ──
+  if (s.includes('open projects') || s.includes('go to skills') || s.includes('show contact') || 
+      s.includes('scroll to about') || s.includes('open services') || s.includes('show testimonials') ||
+      s.includes('open github') || s.includes('navigate') || s.includes('show me'))
+    return "I can guide you there 📍 — use the navigation menu at the top of the portfolio, and I'll be right here if you have questions along the way. You can also scroll down to explore each section!"
+
+  // ── Default ──
+  return "I'm Nova ✨, Muhire Dieudonne's AI assistant from Kigali, Rwanda 🇷🇼. I can tell you about his skills, projects, experience, education, or how to contact him. What interests you most? Just ask or type your question!"
 }
 
-// Quick suggestion chips
-const SUGGESTIONS = [
-  { text: "Who are you?", icon: FiUser },
-  { text: "What are your skills?", icon: FiCode },
-  { text: "Tell me about your projects", icon: FiBriefcase },
-  { text: "What is your experience?", icon: FiAward },
-  { text: "How can I contact you?", icon: FiMail },
-  { text: "Are you available for work?", icon: FiGlobe },
+/* ─────────────────────────────────────────────
+   SUGGESTION CATEGORIES — Well organized layout
+───────────────────────────────────────────── */
+const SUGGESTION_CATEGORIES = [
+  {
+    title: "👋 About Muhire",
+    suggestions: [
+      { text: "Who is Muhire?", icon: FiUser },
+      { text: "Where is Muhire from?", icon: FiGlobe },
+      { text: "What does Muhire do?", icon: FiUser },
+    ]
+  },
+  {
+    title: "💻 Skills & Tech",
+    suggestions: [
+      { text: "What are your skills?", icon: FiCode },
+      { text: "What's your tech stack?", icon: FiCpu },
+      { text: "Tell me about Three.js", icon: FiStar },
+    ]
+  },
+  {
+    title: "🚀 Projects",
+    suggestions: [
+      { text: "Show me your projects", icon: FiBriefcase },
+      { text: "What's your best project?", icon: FiAward },
+      { text: "Tell me about your latest project", icon: FiStar },
+    ]
+  },
+  {
+    title: "💼 Experience",
+    suggestions: [
+      { text: "What is your experience?", icon: FiAward },
+      { text: "How many years of experience?", icon: FiBriefcase },
+      { text: "Are you available for work?", icon: FiGlobe },
+    ]
+  },
+  {
+    title: "📬 Contact",
+    suggestions: [
+      { text: "How can I contact you?", icon: FiMail },
+      { text: "What's your email?", icon: FiMail },
+      { text: "Do you have a CV?", icon: FiHelpCircle },
+    ]
+  },
+  {
+    title: "🤖 About Nova",
+    suggestions: [
+      { text: "What can you do?", icon: FiMessageSquare },
+      { text: "Are you an AI?", icon: FiCpu },
+      { text: "How do I use you?", icon: FiHelpCircle },
+    ]
+  }
 ]
 
 /* ─────────────────────────────────────────────
-   MAIN COMPONENT — aurora-glass layout matching
-   the showcase: floating centered title above a
-   rounded 20px glass panel, drifting aurora blobs
+   MAIN COMPONENT
 ───────────────────────────────────────────── */
 const VoiceAssistant = () => {
-  const [isOpen, setIsOpen]                   = useState(false)
-  const [isMinimized, setIsMinimized]         = useState(false)
-  const [unreadCount, setUnreadCount]         = useState(0)
-  const [isListening, setIsListening]         = useState(false)
-  const [isSpeaking, setIsSpeaking]           = useState(false)
-  const [transcript, setTranscript]           = useState('')
-  const [conversation, setConversation]       = useState([])
-  const [isMuted, setIsMuted]                 = useState(false)
-  const [inputText, setInputText]             = useState('')
-  const [isTypingIndicator, setIsTypingInd]   = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const [isMinimized, setIsMinimized] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [isListening, setIsListening] = useState(false)
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const [transcript, setTranscript] = useState('')
+  const [conversation, setConversation] = useState([])
+  const [isMuted, setIsMuted] = useState(false)
+  const [inputText, setInputText] = useState('')
+  const [isTypingIndicator, setIsTypingInd] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(true)
-  const [welcomeDone, setWelcomeDone]         = useState(false)
-  const [autoVoice, setAutoVoice]             = useState(true)
-  const [voiceSpeed, setVoiceSpeed]           = useState(0.93)
-  const [voicePitch, setVoicePitch]           = useState(1.08)
-  const [persona, setPersona]                 = useState('recruiter')
-  const [personaTouched, setPersonaTouched]   = useState(false)
-  const [showJump, setShowJump]               = useState(false)
+  const [welcomeDone, setWelcomeDone] = useState(false)
+  const [autoVoice, setAutoVoice] = useState(true)
+  const [voiceSpeed, setVoiceSpeed] = useState(0.93)
+  const [voicePitch, setVoicePitch] = useState(1.08)
+  const [persona, setPersona] = useState('recruiter')
+  const [personaTouched, setPersonaTouched] = useState(false)
+  const [showJump, setShowJump] = useState(false)
+  const [isNavOpen, setIsNavOpen] = useState(false)
 
-  const recognitionRef    = useRef(null)
-  const synthRef          = useRef(window.speechSynthesis)
-  const messagesEndRef    = useRef(null)
-  const messagesBoxRef    = useRef(null)
-  const inputRef          = useRef(null)
-  const hasAutoSpokenRef  = useRef(false)
+  const recognitionRef = useRef(null)
+  const synthRef = useRef(window.speechSynthesis)
+  const messagesEndRef = useRef(null)
+  const messagesBoxRef = useRef(null)
+  const inputRef = useRef(null)
+  const hasAutoSpokenRef = useRef(false)
 
-  const activePersona = PERSONAS.find(p => p.key === persona) || PERSONAS[0]
+  // Listen for nav menu toggle events
+  useEffect(() => {
+    const handleNavToggle = (e) => {
+      setIsNavOpen(e.detail)
+    }
+    
+    window.addEventListener('nav-menu-toggle', handleNavToggle)
+    return () => window.removeEventListener('nav-menu-toggle', handleNavToggle)
+  }, [])
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -479,9 +566,9 @@ const VoiceAssistant = () => {
     rec.interimResults = true
     rec.lang = 'en-US'
 
-    rec.onstart  = () => { setIsListening(true); setTranscript('') }
-    rec.onend    = () => setIsListening(false)
-    rec.onerror  = () => setIsListening(false)
+    rec.onstart = () => { setIsListening(true); setTranscript('') }
+    rec.onend = () => setIsListening(false)
+    rec.onerror = () => setIsListening(false)
 
     rec.onresult = (e) => {
       let fin = '', inter = ''
@@ -524,6 +611,7 @@ const VoiceAssistant = () => {
     const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
     setShowJump(distanceFromBottom > 90)
   }
+
   const scrollToLatest = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     setShowJump(false)
@@ -539,13 +627,15 @@ const VoiceAssistant = () => {
 
   useEffect(() => { if (isOpen) setUnreadCount(0) }, [isOpen])
 
+  const activePersona = PERSONAS.find(p => p.key === persona) || PERSONAS[0]
+
   const speak = useCallback((text) => {
     if (!synthRef.current || isMuted) return
     synthRef.current.cancel()
     const u = new SpeechSynthesisUtterance(text.replace(/[*•·]/g, ''))
     u.rate = voiceSpeed; u.pitch = voicePitch; u.volume = 1
     u.onstart = () => setIsSpeaking(true)
-    u.onend   = () => setIsSpeaking(false)
+    u.onend = () => setIsSpeaking(false)
     u.onerror = () => setIsSpeaking(false)
     synthRef.current.speak(u)
   }, [isMuted, voiceSpeed, voicePitch])
@@ -597,7 +687,7 @@ const VoiceAssistant = () => {
   }
 
   const clearConversation = () => {
-    const msg = "Conversation cleared! I'm Muhire Dieudonne, Fullstack Developer from Kigali, Rwanda. Ask me anything about my work!"
+    const msg = "Conversation cleared! I'm Muhire Dieudonne, Fullstack Developer from Kigali, Rwanda 🇷🇼. Ask me anything about my work!"
     setConversation([{ type: 'assistant', text: msg, timestamp: new Date(), isTyping: false }])
     if (!isMuted && autoVoice) speak(msg)
   }
@@ -620,7 +710,6 @@ const VoiceAssistant = () => {
     if (!isMuted && autoVoice) speak(next.welcome)
   }
 
-  /* ─────────────── RENDER ─────────────── */
   return (
     <div className="sig-wrap">
       <style>{style}</style>
@@ -633,11 +722,13 @@ const VoiceAssistant = () => {
         onClick={() => setIsOpen(o => !o)}
         className="fixed z-[9999] w-14 h-14 rounded-2xl border-none cursor-pointer flex items-center justify-center"
         style={{
-          bottom: 'max(1rem, env(safe-area-inset-bottom))',
+          bottom: isNavOpen ? 'calc(max(1rem, env(safe-area-inset-bottom)) + 80px)' : 'max(1rem, env(safe-area-inset-bottom))',
           right: 'max(1rem, env(safe-area-inset-right))',
           background: 'var(--sig-panel)',
           border: '1px solid var(--sig-line-bright)',
           boxShadow: '0 12px 30px rgba(2,3,10,0.6), 0 0 0 1px rgba(167,139,250,0.10), 0 0 26px rgba(167,139,250,0.18)',
+          opacity: isNavOpen ? 0.7 : 1,
+          transition: 'bottom 0.3s ease, opacity 0.3s ease',
         }}
       >
         <motion.span
@@ -675,19 +766,17 @@ const VoiceAssistant = () => {
               maxHeight: 'min(680px, calc(100dvh - 6.5rem))',
             }}
           >
-            {/* ── AMBIENT AURORA BACKDROP ── */}
             <AuroraBackdrop />
 
-            {/* ── FLOATING TITLE (sits above the panel, centered, matches showcase) ── */}
+            {/* ── FLOATING TITLE ── */}
             <div className="relative px-3 sm:px-4 pt-1 pb-[1.75rem] text-center flex-shrink-0" style={{ zIndex: 1 }}>
               <h3 style={{ color: 'var(--sig-ink)', fontSize: 20, fontWeight: 600, letterSpacing: '-0.01em', fontFamily: 'var(--sig-font-display)', marginBottom: 4 }}>
                 Muhire Dieudonne
               </h3>
               <p style={{ color: 'var(--sig-dim)', fontSize: 12, fontFamily: 'var(--sig-font-mono)' }}>
-                fullstack developer &middot; kigali, rwanda
+                fullstack developer 🇷🇼 kigali, rwanda
               </p>
 
-              {/* quiet utility controls */}
               <div className="sig-ghostbar absolute top-0 right-2 sm:right-3 flex gap-1">
                 <button onClick={toggleMute} title={isMuted ? 'Unmute' : 'Mute'}
                   className="sig-ghost-btn w-6 h-6 rounded-md flex items-center justify-center"
@@ -712,7 +801,7 @@ const VoiceAssistant = () => {
               </div>
             </div>
 
-            {/* ── PANEL — 20px radius glass card, matches showcase ── */}
+            {/* ── PANEL ── */}
             <div
               className="sig-scan sig-panel flex flex-col relative"
               style={{
@@ -725,7 +814,7 @@ const VoiceAssistant = () => {
                 zIndex: 1,
               }}
             >
-              {/* ── NOVA BAR (14px 16px padding, matches showcase header) ── */}
+              {/* ── NOVA BAR ── */}
               <div
                 className="sig-tight flex items-center gap-3 sticky top-0"
                 style={{ padding: '14px 16px', borderBottom: '1px solid var(--sig-line)', background: 'var(--sig-surface)' }}
@@ -738,7 +827,7 @@ const VoiceAssistant = () => {
 
                 <div className="flex-1 min-w-0">
                   <p style={{ color: 'var(--sig-ink)', fontSize: 14, fontWeight: 600, fontFamily: 'var(--sig-font-display)', margin: 0 }}>
-                    Nova
+                    Nova ✨
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5" style={{ fontSize: 11, fontFamily: 'var(--sig-font-mono)' }}>
                     <StatusDot listening={isListening} speaking={isSpeaking} />
@@ -747,7 +836,7 @@ const VoiceAssistant = () => {
                     ) : isSpeaking ? (
                       <span style={{ color: 'var(--sig-teal)' }}>speaking_output…</span>
                     ) : (
-                      <span style={{ color: 'rgba(94,234,212,0.9)' }}>online &middot; {activePersona.mode}</span>
+                      <span style={{ color: 'rgba(94,234,212,0.9)' }}>online 🇷🇼 {activePersona.mode}</span>
                     )}
                   </div>
                 </div>
@@ -764,7 +853,7 @@ const VoiceAssistant = () => {
                 </span>
               </div>
 
-              {/* ── PERSONA TABS (10px 16px padding, gradient active state, matches showcase) ── */}
+              {/* ── PERSONA TABS ── */}
               <div
                 className="sig-tight flex gap-1.5 overflow-x-auto"
                 style={{ padding: '10px 16px', borderBottom: '1px solid var(--sig-line)', background: 'rgba(10,11,20,0.4)' }}
@@ -803,12 +892,12 @@ const VoiceAssistant = () => {
                     transition={{ duration: 0.22 }}
                     className="overflow-hidden"
                   >
-                    {/* ── MESSAGES (14px 16px padding, matches showcase) ── */}
+                    {/* ── MESSAGES ── */}
                     <div className="relative">
                       <div
                         ref={messagesBoxRef}
                         onScroll={handleMessagesScroll}
-                        className="sig-tight sig-messages h-[min(42dvh,300px)] sm:h-[340px] overflow-y-auto flex flex-col gap-2.5 relative"
+                        className="sig-tight sig-messages h-[min(35dvh,280px)] sm:h-[320px] overflow-y-auto flex flex-col gap-2.5 relative"
                         style={{ padding: '14px 16px', background: 'rgba(0,0,0,0.2)', zIndex: 1 }}
                       >
                         {conversation.length === 0 && (
@@ -824,7 +913,7 @@ const VoiceAssistant = () => {
                               Ask about Muhire Dieudonne
                             </p>
                             <p style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)', fontSize: 12, marginTop: 6 }}>
-                              fullstack · kigali, rwanda
+                              fullstack 🇷🇼 kigali, rwanda
                             </p>
                           </motion.div>
                         )}
@@ -914,7 +1003,7 @@ const VoiceAssistant = () => {
                       )}
                     </AnimatePresence>
 
-                    {/* ── INPUT AREA (10px 16px padding, gradient send + pink-tinted mic, matches showcase) ── */}
+                    {/* ── INPUT AREA ── */}
                     <div className="sig-tight" style={{ padding: '10px 16px', background: 'rgba(10,11,20,0.55)', borderTop: '1px solid var(--sig-line)' }}>
                       <div className="flex gap-2 items-center">
                         <button
@@ -1010,7 +1099,7 @@ const VoiceAssistant = () => {
                       </div>
                     </div>
 
-                    {/* ── SUGGESTIONS ── */}
+                    {/* ── SUGGESTIONS — Well organized layout ── */}
                     <AnimatePresence>
                       {showSuggestions && (
                         <motion.div
@@ -1018,25 +1107,39 @@ const VoiceAssistant = () => {
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2 }}
+                          transition={{ duration: 0.25 }}
                           className="overflow-hidden"
                           style={{ background: 'rgba(0,0,0,0.15)', borderTop: '1px solid var(--sig-line)' }}
                         >
                           <div className="sig-tight" style={{ padding: '14px 16px' }}>
-                            <p style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)', marginBottom: 8 }}>
-                              quick_prompts
+                            <p style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)', marginBottom: 10 }}>
+                              📋 quick prompts — tap to ask
                             </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                              {SUGGESTIONS.map((s, i) => (
-                                <motion.button key={i} className="sig-chip px-3 py-2 rounded-md border text-left flex items-center gap-2"
-                                  initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: i * 0.03 }}
-                                  onClick={() => processUserInput(s.text)}
-                                  style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)' }}
-                                >
-                                  <s.icon size={11} style={{ color: 'var(--sig-purple)', flexShrink: 0 }} />
-                                  <span className="text-[11.5px] truncate" style={{ color: 'var(--sig-ink)' }}>{s.text}</span>
-                                </motion.button>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {SUGGESTION_CATEGORIES.map((category, catIdx) => (
+                                <div key={catIdx} className="flex flex-col gap-1">
+                                  <p style={{ fontSize: 9, color: 'var(--sig-teal)', fontFamily: 'var(--sig-font-mono)', letterSpacing: '0.04em', marginBottom: 2 }}>
+                                    {category.title}
+                                  </p>
+                                  {category.suggestions.map((s, i) => (
+                                    <motion.button
+                                      key={i}
+                                      className="sig-chip px-2.5 py-1.5 rounded-md border text-left flex items-center gap-2"
+                                      initial={{ opacity: 0, y: 4 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: (catIdx * 3 + i) * 0.04 }}
+                                      onClick={() => processUserInput(s.text)}
+                                      style={{
+                                        background: 'var(--sig-glass)',
+                                        borderColor: 'var(--sig-line)',
+                                        fontSize: 10.5,
+                                      }}
+                                    >
+                                      <s.icon size={10} style={{ color: 'var(--sig-purple)', flexShrink: 0 }} />
+                                      <span className="truncate" style={{ color: 'var(--sig-ink)' }}>{s.text}</span>
+                                    </motion.button>
+                                  ))}
+                                </div>
                               ))}
                             </div>
                           </div>
@@ -1044,17 +1147,17 @@ const VoiceAssistant = () => {
                       )}
                     </AnimatePresence>
 
-                    {/* ── FOOTER (matches showcase caption line) ── */}
+                    {/* ── FOOTER ── */}
                     <div className="flex items-center justify-center gap-2" style={{ padding: '10px 16px' }}>
                       {isSpeaking && <Meter active count={4} h={10} />}
                       <span className="truncate" style={{ fontSize: 10, letterSpacing: '0.02em', color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
                         {isSpeaking
-                          ? 'output_active'
+                          ? '🔊 output_active'
                           : isListening
-                          ? 'input_active'
+                          ? '🎤 input_active'
                           : !personaTouched
-                          ? 'tap a persona above to see the live switch'
-                          : 'muhire · fullstack · kigali'}
+                          ? '🇷🇼 tap a persona above to switch mode'
+                          : '🇷🇼 muhire · fullstack · kigali'}
                       </span>
                     </div>
                   </motion.div>
@@ -1068,7 +1171,7 @@ const VoiceAssistant = () => {
                     <div className="flex items-center gap-1.5 min-w-0">
                       <StatusDot listening={isListening} speaking={isSpeaking} />
                       <span className="truncate" style={{ fontSize: 12, fontWeight: 600, color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
-                        Nova · {activePersona.label}
+                        Nova ✨ · {activePersona.label}
                       </span>
                       {unreadCount > 0 && (
                         <span className="px-1.5 py-0.5 rounded flex-shrink-0" style={{ fontSize: 10, fontWeight: 700, background: 'var(--sig-pink)', color: '#05060d', fontFamily: 'var(--sig-font-mono)' }}>
