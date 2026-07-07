@@ -17,14 +17,6 @@ import profilePhoto from '../images/Muhire_dieudonne.JPG'
    CONSTANTS
 ───────────────────────────────────────────── */
 
-const NAV_LINKS = [
-  { label: 'Experience', href: '#experience' },
-  { label: 'About', href: '#about' },
-  { label: 'Skills', href: '#skills' },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Contact', href: '#contact' },
-]
-
 const TECH_STACK = ['React', 'Three.js', 'Node.js', 'Framer Motion', 'Tailwind', 'TypeScript']
 
 const STATS = [
@@ -509,8 +501,13 @@ const Hero = () => {
     <>
       <style>{PREMIUM_STYLES}</style>
 
+      {/*
+        NOTE: id="home" — this MUST match the `id: 'home'` entry in
+        Navbar.jsx's navItems array, since Navbar.scrollToSection()
+        looks this element up via document.getElementById('home').
+      */}
       <section
-        id="top"
+        id="home"
         ref={containerRef}
         className="hero-root"
         style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
