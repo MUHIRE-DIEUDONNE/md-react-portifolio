@@ -87,9 +87,6 @@ const Card3D = ({ children, className = '', delay = 0, ...rest }) => (
 )
 
 // ─── Sound hook ───────────────────────────────────────────────────────
-// Sound toggle UI has been removed from the navbar, so this hook is
-// invoked with enabled=false below (no-op playback). Kept in place in
-// case click/hover sound is reintroduced later.
 const useSound = (enabled) => {
   const clickSound = useRef(null)
   const hoverSound = useRef(null)
@@ -150,7 +147,7 @@ const Navbar = () => {
 
   const navItems = [
     { id: 'home', label: 'Home', icon: <FiHome /> },
-    { id: 'about', label: 'About', icon: <FiUser /> },
+    { id: 'about', label: 'About', icon: <FiUser /> }, // Correctly restored target identity
     { id: 'skills', label: 'Skills', icon: <FiZap /> },
     { id: 'projects', label: 'Projects', icon: <FiBriefcase /> },
     { id: 'experience', label: 'Experience', icon: <FiTrendingUp /> },
@@ -243,11 +240,6 @@ const Navbar = () => {
     setIsDarkMode((prev) => { applyTheme(!prev); playClick(); return !prev })
   }
 
-  // ── Mobile hamburger toggle ──────────────────────────────────────────
-  // Broadcasts a `nav-menu-toggle` CustomEvent whenever the mobile menu
-  // opens/closes so other fixed/high-z-index UI (e.g. VoiceAssistant's
-  // floating action button) can temporarily get out of the way and avoid
-  // overlapping/blocking taps on nav items or page content underneath it.
   const handleHamburgerClick = () => {
     setIsOpen((prev) => {
       const next = !prev
@@ -456,7 +448,6 @@ const Navbar = () => {
                         gap: 4,
                       }}
                     >
-                      {/* rounded-cap bars, matches uploaded icon */}
                       <span style={{ display: 'block', width: 20, height: 3, borderRadius: 4, background: '#f5eed8' }} />
                       <span style={{ display: 'block', width: 20, height: 3, borderRadius: 4, background: '#f5eed8' }} />
                       <span style={{ display: 'block', width: 20, height: 3, borderRadius: 4, background: '#f5eed8' }} />
