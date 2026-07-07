@@ -2,35 +2,38 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  FiMic, FiVolume2, FiVolumeX, FiUser,
+  FiVolume2, FiVolumeX, FiUser,
   FiTrash2, FiX, FiMinimize2, FiMaximize2,
   FiBriefcase, FiCode, FiMail, FiGlobe,
-  FiAward, FiChevronDown, FiChevronUp, FiMoreHorizontal
+  FiAward, FiChevronDown, FiChevronUp
 } from 'react-icons/fi'
-import { FaRobot, FaMicrophone, FaStop, FaPaperPlane } from 'react-icons/fa'
+import { FaStop, FaPaperPlane, FaMicrophone } from 'react-icons/fa'
 
 /* ─────────────────────────────────────────────
-   DESIGN TOKENS — refined for the screenshot look
+   DESIGN TOKENS — aurora-glass palette
+   (teal / purple / pink), matching the showcase
 ───────────────────────────────────────────── */
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
   :root {
-    --sig-bg: #0a0c10;
-    --sig-surface: rgba(15,17,22,0.98);
-    --sig-glass: rgba(255,255,255,0.035);
-    --sig-line: rgba(255,255,255,0.08);
-    --sig-line-bright: rgba(94,234,212,0.30);
-    --sig-mint: #5eead4;
-    --sig-mint-dim: rgba(94,234,212,0.14);
-    --sig-user-a: #8b5cf6;
-    --sig-user-b: #ec4899;
-    --sig-user-grad: linear-gradient(135deg, var(--sig-user-a), var(--sig-user-b));
-    --sig-rose: #fb7185;
-    --sig-ink: #eef1f6;
-    --sig-dim: rgba(238,241,246,0.52);
-    --sig-faint: rgba(238,241,246,0.24);
-    --sig-shadow: 0 28px 70px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.05);
+    --sig-bg: #05060d;
+    --sig-surface: rgba(10,11,20,0.85);
+    --sig-panel: rgba(12,13,24,0.85);
+    --sig-glass: rgba(255,255,255,0.055);
+    --sig-line: rgba(255,255,255,0.13);
+    --sig-line-bright: rgba(167,139,250,0.45);
+    --sig-teal: #5eead4;
+    --sig-purple: #a78bfa;
+    --sig-pink: #f472b6;
+    --sig-teal-dim: rgba(94,234,212,0.14);
+    --sig-user-grad: linear-gradient(135deg, #a78bfa, #f472b6);
+    --sig-tab-grad: linear-gradient(90deg, rgba(94,234,212,0.2), rgba(167,139,250,0.2));
+    --sig-mic-grad: linear-gradient(135deg, #5eead4, #a78bfa);
+    --sig-ink: #f5f3fb;
+    --sig-dim: rgba(245,243,251,0.6);
+    --sig-faint: rgba(245,243,251,0.35);
+    --sig-shadow: 0 30px 80px rgba(2,3,10,0.7), 0 0 60px rgba(167,139,250,0.14);
     --sig-font-display: 'Space Grotesk', sans-serif;
     --sig-font-body: 'Inter', sans-serif;
     --sig-font-mono: 'JetBrains Mono', monospace;
@@ -45,24 +48,26 @@ const style = `
   .sig-messages::-webkit-scrollbar-thumb { background: var(--sig-line-bright); border-radius: 10px; }
   .sig-panel { overscroll-behavior: contain; }
 
-  .sig-scan::before {
-    content: '';
-    position: absolute; inset: 0; pointer-events: none; z-index: 0;
-    background: repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
-  }
+  /* ambient blurred aurora blobs, matching showcase drift */
+  @keyframes drift1 { 0%, 100% { transform: translate(-6%, -4%); } 50% { transform: translate(8%, 6%); } }
+  @keyframes drift2 { 0%, 100% { transform: translate(6%, 4%); } 50% { transform: translate(-8%, -8%); } }
+  @keyframes drift3 { 0%, 100% { transform: translate(0, 8%); } 50% { transform: translate(-6%, -10%); } }
+  .sig-blob-1 { animation: drift1 14s ease-in-out infinite; }
+  .sig-blob-2 { animation: drift2 17s ease-in-out infinite; }
+  .sig-blob-3 { animation: drift3 20s ease-in-out infinite; }
 
   @keyframes meter {
     0%, 100% { height: 30%; opacity: 0.5; }
     50% { height: 100%; opacity: 1; }
   }
-  .meter-bar { width: 2.5px; border-radius: 1px; background: var(--sig-mint); animation: meter 0.85s ease-in-out infinite; transition: background 0.25s; }
+  .meter-bar { width: 2.5px; border-radius: 1px; background: var(--sig-teal); animation: meter 0.85s ease-in-out infinite; transition: background 0.25s; }
   .meter-bar:nth-child(2) { animation-delay: 0.10s; }
   .meter-bar:nth-child(3) { animation-delay: 0.20s; }
   .meter-bar:nth-child(4) { animation-delay: 0.06s; }
   .meter-bar:nth-child(5) { animation-delay: 0.16s; }
 
   @keyframes ring-spin { to { transform: rotate(360deg); } }
-  .sig-ring { animation: ring-spin 6s linear infinite; }
+  .sig-ring { animation: ring-spin 6s linear infinite; transform-origin: 23px 23px; }
 
   @keyframes pulse-soft {
     0%, 100% { transform: scale(1); opacity: 0.55; }
@@ -78,7 +83,7 @@ const style = `
     0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
     40% { transform: translateY(-4px); opacity: 1; }
   }
-  .type-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--sig-mint); animation: typedot 1.1s ease-in-out infinite; }
+  .type-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--sig-purple); animation: typedot 1.1s ease-in-out infinite; }
   .type-dot:nth-child(2) { animation-delay: 0.14s; }
   .type-dot:nth-child(3) { animation-delay: 0.28s; }
 
@@ -87,34 +92,33 @@ const style = `
   .sig-mic-btn:active { transform: translateY(1px) scale(0.97); }
 
   .sig-chip { transition: background 0.18s, border-color 0.18s, transform 0.15s; touch-action: manipulation; }
-  .sig-chip:hover { background: var(--sig-mint-dim) !important; border-color: var(--sig-line-bright) !important; transform: translateX(2px); }
+  .sig-chip:hover { background: var(--sig-teal-dim) !important; border-color: var(--sig-line-bright) !important; transform: translateX(2px); }
 
   .sig-persona { transition: background 0.18s, border-color 0.18s, color 0.18s; touch-action: manipulation; white-space: nowrap; }
-  .sig-persona:hover { border-color: rgba(255,255,255,0.22) !important; }
+  .sig-persona:hover { border-color: rgba(255,255,255,0.28) !important; }
 
   .sig-input { -webkit-appearance: none; font-size: 16px; }
-  .sig-input:focus { outline: none; border-color: var(--sig-mint); box-shadow: 0 0 0 3px rgba(94,234,212,0.12); }
+  .sig-input:focus { outline: none; border-color: var(--sig-purple); box-shadow: 0 0 0 3px rgba(167,139,250,0.14); }
+  .sig-input::placeholder { color: var(--sig-faint); }
 
   .sig-toolbtn { transition: background 0.18s, color 0.18s, border-color 0.18s, opacity 0.18s; }
 
   .sig-jump { transition: opacity 0.2s, transform 0.2s; }
   .sig-jump:hover { transform: translateY(-1px); }
 
-  /* Ghost utility controls that float above the panel, near the title —
-     quiet until hovered so they don't compete with the identity block */
   .sig-ghostbar { opacity: 0.55; transition: opacity 0.2s; }
   .sig-ghostbar:hover { opacity: 1; }
   .sig-ghost-btn { transition: background 0.18s, color 0.18s, opacity 0.18s; }
 
   @media (max-width: 380px) {
-    .sig-tight { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+    .sig-tight { padding-left: 0.9rem !important; padding-right: 0.9rem !important; }
   }
 `
 
 /* ─────────────────────────────────────────────
    MINI COMPONENTS
 ───────────────────────────────────────────── */
-const Meter = ({ active, color = 'var(--sig-mint)', count = 5, h = 14 }) => (
+const Meter = ({ active, color = 'var(--sig-teal)', count = 5, h = 14 }) => (
   <div className="flex items-end gap-[3px]" style={{ height: h }}>
     {Array.from({ length: count }).map((_, i) => (
       <div key={i} className="meter-bar" style={{ background: color, animationPlayState: active ? 'running' : 'paused', height: active ? undefined : '30%' }} />
@@ -122,27 +126,35 @@ const Meter = ({ active, color = 'var(--sig-mint)', count = 5, h = 14 }) => (
   </div>
 )
 
+/* Gradient avatar ring — mirrors the showcase's core-ring SVG (teal → purple → pink) */
 const SignalRing = ({ listening, speaking }) => {
   const active = listening || speaking
-  const color = listening ? 'var(--sig-rose)' : speaking ? 'var(--sig-mint)' : 'var(--sig-faint)'
   return (
-    <svg width="46" height="46" viewBox="0 0 46 46" className="absolute -inset-[3px] pointer-events-none">
-      <circle cx="23" cy="23" r="20.5" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
-      <g className={active ? 'sig-ring' : ''} style={{ transformOrigin: '23px 23px' }}>
-        {Array.from({ length: 18 }).map((_, i) => {
-          const a = (i / 18) * Math.PI * 2
-          const r1 = 20.5, r2 = 17.8
-          const x1 = 23 + r1 * Math.cos(a), y1 = 23 + r1 * Math.sin(a)
-          const x2 = 23 + r2 * Math.cos(a), y2 = 23 + r2 * Math.sin(a)
-          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth="1.4" opacity={active ? (i % 3 === 0 ? 0.9 : 0.35) : 0.25} />
-        })}
-      </g>
+    <svg width="30" height="30" viewBox="0 0 46 46">
+      <defs>
+        <linearGradient id="sig-aurora-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#5eead4" />
+          <stop offset="50%" stopColor="#a78bfa" />
+          <stop offset="100%" stopColor="#f472b6" />
+        </linearGradient>
+      </defs>
+      <circle cx="23" cy="23" r="20" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+      <circle
+        className={active ? 'sig-ring' : ''}
+        cx="23" cy="23" r="17"
+        fill="none"
+        stroke="url(#sig-aurora-grad)"
+        strokeWidth="1.4"
+        strokeDasharray="4 3"
+        opacity={active ? 0.95 : 0.7}
+      />
+      <circle cx="23" cy="23" r="4" fill="url(#sig-aurora-grad)" />
     </svg>
   )
 }
 
 const StatusDot = ({ listening, speaking }) => {
-  const color = listening ? 'var(--sig-rose)' : speaking ? 'var(--sig-mint)' : '#34d399'
+  const color = listening ? 'var(--sig-pink)' : speaking ? 'var(--sig-teal)' : '#34d399'
   return (
     <span className="relative inline-flex w-1.5 h-1.5 flex-shrink-0">
       <span className="absolute inset-0 rounded-full" style={{ background: color, opacity: 0.5, animation: (listening || speaking) ? 'pulse-soft 1.3s ease-out infinite' : 'none' }} />
@@ -152,12 +164,21 @@ const StatusDot = ({ listening, speaking }) => {
 }
 
 const Avatar = ({ isUser }) => (
-  <div className="w-7 h-7 rounded-full flex-shrink-0"
+  <div className="w-[22px] h-[22px] rounded-full flex-shrink-0"
     style={{
       background: isUser ? 'var(--sig-user-grad)' : 'rgba(255,255,255,0.06)',
-      border: isUser ? 'none' : '1px solid var(--sig-line)',
+      border: isUser ? 'none' : '1px solid rgba(167,139,250,0.3)',
     }}
   />
+)
+
+/* Ambient background aurora blobs behind the panel */
+const AuroraBackdrop = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
+    <div className="sig-blob-1 absolute rounded-full" style={{ width: 220, height: 220, top: -40, left: -30, background: '#5eead4', filter: 'blur(70px)', opacity: 0.22 }} />
+    <div className="sig-blob-2 absolute rounded-full" style={{ width: 220, height: 220, bottom: -40, right: -30, background: '#a78bfa', filter: 'blur(70px)', opacity: 0.25 }} />
+    <div className="sig-blob-3 absolute rounded-full" style={{ width: 180, height: 180, bottom: '30%', left: '6%', background: '#f472b6', filter: 'blur(60px)', opacity: 0.16 }} />
+  </div>
 )
 
 /* ─────────────────────────────────────────────
@@ -395,7 +416,7 @@ function generateResponse(input) {
   return "I'm Nova, Muhire Dieudonne's AI assistant. I can tell you about his skills, projects, experience, education, or how to contact him. What interests you most?"
 }
 
-// Quick suggestion chips – includes the "What's he built recently?" from screenshot
+// Quick suggestion chips
 const SUGGESTIONS = [
   { text: "Who are you?", icon: FiUser },
   { text: "What are your skills?", icon: FiCode },
@@ -406,8 +427,9 @@ const SUGGESTIONS = [
 ]
 
 /* ─────────────────────────────────────────────
-   MAIN COMPONENT — screenshot layout:
-   floating centered title above a clean, borderless-top panel
+   MAIN COMPONENT — aurora-glass layout matching
+   the showcase: floating centered title above a
+   rounded 20px glass panel, drifting aurora blobs
 ───────────────────────────────────────────── */
 const VoiceAssistant = () => {
   const [isOpen, setIsOpen]                   = useState(false)
@@ -425,7 +447,7 @@ const VoiceAssistant = () => {
   const [autoVoice, setAutoVoice]             = useState(true)
   const [voiceSpeed, setVoiceSpeed]           = useState(0.93)
   const [voicePitch, setVoicePitch]           = useState(1.08)
-  const [persona, setPersona]                 = useState('recruiter') // default to recruiter to match screenshot
+  const [persona, setPersona]                 = useState('recruiter')
   const [personaTouched, setPersonaTouched]   = useState(false)
   const [showJump, setShowJump]               = useState(false)
 
@@ -613,24 +635,24 @@ const VoiceAssistant = () => {
         style={{
           bottom: 'max(1rem, env(safe-area-inset-bottom))',
           right: 'max(1rem, env(safe-area-inset-right))',
-          background: 'var(--sig-surface)',
+          background: 'var(--sig-panel)',
           border: '1px solid var(--sig-line-bright)',
-          boxShadow: '0 12px 30px rgba(0,0,0,0.55), 0 0 0 1px rgba(94,234,212,0.08), 0 0 24px rgba(94,234,212,0.12)',
+          boxShadow: '0 12px 30px rgba(2,3,10,0.6), 0 0 0 1px rgba(167,139,250,0.10), 0 0 26px rgba(167,139,250,0.18)',
         }}
       >
         <motion.span
           animate={{ scale: [1, 1.6, 1], opacity: [0.35, 0, 0.35] }}
           transition={{ duration: 2.4, repeat: Infinity }}
           className="absolute inset-2 rounded-xl"
-          style={{ border: '1px solid var(--sig-mint)' }}
+          style={{ border: '1px solid var(--sig-purple)' }}
         />
-        {isOpen ? <FiX size={18} color="var(--sig-mint)" /> : <Meter active count={4} h={16} />}
+        {isOpen ? <FiX size={18} color="var(--sig-teal)" /> : <Meter active count={4} h={16} />}
         {!isOpen && unreadCount > 0 && (
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center border-2"
-            style={{ background: 'var(--sig-rose)', color: '#0a0c10', borderColor: 'var(--sig-bg)', fontFamily: 'var(--sig-font-mono)' }}
+            style={{ background: 'var(--sig-pink)', color: '#05060d', borderColor: 'var(--sig-bg)', fontFamily: 'var(--sig-font-mono)' }}
           >
             {unreadCount}
           </motion.span>
@@ -653,20 +675,23 @@ const VoiceAssistant = () => {
               maxHeight: 'min(680px, calc(100dvh - 6.5rem))',
             }}
           >
-            {/* ── FLOATING TITLE (sits above the panel, transparent, centered) ── */}
-            <div className="relative px-3 sm:px-4 pt-1 pb-3 text-center flex-shrink-0">
-              <h3 className="font-bold text-lg sm:text-xl" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)', letterSpacing: '-0.01em' }}>
+            {/* ── AMBIENT AURORA BACKDROP ── */}
+            <AuroraBackdrop />
+
+            {/* ── FLOATING TITLE (sits above the panel, centered, matches showcase) ── */}
+            <div className="relative px-3 sm:px-4 pt-1 pb-[1.75rem] text-center flex-shrink-0" style={{ zIndex: 1 }}>
+              <h3 style={{ color: 'var(--sig-ink)', fontSize: 20, fontWeight: 600, letterSpacing: '-0.01em', fontFamily: 'var(--sig-font-display)', marginBottom: 4 }}>
                 Muhire Dieudonne
               </h3>
-              <p className="text-[11px] mt-1" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
-                fullstack developer · kigali, rwanda
+              <p style={{ color: 'var(--sig-dim)', fontSize: 12, fontFamily: 'var(--sig-font-mono)' }}>
+                fullstack developer &middot; kigali, rwanda
               </p>
 
-              {/* quiet utility controls — present but out of the way */}
+              {/* quiet utility controls */}
               <div className="sig-ghostbar absolute top-0 right-2 sm:right-3 flex gap-1">
                 <button onClick={toggleMute} title={isMuted ? 'Unmute' : 'Mute'}
                   className="sig-ghost-btn w-6 h-6 rounded-md flex items-center justify-center"
-                  style={{ background: 'transparent', color: isMuted ? 'var(--sig-rose)' : 'var(--sig-faint)' }}
+                  style={{ background: 'transparent', color: isMuted ? 'var(--sig-pink)' : 'var(--sig-faint)' }}
                 >
                   {isMuted ? <FiVolumeX size={12} /> : <FiVolume2 size={12} />}
                 </button>
@@ -687,77 +712,84 @@ const VoiceAssistant = () => {
               </div>
             </div>
 
-            {/* ── PANEL (clean bordered card, starts at the Nova bar) ── */}
+            {/* ── PANEL — 20px radius glass card, matches showcase ── */}
             <div
-              className="sig-scan sig-panel rounded-xl flex flex-col relative"
+              className="sig-scan sig-panel flex flex-col relative"
               style={{
-                background: 'var(--sig-surface)',
+                background: 'var(--sig-panel)',
                 border: '1px solid var(--sig-line)',
+                borderRadius: 20,
                 boxShadow: 'var(--sig-shadow)',
                 overflowY: 'auto',
                 overflowX: 'hidden',
+                zIndex: 1,
               }}
             >
-              {/* ── NOVA BAR + PERSONA TABS ── */}
-              <div className="sig-tight px-3 pt-3.5 sm:px-4 sm:pt-4 pb-1 relative z-10 sticky top-0"
-                style={{ background: 'var(--sig-surface)' }}
+              {/* ── NOVA BAR (14px 16px padding, matches showcase header) ── */}
+              <div
+                className="sig-tight flex items-center gap-3 sticky top-0"
+                style={{ padding: '14px 16px', borderBottom: '1px solid var(--sig-line)', background: 'var(--sig-surface)' }}
               >
-                <div className="rounded-lg border flex items-center gap-2.5 px-2.5 py-2"
-                  style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)' }}
+                <div className="relative flex-shrink-0 w-[38px] h-[38px] rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--sig-line-bright)' }}
                 >
-                  <div className="relative flex-shrink-0 w-9 h-9 flex items-center justify-center">
-                    <SignalRing listening={isListening} speaking={isSpeaking} />
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center"
-                      style={{ background: 'rgba(94,234,212,0.10)', border: '1px solid var(--sig-line-bright)' }}
+                  <SignalRing listening={isListening} speaking={isSpeaking} />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p style={{ color: 'var(--sig-ink)', fontSize: 14, fontWeight: 600, fontFamily: 'var(--sig-font-display)', margin: 0 }}>
+                    Nova
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-0.5" style={{ fontSize: 11, fontFamily: 'var(--sig-font-mono)' }}>
+                    <StatusDot listening={isListening} speaking={isSpeaking} />
+                    {isListening ? (
+                      <span style={{ color: 'var(--sig-pink)' }}>recording_input…</span>
+                    ) : isSpeaking ? (
+                      <span style={{ color: 'var(--sig-teal)' }}>speaking_output…</span>
+                    ) : (
+                      <span style={{ color: 'rgba(94,234,212,0.9)' }}>online &middot; {activePersona.mode}</span>
+                    )}
+                  </div>
+                </div>
+
+                <span
+                  className="flex-shrink-0"
+                  style={{
+                    fontSize: 9, letterSpacing: '0.05em', color: 'var(--sig-teal)',
+                    border: '1px solid var(--sig-line-bright)', padding: '3px 8px', borderRadius: 20,
+                    fontFamily: 'var(--sig-font-mono)', textTransform: 'uppercase',
+                  }}
+                >
+                  Fullstack AI
+                </span>
+              </div>
+
+              {/* ── PERSONA TABS (10px 16px padding, gradient active state, matches showcase) ── */}
+              <div
+                className="sig-tight flex gap-1.5 overflow-x-auto"
+                style={{ padding: '10px 16px', borderBottom: '1px solid var(--sig-line)', background: 'rgba(10,11,20,0.4)' }}
+              >
+                {PERSONAS.map(p => {
+                  const activeTab = p.key === persona
+                  return (
+                    <button
+                      key={p.key}
+                      onClick={() => switchPersona(p.key)}
+                      className="sig-persona"
+                      style={{
+                        padding: '5px 11px',
+                        borderRadius: 20,
+                        fontSize: 10,
+                        border: activeTab ? '1px solid var(--sig-line-bright)' : '1px solid var(--sig-line)',
+                        background: activeTab ? 'var(--sig-tab-grad)' : 'var(--sig-glass)',
+                        color: activeTab ? 'var(--sig-ink)' : 'var(--sig-dim)',
+                        fontFamily: 'var(--sig-font-mono)',
+                      }}
                     >
-                      <FaRobot size={10} color="var(--sig-mint)" />
-                    </div>
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-[13px]" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
-                      Nova
-                    </div>
-                    <div className="text-[10.5px] mt-0.5 flex items-center gap-1.5 truncate" style={{ color: 'var(--sig-dim)', fontFamily: 'var(--sig-font-mono)' }}>
-                      <StatusDot listening={isListening} speaking={isSpeaking} />
-                      {isListening ? (
-                        <span style={{ color: 'var(--sig-rose)' }}>recording_input…</span>
-                      ) : isSpeaking ? (
-                        <span style={{ color: 'var(--sig-mint)' }}>speaking_output…</span>
-                      ) : (
-                        <span>online · {activePersona.mode}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <span className="flex-shrink-0 text-[9.5px] font-semibold tracking-wider px-2 py-1 rounded-full border uppercase"
-                    style={{ color: 'var(--sig-mint)', borderColor: 'var(--sig-line-bright)', fontFamily: 'var(--sig-font-mono)' }}
-                  >
-                    Fullstack AI
-                  </span>
-                </div>
-
-                {/* ── PERSONA TABS ── */}
-                <div className="flex gap-1.5 mt-2.5 overflow-x-auto pb-0.5">
-                  {PERSONAS.map(p => {
-                    const activeTab = p.key === persona
-                    return (
-                      <button
-                        key={p.key}
-                        onClick={() => switchPersona(p.key)}
-                        className="sig-persona px-3 py-1.5 rounded-full border text-[11px] font-medium"
-                        style={{
-                          background: activeTab ? 'rgba(255,255,255,0.09)' : 'transparent',
-                          borderColor: activeTab ? 'rgba(255,255,255,0.22)' : 'var(--sig-line)',
-                          color: activeTab ? 'var(--sig-ink)' : 'var(--sig-dim)',
-                          fontFamily: 'var(--sig-font-mono)',
-                        }}
-                      >
-                        {p.label}
-                      </button>
-                    )
-                  })}
-                </div>
+                      {p.label}
+                    </button>
+                  )
+                })}
               </div>
 
               {/* ── BODY ── */}
@@ -771,13 +803,13 @@ const VoiceAssistant = () => {
                     transition={{ duration: 0.22 }}
                     className="overflow-hidden"
                   >
-                    {/* ── MESSAGES ── */}
+                    {/* ── MESSAGES (14px 16px padding, matches showcase) ── */}
                     <div className="relative">
                       <div
                         ref={messagesBoxRef}
                         onScroll={handleMessagesScroll}
-                        className="sig-tight sig-messages h-[min(42dvh,300px)] sm:h-[340px] overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 flex flex-col gap-2.5 relative z-10 mt-2.5"
-                        style={{ background: 'rgba(0,0,0,0.18)' }}
+                        className="sig-tight sig-messages h-[min(42dvh,300px)] sm:h-[340px] overflow-y-auto flex flex-col gap-2.5 relative"
+                        style={{ padding: '14px 16px', background: 'rgba(0,0,0,0.2)', zIndex: 1 }}
                       >
                         {conversation.length === 0 && (
                           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
@@ -786,12 +818,12 @@ const VoiceAssistant = () => {
                             <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center border"
                               style={{ background: 'rgba(94,234,212,0.06)', borderColor: 'var(--sig-line-bright)' }}
                             >
-                              <FaRobot size={18} style={{ color: 'var(--sig-mint)' }} />
+                              <SignalRing listening={false} speaking={false} />
                             </div>
-                            <p className="font-semibold text-sm" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
+                            <p style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)', fontWeight: 600, fontSize: 14 }}>
                               Ask about Muhire Dieudonne
                             </p>
-                            <p className="text-xs mt-1.5" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
+                            <p style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)', fontSize: 12, marginTop: 6 }}>
                               fullstack · kigali, rwanda
                             </p>
                           </motion.div>
@@ -802,28 +834,26 @@ const VoiceAssistant = () => {
                             initial={{ opacity: 0, x: msg.type === 'user' ? 14 : -14 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.22 }}
-                            className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                            className={`flex gap-2 ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+                            style={{ maxWidth: '100%' }}
                           >
-                            <div className={`flex gap-2 max-w-[88%] sm:max-w-[84%] ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'} items-end`}>
-                              <Avatar isUser={msg.type === 'user'} />
-                              <div
-                                className={msg.type === 'user' ? 'px-4 py-2.5 rounded-full' : 'px-3 py-2 sm:py-2.5 rounded-lg'}
-                                style={{
-                                  background: msg.type === 'user' ? 'var(--sig-user-grad)' : 'var(--sig-glass)',
-                                  border: msg.type === 'user' ? 'none' : '1px solid var(--sig-line)',
-                                  borderLeft: msg.type === 'user' ? 'none' : '2px solid var(--sig-mint)',
-                                  borderRadius: msg.type === 'user' ? '999px' : '2px 10px 10px 10px',
-                                }}
-                              >
-                                <p className="text-[13px] leading-relaxed whitespace-pre-wrap"
-                                  style={{ color: msg.type === 'user' ? '#fff' : 'var(--sig-ink)' }}
-                                >
-                                  {msg.text}
-                                  {msg.isTyping && (
-                                    <span className="sig-dot inline-block w-1 h-3 ml-1 align-middle" style={{ background: 'var(--sig-mint)' }} />
-                                  )}
-                                </p>
-                              </div>
+                            <Avatar isUser={msg.type === 'user'} />
+                            <div
+                              style={{
+                                background: msg.type === 'user' ? 'var(--sig-user-grad)' : 'var(--sig-glass)',
+                                border: msg.type === 'user' ? 'none' : '1px solid var(--sig-line)',
+                                borderLeft: msg.type === 'user' ? 'none' : '2px solid var(--sig-teal)',
+                                borderRadius: msg.type === 'user' ? '14px 14px 3px 14px' : '3px 14px 14px 14px',
+                                padding: '9px 13px',
+                                maxWidth: '82%',
+                              }}
+                            >
+                              <p style={{ color: msg.type === 'user' ? '#fff' : 'var(--sig-ink)', fontSize: 12.5, lineHeight: 1.5, margin: 0, whiteSpace: 'pre-wrap' }}>
+                                {msg.text}
+                                {msg.isTyping && (
+                                  <span className="sig-dot inline-block w-1 h-3 ml-1 align-middle" style={{ background: 'var(--sig-teal)' }} />
+                                )}
+                              </p>
                             </div>
                           </motion.div>
                         ))}
@@ -831,11 +861,15 @@ const VoiceAssistant = () => {
                         <AnimatePresence>
                           {isTypingIndicator && (
                             <motion.div key="typing" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                              className="flex gap-2 items-end"
+                              className="flex gap-2"
                             >
                               <Avatar isUser={false} />
-                              <div className="px-3.5 py-2.5 rounded-lg flex gap-1.5 items-center"
-                                style={{ background: 'var(--sig-glass)', border: '1px solid var(--sig-line)', borderLeft: '2px solid var(--sig-mint)', borderRadius: '2px 10px 10px 10px' }}
+                              <div className="flex gap-[5px] items-center"
+                                style={{
+                                  background: 'var(--sig-glass)', border: '1px solid var(--sig-line)',
+                                  borderLeft: '2px solid var(--sig-purple)', borderRadius: '3px 14px 14px 14px',
+                                  padding: '11px 13px',
+                                }}
                               >
                                 {[0, 1, 2].map(i => <div key={i} className="type-dot" />)}
                               </div>
@@ -855,10 +889,10 @@ const VoiceAssistant = () => {
                             exit={{ opacity: 0, y: 6, scale: 0.9 }}
                             onClick={scrollToLatest}
                             className="sig-jump absolute bottom-2.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full border flex items-center justify-center z-20"
-                            style={{ background: 'var(--sig-surface)', borderColor: 'var(--sig-line-bright)', boxShadow: '0 6px 16px rgba(0,0,0,0.45)' }}
+                            style={{ background: 'var(--sig-panel)', borderColor: 'var(--sig-line-bright)', boxShadow: '0 6px 16px rgba(0,0,0,0.45)' }}
                             title="Jump to latest"
                           >
-                            <FiChevronDown size={13} color="var(--sig-mint)" />
+                            <FiChevronDown size={13} color="var(--sig-purple)" />
                           </motion.button>
                         )}
                       </AnimatePresence>
@@ -869,43 +903,47 @@ const VoiceAssistant = () => {
                       {transcript && isListening && (
                         <motion.div
                           initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                          className="px-3 sm:px-4 py-2 border-t flex items-center gap-2 overflow-hidden"
-                          style={{ background: 'rgba(251,113,133,0.05)', borderColor: 'var(--sig-line)' }}
+                          className="flex items-center gap-2 overflow-hidden"
+                          style={{ padding: '8px 16px', background: 'rgba(244,114,182,0.06)', borderTop: '1px solid var(--sig-line)' }}
                         >
-                          <Meter active count={4} color="var(--sig-rose)" h={12} />
-                          <p className="text-xs truncate" style={{ color: 'var(--sig-rose)', fontFamily: 'var(--sig-font-mono)' }}>
+                          <Meter active count={4} color="var(--sig-pink)" h={12} />
+                          <p className="truncate" style={{ fontSize: 12, color: 'var(--sig-pink)', fontFamily: 'var(--sig-font-mono)' }}>
                             {transcript}
                           </p>
                         </motion.div>
                       )}
                     </AnimatePresence>
 
-                    {/* ── INPUT AREA ── */}
-                    <div className="sig-tight px-3 py-3 sm:px-4 border-t" style={{ background: 'var(--sig-surface)', borderColor: 'var(--sig-line)' }}>
+                    {/* ── INPUT AREA (10px 16px padding, gradient send + pink-tinted mic, matches showcase) ── */}
+                    <div className="sig-tight" style={{ padding: '10px 16px', background: 'rgba(10,11,20,0.55)', borderTop: '1px solid var(--sig-line)' }}>
                       <div className="flex gap-2 items-center">
                         <button
-                          className="sig-mic-btn w-11 h-11 rounded-lg border flex items-center justify-center flex-shrink-0"
+                          className="sig-mic-btn rounded-full flex items-center justify-center flex-shrink-0"
                           onClick={toggleListening}
                           title={isListening ? 'Stop' : 'Speak'}
                           style={{
-                            background: isListening ? 'rgba(251,113,133,0.12)' : 'var(--sig-glass)',
-                            borderColor: isListening ? 'var(--sig-rose)' : 'var(--sig-line)',
+                            width: 36, height: 36,
+                            background: isListening ? 'rgba(251,113,133,0.14)' : 'rgba(244,114,182,0.12)',
+                            border: `1px solid ${isListening ? '#fb7185' : 'rgba(244,114,182,0.5)'}`,
                           }}
                         >
-                          {isListening ? <FaStop size={13} color="var(--sig-rose)" /> : <FaMicrophone size={15} style={{ color: 'var(--sig-mint)' }} />}
+                          {isListening ? <FaStop size={12} color="#fb7185" /> : <Meter active count={3} color="#f472b6" h={12} />}
                         </button>
 
                         <input
                           ref={inputRef}
-                          className="sig-input flex-1 min-w-0 h-11 px-4 rounded-lg border"
+                          className="sig-input flex-1 min-w-0"
                           type="text"
                           value={inputText}
                           onChange={e => setInputText(e.target.value)}
                           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && processUserInput(inputText)}
                           placeholder="Ask about Muhire's work…"
                           style={{
+                            height: 36,
+                            padding: '0 14px',
+                            borderRadius: 20,
                             border: '1px solid var(--sig-line)',
-                            background: 'rgba(255,255,255,0.025)',
+                            background: 'rgba(255,255,255,0.035)',
                             color: 'var(--sig-ink)',
                           }}
                         />
@@ -914,14 +952,15 @@ const VoiceAssistant = () => {
                           whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.94 }}
                           onClick={() => processUserInput(inputText)}
                           disabled={!inputText.trim()}
-                          className="w-11 h-11 rounded-lg border flex items-center justify-center flex-shrink-0"
+                          className="rounded-full flex items-center justify-center flex-shrink-0"
                           style={{
-                            background: inputText.trim() ? 'var(--sig-mint)' : 'var(--sig-glass)',
-                            borderColor: inputText.trim() ? 'var(--sig-mint)' : 'var(--sig-line)',
+                            width: 36, height: 36,
+                            background: inputText.trim() ? 'var(--sig-mic-grad)' : 'var(--sig-glass)',
+                            border: inputText.trim() ? 'none' : '1px solid var(--sig-line)',
                             cursor: inputText.trim() ? 'pointer' : 'not-allowed',
                           }}
                         >
-                          <FaPaperPlane size={13} color={inputText.trim() ? '#0a0c10' : 'var(--sig-faint)'} />
+                          <FaPaperPlane size={12} color={inputText.trim() ? '#05060d' : 'var(--sig-faint)'} />
                         </motion.button>
                       </div>
 
@@ -948,9 +987,9 @@ const VoiceAssistant = () => {
                           <button key={i} onClick={btn.onClick}
                             className="sig-toolbtn flex-1 py-1.5 px-1.5 sm:px-2 rounded-md border text-[10px] flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95"
                             style={{
-                              background: btn.accent ? 'var(--sig-mint-dim)' : btn.danger ? 'rgba(251,113,133,0.06)' : 'var(--sig-glass)',
-                              borderColor: btn.accent ? 'var(--sig-line-bright)' : btn.danger ? 'rgba(251,113,133,0.25)' : 'var(--sig-line)',
-                              color: btn.accent ? 'var(--sig-mint)' : btn.danger ? 'var(--sig-rose)' : 'var(--sig-dim)',
+                              background: btn.accent ? 'var(--sig-teal-dim)' : btn.danger ? 'rgba(244,114,182,0.08)' : 'var(--sig-glass)',
+                              borderColor: btn.accent ? 'var(--sig-line-bright)' : btn.danger ? 'rgba(244,114,182,0.3)' : 'var(--sig-line)',
+                              color: btn.accent ? 'var(--sig-teal)' : btn.danger ? 'var(--sig-pink)' : 'var(--sig-dim)',
                               fontFamily: 'var(--sig-font-mono)',
                             }}
                           >
@@ -961,13 +1000,13 @@ const VoiceAssistant = () => {
                       </div>
 
                       <div className="flex items-center gap-2 mt-2.5">
-                        <span className="text-[10px]" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>rate</span>
+                        <span style={{ fontSize: 10, color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>rate</span>
                         <input type="range" min={0.5} max={1.5} step={0.05} value={voiceSpeed}
                           onChange={e => setVoiceSpeed(parseFloat(e.target.value))}
                           className="flex-1 h-1 rounded-full cursor-pointer"
-                          style={{ accentColor: 'var(--sig-mint)' }}
+                          style={{ accentColor: 'var(--sig-purple)' }}
                         />
-                        <span className="text-[10px] w-9 text-right" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>{voiceSpeed.toFixed(2)}×</span>
+                        <span style={{ fontSize: 10, width: 36, textAlign: 'right', color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>{voiceSpeed.toFixed(2)}×</span>
                       </div>
                     </div>
 
@@ -980,11 +1019,11 @@ const VoiceAssistant = () => {
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.2 }}
-                          className="border-t overflow-hidden"
-                          style={{ background: 'rgba(0,0,0,0.15)', borderColor: 'var(--sig-line)' }}
+                          className="overflow-hidden"
+                          style={{ background: 'rgba(0,0,0,0.15)', borderTop: '1px solid var(--sig-line)' }}
                         >
-                          <div className="sig-tight px-3 py-3 sm:px-4">
-                            <p className="text-[10px] tracking-wider uppercase mb-2" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
+                          <div className="sig-tight" style={{ padding: '14px 16px' }}>
+                            <p style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)', marginBottom: 8 }}>
                               quick_prompts
                             </p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -995,7 +1034,7 @@ const VoiceAssistant = () => {
                                   onClick={() => processUserInput(s.text)}
                                   style={{ background: 'var(--sig-glass)', borderColor: 'var(--sig-line)' }}
                                 >
-                                  <s.icon size={11} style={{ color: 'var(--sig-mint)', flexShrink: 0 }} />
+                                  <s.icon size={11} style={{ color: 'var(--sig-purple)', flexShrink: 0 }} />
                                   <span className="text-[11.5px] truncate" style={{ color: 'var(--sig-ink)' }}>{s.text}</span>
                                 </motion.button>
                               ))}
@@ -1005,12 +1044,10 @@ const VoiceAssistant = () => {
                       )}
                     </AnimatePresence>
 
-                    {/* ── FOOTER ── */}
-                    <div className="px-3 py-2 sm:px-4 border-t flex items-center justify-center gap-2"
-                      style={{ background: 'var(--sig-surface)', borderColor: 'var(--sig-line)' }}
-                    >
+                    {/* ── FOOTER (matches showcase caption line) ── */}
+                    <div className="flex items-center justify-center gap-2" style={{ padding: '10px 16px' }}>
                       {isSpeaking && <Meter active count={4} h={10} />}
-                      <span className="text-[9.5px] tracking-wide truncate" style={{ color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
+                      <span className="truncate" style={{ fontSize: 10, letterSpacing: '0.02em', color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>
                         {isSpeaking
                           ? 'output_active'
                           : isListening
@@ -1026,15 +1063,15 @@ const VoiceAssistant = () => {
 
               {/* ── MINIMISED BODY ── */}
               {isMinimized && (
-                <div className="px-4 py-3" style={{ background: 'var(--sig-surface)' }}>
+                <div style={{ padding: '14px 16px', background: 'var(--sig-surface)' }}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <StatusDot listening={isListening} speaking={isSpeaking} />
-                      <span className="text-xs font-semibold truncate" style={{ color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
+                      <span className="truncate" style={{ fontSize: 12, fontWeight: 600, color: 'var(--sig-ink)', fontFamily: 'var(--sig-font-display)' }}>
                         Nova · {activePersona.label}
                       </span>
                       {unreadCount > 0 && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold flex-shrink-0" style={{ background: 'var(--sig-rose)', color: '#0a0c10', fontFamily: 'var(--sig-font-mono)' }}>
+                        <span className="px-1.5 py-0.5 rounded flex-shrink-0" style={{ fontSize: 10, fontWeight: 700, background: 'var(--sig-pink)', color: '#05060d', fontFamily: 'var(--sig-font-mono)' }}>
                           {unreadCount}
                         </span>
                       )}
@@ -1048,7 +1085,7 @@ const VoiceAssistant = () => {
                     </button>
                   </div>
                   {conversation.length > 0 && (
-                    <p className="text-[11px] truncate mt-1.5" style={{ color: 'var(--sig-dim)' }}>
+                    <p className="truncate" style={{ fontSize: 11, color: 'var(--sig-dim)', marginTop: 6 }}>
                       {conversation[conversation.length - 1].text}
                     </p>
                   )}
