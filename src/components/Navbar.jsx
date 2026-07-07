@@ -221,6 +221,7 @@ const Navbar = () => {
       const navHeight = navRef.current?.offsetHeight || 80
       window.scrollTo({ top: element.offsetTop - navHeight, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
       setIsOpen(false)
+      window.dispatchEvent(new CustomEvent('nav-menu-toggle', { detail: false }))
       playClick()
     }
   }
@@ -240,6 +241,20 @@ const Navbar = () => {
 
   const toggleTheme = () => {
     setIsDarkMode((prev) => { applyTheme(!prev); playClick(); return !prev })
+  }
+
+  // ── Mobile hamburger toggle ──────────────────────────────────────────
+  // Broadcasts a `nav-menu-toggle` CustomEvent whenever the mobile menu
+  // opens/closes so other fixed/high-z-index UI (e.g. VoiceAssistant's
+  // floating action button) can temporarily get out of the way and avoid
+  // overlapping/blocking taps on nav items or page content underneath it.
+  const handleHamburgerClick = () => {
+    setIsOpen((prev) => {
+      const next = !prev
+      window.dispatchEvent(new CustomEvent('nav-menu-toggle', { detail: next }))
+      return next
+    })
+    playClick()
   }
 
   const showUnderline = mousePos.activeIndex !== -1 && windowWidth >= 1024
@@ -390,7 +405,7 @@ const Navbar = () => {
 
               {/* ── MOBILE MENU ICON BUTTON (hamburger) ── */}
               <motion.button
-                onClick={() => { setIsOpen((prev) => !prev); playClick() }}
+                onClick={handleHamburgerClick}
                 onMouseEnter={playHover}
                 aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
                 aria-expanded={isOpen}
