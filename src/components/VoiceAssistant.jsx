@@ -827,7 +827,7 @@ const VoiceAssistant = () => {
 
                 <div className="flex-1 min-w-0">
                   <p style={{ color: 'var(--sig-ink)', fontSize: 14, fontWeight: 600, fontFamily: 'var(--sig-font-display)', margin: 0 }}>
-                    Nova ✨
+                    Muhire Dieudonne AI 
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5" style={{ fontSize: 11, fontFamily: 'var(--sig-font-mono)' }}>
                     <StatusDot listening={isListening} speaking={isSpeaking} />
