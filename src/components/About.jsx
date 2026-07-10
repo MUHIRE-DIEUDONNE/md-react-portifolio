@@ -590,17 +590,15 @@ const About = () => {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 24 }}>
                       {SKILLS.map(s => <span key={s} className="about-badge">{s}</span>)}
                     </div>
-                    <a
-                      href="/Muhire_Dieudonne_CV.pdf"
-                      download="Muhire_Dieudonne_CV.pdf"
-                      className="about-btn-primary"
-                    >
-                      <FiDownload size={14} />
-                      Download CV
-                      <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.4, repeat: Infinity }}>
-                        <FiArrowUpRight size={14} />
-                      </motion.span>
-                    </a>
+<a
+  href="/files/Muhire_Dieudonne_CV.pdf"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="about-btn-primary"
+>
+  <FiDownload size={14} />
+  Download CV
+</a>
                   </div>
                 </motion.div>
               )}
