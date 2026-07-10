@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import MainLayout from './layout/MainLayout'
 import VoiceAssistant from './components/VoiceAssistant'
 import LoadingScreen from './components/LoadingScreen'
+import ParticleBackground from './components/ParticleBackground'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSound } from './hooks/useSound'
 
@@ -16,7 +17,6 @@ function App() {
     const timer = setTimeout(() => {
       setIsLoading(false)
     }, 3500) // Total loading time matches LoadingScreen duration
-
     return () => clearTimeout(timer)
   }, [])
 
@@ -26,8 +26,10 @@ function App() {
 
   return (
     <>
+      <ParticleBackground />
+
       <LoadingScreen isLoading={isLoading} onLoadingComplete={handleLoadingComplete} />
-      
+
       <AnimatePresence mode="wait">
         {!isLoading && (
           <motion.div
@@ -42,7 +44,7 @@ function App() {
               soundEnabled={soundEnabled}
               setSoundEnabled={setSoundEnabled}
             />
-            
+
             {/* AI Voice Assistant */}
             <VoiceAssistant />
           </motion.div>
