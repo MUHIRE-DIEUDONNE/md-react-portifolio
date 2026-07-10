@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import MainLayout from './layout/MainLayout'
 import VoiceAssistant from './components/VoiceAssistant'
 import LoadingScreen from './components/LoadingScreen'
-import ParticleBackground from './components/ParticleBackground'
+import Particlebackground from './components/Particlebackground'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSound } from './hooks/useSound'
 
