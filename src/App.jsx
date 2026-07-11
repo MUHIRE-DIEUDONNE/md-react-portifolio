@@ -26,7 +26,7 @@ function App() {
 
   return (
     <>
-      <Particlebackground />
+      <Particlebackground particleCount={30} speed={0.2} />
 
       <LoadingScreen isLoading={isLoading} onLoadingComplete={handleLoadingComplete} />
 
