@@ -2,8 +2,27 @@ import { useEffect, useRef } from "react";
 
 /**
  * ParticleBackground
- * Uduce twera (white dots) tugenda kuva ibumoso ujya iburyo,
- * bikagaragara inyuma ya content (background layer).
+ * Uduce twera (white dots) tugenda buhoro buhoro muri background.
+ *
+ * Uko wayikoresha (usage):
+ *   1. Shyira iyi file muri src/components/ParticleBackground.jsx
+ *   2. Muri App.jsx, yishyire hejuru ya content yose, isanzwe (position: fixed):
+ *
+ *      import ParticleBackground from "./components/ParticleBackground";
+ *
+ *      function App() {
+ *        return (
+ *          <>
+ *            <ParticleBackground />
+ *            <div className="app-content">
+ *              ... paji zawe zose (Home, About, Projects, ...) ...
+ *            </div>
+ *          </>
+ *        );
+ *      }
+ *
+ *   Kubera ko iyi component ikoresha position: fixed, izagaragara
+ *   kuri paji zose zikurikira, nta kongera kuyishyiraho buri paji.
  */
 export default function ParticleBackground({
   particleCount = 80,
@@ -25,15 +44,20 @@ export default function ParticleBackground({
       canvas.height = window.innerHeight;
     };
 
+    // Buri particle ivuka ahantu na hantu ku ruhande rw'ibumoso (cyangwa
+    // hagati mu ecran igihe cyo gutangira gusa), hanyuma ikagenda ijya
+    // iburyo. Iyo igeze ku mpera y'iburyo, izimira maze indi nshya
+    // ikavuka ku ruhande rw'ibumoso kandi.
     const spawnParticle = (randomX = false) => ({
       x: randomX ? Math.random() * canvas.width : -10,
       y: Math.random() * canvas.height,
       size: Math.random() * (maxSize - minSize) + minSize,
-      speedX: speed * (0.5 + Math.random()),
+      speedX: speed * (0.5 + Math.random()), // buri particle ifite umuvuduko utandukanye gato
       opacity: Math.random() * 0.5 + 0.3,
     });
 
     const createParticles = () => {
+      // Ku gutangira, particles zisanzwe ziri hirya no hino ku ecran (randomX)
       particles = Array.from({ length: particleCount }, () => spawnParticle(true));
     };
 
@@ -43,6 +67,7 @@ export default function ParticleBackground({
       particles.forEach((p, i) => {
         p.x += p.speedX;
 
+        // Iyo particle isohotse iburyo, iyisubiremo indi nshya ku bumoso
         if (p.x > canvas.width + 10) {
           particles[i] = spawnParticle(false);
           return;
