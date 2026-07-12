@@ -44,34 +44,29 @@ export default function ParticleBackground({
       canvas.height = window.innerHeight;
     };
 
-    // Buri particle ivuka ahantu na hantu ku ruhande rw'ibumoso (cyangwa
-    // hagati mu ecran igihe cyo gutangira gusa), hanyuma ikagenda ijya
-    // iburyo. Iyo igeze ku mpera y'iburyo, izimira maze indi nshya
-    // ikavuka ku ruhande rw'ibumoso kandi.
-    const spawnParticle = (randomX = false) => ({
-      x: randomX ? Math.random() * canvas.width : -10,
-      y: Math.random() * canvas.height,
-      size: Math.random() * (maxSize - minSize) + minSize,
-      speedX: speed * (0.5 + Math.random()), // buri particle ifite umuvuduko utandukanye gato
-      opacity: Math.random() * 0.5 + 0.3,
-    });
-
     const createParticles = () => {
-      // Ku gutangira, particles zisanzwe ziri hirya no hino ku ecran (randomX)
-      particles = Array.from({ length: particleCount }, () => spawnParticle(true));
+      particles = Array.from({ length: particleCount }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * (maxSize - minSize) + minSize,
+        speedX: (Math.random() - 0.5) * speed,
+        speedY: (Math.random() - 0.5) * speed,
+        opacity: Math.random() * 0.5 + 0.3,
+      }));
     };
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach((p, i) => {
+      particles.forEach((p) => {
         p.x += p.speedX;
+        p.y += p.speedY;
 
-        // Iyo particle isohotse iburyo, iyisubiremo indi nshya ku bumoso
-        if (p.x > canvas.width + 10) {
-          particles[i] = spawnParticle(false);
-          return;
-        }
+        // Iyo ugeze ku mpera y'ecran, usubira indi ruhande (wrap around)
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
