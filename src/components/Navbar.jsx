@@ -138,6 +138,7 @@ const Navbar = () => {
   const magneticTheme = useMagneticEffect()
 
   const navRef = useRef(null)
+  const topBarRef = useRef(null) // measures only the fixed-height top row (logo/links/hamburger), excluding the collapsible mobile menu
   const linkRefs = useRef([])
   const { playClick, playHover } = useSound(false)
 
@@ -216,8 +217,12 @@ const Navbar = () => {
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId)
     if (element) {
-      const navHeight = navRef.current?.offsetHeight || 80
-      
+      // FIX: use topBarRef (fixed-height row) instead of navRef (whole nav).
+      // navRef includes the expanded mobile menu grid while it's open, which
+      // inflates offsetHeight and pushes offsetPosition negative — the browser
+      // then clamps the scroll to 0, making taps look like they do nothing.
+      const navHeight = topBarRef.current?.offsetHeight || 80
+
       // Calculate real absolute coordinates, ignoring parent offsets or overlay height drops
       const elementPosition = element.getBoundingClientRect().top + window.scrollY
       const offsetPosition = elementPosition - navHeight
@@ -301,7 +306,7 @@ const Navbar = () => {
         className="fixed w-full z-40 transition-all duration-300 shadow-lg shadow-primary/5"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-3 sm:py-4">
+          <div ref={topBarRef} className="flex justify-between items-center py-3 sm:py-4">
 
             {/* ── Logo ── */}
             <Card3D delay={0.2} className="cursor-pointer" onClick={() => scrollToSection('home')} onMouseEnter={playHover}>
