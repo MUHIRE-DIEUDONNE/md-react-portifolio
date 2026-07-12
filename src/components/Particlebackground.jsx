@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+
 /**
  * ParticleBackground
  * Uduce twera (white dots) tugenda buhoro buhoro muri background.
@@ -40,26 +41,30 @@ export default function ParticleBackground({
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
+    // Buri particle igenda gusa kuva ibumoso ijya iburyo. Iyo igeze ku
+    // mpera y'iburyo, izimira maze indi nshya ikavuka ku ruhande
+    // rw'ibumoso — bigatuma uhora ubona utundi "tuza" buhoraho.
+    const spawnParticle = (randomX = false) => ({
+      x: randomX ? Math.random() * canvas.width : -10,
+      y: Math.random() * canvas.height,
+      size: Math.random() * (maxSize - minSize) + minSize,
+      speedX: speed * (0.5 + Math.random()),
+      opacity: Math.random() * 0.5 + 0.3,
+    });
     const createParticles = () => {
-      particles = Array.from({ length: particleCount }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random() * (maxSize - minSize) + minSize,
-        speedX: (Math.random() - 0.5) * speed,
-        speedY: (Math.random() - 0.5) * speed,
-        opacity: Math.random() * 0.5 + 0.3,
-      }));
+      particles = Array.from({ length: particleCount }, () => spawnParticle(true));
     };
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p) => {
+      particles.forEach((p, i) => {
         p.x += p.speedX;
-        p.y += p.speedY;
-        // Iyo ugeze ku mpera y'ecran, usubira indi ruhande (wrap around)
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
+
+        // Iyo particle isohotse iburyo, iyisubiremo indi nshya ku bumoso
+        if (p.x > canvas.width + 10) {
+          particles[i] = spawnParticle(false);
+          return;
+        }
+
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = color.replace(/[\d.]+\)$/, `${p.opacity})`);
@@ -95,13 +100,13 @@ export default function ParticleBackground({
         width: "100vw",
         height: "100vh",
         pointerEvents: "none",
-        // FIX: was zIndex: -1, which put the canvas BEHIND every section's
-        // own solid background (e.g. #0c0b09 on About/Skills/Projects/
-        // Experience/Contact), hiding it completely once those sections
-        // mounted over it. A high positive z-index puts it above all
-        // content instead; pointerEvents: "none" keeps it fully
-        // click-through so it never blocks buttons, links, or the nav.
-        zIndex: 9999,
+        // Back to sitting BEHIND all page content (not floating on top
+        // while scrolling). NOTE: this only actually shows through if the
+        // sections rendered on top of it don't use fully opaque
+        // backgrounds — see the note below about lowering background
+        // opacity on About/Projects/Experience/Contact so the particles
+        // can peek through instead of being fully hidden again.
+        zIndex: 0,
       }}
     />
   );
