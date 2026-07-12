@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import MainLayout from './layout/MainLayout'
 import VoiceAssistant from './components/VoiceAssistant'
 import LoadingScreen from './components/LoadingScreen'
-import Particlebackground from './components/Particlebackground'
+import ParticleBackground from './components/Particlebackground'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSound } from './hooks/useSound'
 
@@ -26,7 +26,7 @@ function App() {
 
   return (
     <>
-      <Particlebackground particleCount={30} speed={0.2} />
+      <ParticleBackground particleCount={30} speed={0.2} />
 
       <LoadingScreen isLoading={isLoading} onLoadingComplete={handleLoadingComplete} />
 
