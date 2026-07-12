@@ -345,7 +345,7 @@ const Footer = () => {
   const resources = [
     { name: 'Blog', href: '#', icon: FiBookOpen },
     { name: 'Free Resources', href: '#', icon: FiGift },
-    { name: 'GitHub', href: '#', icon: FiGithub }
+    { name: 'GitHub', href: 'https://github.com/MUHIRE-DIEUDONNE', icon: FiGithub }
   ]
 
   const legal = [
@@ -355,10 +355,10 @@ const Footer = () => {
   ]
 
   const socialLinks = [
-    { icon: FiGithub, href: '#', name: 'GitHub' },
-    { icon: FiLinkedin, href: '#', name: 'LinkedIn' },
+    { icon: FiGithub, href: 'https://github.com/MUHIRE-DIEUDONNE', name: 'GitHub' },
+    { icon: FiLinkedin, href: 'https://www.linkedin.com/in/muhire-dieudonne-498845419/', name: 'LinkedIn' },
     { icon: FiTwitter, href: '#', name: 'Twitter' },
-    { icon: FiInstagram, href: '#', name: 'Instagram' }
+    { icon: FiInstagram, href: 'https://www.instagram.com/muhiredieu7/', name: 'Instagram' }
   ]
 
   const perks = ['Weekly insights', 'No spam, ever', 'Unsubscribe anytime']
@@ -431,6 +431,8 @@ const Footer = () => {
                 <motion.a
                   key={index}
                   href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="footer-social-link"
                   whileHover={{ y: -3, scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -490,7 +492,12 @@ const Footer = () => {
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {resources.map((link) => (
                 <motion.li key={link.name} whileHover={{ x: 4 }}>
-                  <a href={link.href} className="footer-quicklink">
+                  <a
+                    href={link.href}
+                    className="footer-quicklink"
+                    target={link.href.startsWith('http') ? '_blank' : undefined}
+                    rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  >
                     <link.icon size={11} style={{ color: 'var(--footer-dim)' }} />
                     {link.name}
                   </a>
