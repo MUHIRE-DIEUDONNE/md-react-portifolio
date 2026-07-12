@@ -2,11 +2,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  FiVolume2, FiVolumeX, FiUser,
+  FiVolume2, FiVolumeX,
   FiTrash2, FiX, FiMinimize2, FiMaximize2,
-  FiBriefcase, FiCode, FiMail, FiGlobe,
-  FiAward, FiChevronDown, FiChevronUp,
-  FiMessageSquare, FiHelpCircle, FiStar, FiCpu
+  FiChevronDown
 } from 'react-icons/fi'
 import { FaStop, FaPaperPlane, FaMicrophone } from 'react-icons/fa'
 
@@ -453,60 +451,6 @@ function generateResponse(input) {
 }
 
 /* ─────────────────────────────────────────────
-   SUGGESTION CATEGORIES — Well organized layout
-───────────────────────────────────────────── */
-const SUGGESTION_CATEGORIES = [
-  {
-    title: "👋 About Muhire",
-    suggestions: [
-      { text: "Who is Muhire?", icon: FiUser },
-      { text: "Where is Muhire from?", icon: FiGlobe },
-      { text: "What does Muhire do?", icon: FiUser },
-    ]
-  },
-  {
-    title: "💻 Skills & Tech",
-    suggestions: [
-      { text: "What are your skills?", icon: FiCode },
-      { text: "What's your tech stack?", icon: FiCpu },
-      { text: "Tell me about Three.js", icon: FiStar },
-    ]
-  },
-  {
-    title: "🚀 Projects",
-    suggestions: [
-      { text: "Show me your projects", icon: FiBriefcase },
-      { text: "What's your best project?", icon: FiAward },
-      { text: "Tell me about your latest project", icon: FiStar },
-    ]
-  },
-  {
-    title: "💼 Experience",
-    suggestions: [
-      { text: "What is your experience?", icon: FiAward },
-      { text: "How many years of experience?", icon: FiBriefcase },
-      { text: "Are you available for work?", icon: FiGlobe },
-    ]
-  },
-  {
-    title: "📬 Contact",
-    suggestions: [
-      { text: "How can I contact you?", icon: FiMail },
-      { text: "What's your email?", icon: FiMail },
-      { text: "Do you have a CV?", icon: FiHelpCircle },
-    ]
-  },
-  {
-    title: "🤖 About Nova",
-    suggestions: [
-      { text: "What can you do?", icon: FiMessageSquare },
-      { text: "Are you an AI?", icon: FiCpu },
-      { text: "How do I use you?", icon: FiHelpCircle },
-    ]
-  }
-]
-
-/* ─────────────────────────────────────────────
    MAIN COMPONENT
 ───────────────────────────────────────────── */
 const VoiceAssistant = () => {
@@ -520,7 +464,6 @@ const VoiceAssistant = () => {
   const [isMuted, setIsMuted] = useState(false)
   const [inputText, setInputText] = useState('')
   const [isTypingIndicator, setIsTypingInd] = useState(false)
-  const [showSuggestions, setShowSuggestions] = useState(true)
   const [welcomeDone, setWelcomeDone] = useState(false)
   const [autoVoice, setAutoVoice] = useState(true)
   const [voiceSpeed, setVoiceSpeed] = useState(0.93)
@@ -1056,11 +999,6 @@ const VoiceAssistant = () => {
                       <div className="flex gap-1.5 mt-2.5">
                         {[
                           {
-                            label: showSuggestions ? 'Hide prompts' : 'Show prompts',
-                            icon: showSuggestions ? FiChevronDown : FiChevronUp,
-                            onClick: () => setShowSuggestions(s => !s),
-                          },
-                          {
                             label: autoVoice ? 'Voice on' : 'Voice off',
                             icon: autoVoice ? FiVolume2 : FiVolumeX,
                             onClick: () => setAutoVoice(v => !v),
@@ -1098,54 +1036,6 @@ const VoiceAssistant = () => {
                         <span style={{ fontSize: 10, width: 36, textAlign: 'right', color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)' }}>{voiceSpeed.toFixed(2)}×</span>
                       </div>
                     </div>
-
-                    {/* ── SUGGESTIONS — Well organized layout ── */}
-                    <AnimatePresence>
-                      {showSuggestions && (
-                        <motion.div
-                          key="sugg"
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.25 }}
-                          className="overflow-hidden"
-                          style={{ background: 'rgba(0,0,0,0.15)', borderTop: '1px solid var(--sig-line)' }}
-                        >
-                          <div className="sig-tight" style={{ padding: '14px 16px' }}>
-                            <p style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--sig-faint)', fontFamily: 'var(--sig-font-mono)', marginBottom: 10 }}>
-                              📋 quick prompts — tap to ask
-                            </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                              {SUGGESTION_CATEGORIES.map((category, catIdx) => (
-                                <div key={catIdx} className="flex flex-col gap-1">
-                                  <p style={{ fontSize: 9, color: 'var(--sig-teal)', fontFamily: 'var(--sig-font-mono)', letterSpacing: '0.04em', marginBottom: 2 }}>
-                                    {category.title}
-                                  </p>
-                                  {category.suggestions.map((s, i) => (
-                                    <motion.button
-                                      key={i}
-                                      className="sig-chip px-2.5 py-1.5 rounded-md border text-left flex items-center gap-2"
-                                      initial={{ opacity: 0, y: 4 }}
-                                      animate={{ opacity: 1, y: 0 }}
-                                      transition={{ delay: (catIdx * 3 + i) * 0.04 }}
-                                      onClick={() => processUserInput(s.text)}
-                                      style={{
-                                        background: 'var(--sig-glass)',
-                                        borderColor: 'var(--sig-line)',
-                                        fontSize: 10.5,
-                                      }}
-                                    >
-                                      <s.icon size={10} style={{ color: 'var(--sig-purple)', flexShrink: 0 }} />
-                                      <span className="truncate" style={{ color: 'var(--sig-ink)' }}>{s.text}</span>
-                                    </motion.button>
-                                  ))}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
 
                     {/* ── FOOTER ── */}
                     <div className="flex items-center justify-center gap-2" style={{ padding: '10px 16px' }}>
