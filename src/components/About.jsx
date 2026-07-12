@@ -345,7 +345,13 @@ const About = () => {
   `
 
   return (
-    <section className="about-root">
+    /*
+      FIX: id="about" added below — this MUST match the `id: 'about'`
+      entry in Navbar.jsx's navItems array, since Navbar.scrollToSection()
+      looks this element up via document.getElementById('about'). It was
+      previously missing, which is why the mobile "About" link did nothing.
+    */
+    <section id="about" className="about-root">
       <style>{STYLES}{lightModeStyles}</style>
 
       <div className="about-glow-orb" style={{
