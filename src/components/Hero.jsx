@@ -72,7 +72,9 @@ const PREMIUM_STYLES = `
 .hero-root {
   position: relative;
   overflow: hidden;
-  background: var(--hero-bg);
+  /* background removed so ParticleBackground (behind, z-index: -1)
+     shows through. The dark base color now lives on html/body in
+     index.css instead. */
   color: var(--hero-cream);
   font-family: var(--hero-body);
 }
