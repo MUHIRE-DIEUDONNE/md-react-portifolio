@@ -44,13 +44,22 @@ export default function ParticleBackground({
     // Buri particle igenda gusa kuva ibumoso ijya iburyo. Iyo igeze ku
     // mpera y'iburyo, izimira maze indi nshya ikavuka ku ruhande
     // rw'ibumoso — bigatuma uhora ubona utundi "tuza" buhoraho.
-    const spawnParticle = (randomX = false) => ({
-      x: randomX ? Math.random() * canvas.width : -10,
-      y: Math.random() * canvas.height,
-      size: Math.random() * (maxSize - minSize) + minSize,
-      speedX: speed * (0.5 + Math.random()),
-      opacity: Math.random() * 0.5 + 0.3,
-    });
+    //
+    // Umuvuduko (speed) uhujwe n'ingano (size) ya buri particle: izinini
+    // (zisa n'ziri hafi) zigenda vuba, naho izitoya (zisa n'ziri kure)
+    // zigenda buhoro — bigatuma habaho depth/parallax effect isa
+    // n'iy'ukuri, nk'uko particle backgrounds za none zikunda kuba zimeze.
+    const spawnParticle = (randomX = false) => {
+      const size = Math.random() * (maxSize - minSize) + minSize;
+      const sizeRatio = (size - minSize) / (maxSize - minSize || 1); // 0 (ntoya) → 1 (nini)
+      return {
+        x: randomX ? Math.random() * canvas.width : -10,
+        y: Math.random() * canvas.height,
+        size,
+        speedX: speed * (0.4 + sizeRatio * 1.6), // nini = vuba, ntoya = buhoro
+        opacity: 0.25 + sizeRatio * 0.55, // nini zigaragara neza kurushaho
+      };
+    };
     const createParticles = () => {
       particles = Array.from({ length: particleCount }, () => spawnParticle(true));
     };
