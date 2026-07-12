@@ -77,10 +77,10 @@ const Contact = () => {
   ]
 
   const SOCIALS = [
-    { Icon: FiGithub, href: 'https://github.com/muhiredieu', label: 'GitHub' },
-    { Icon: FiLinkedin, href: 'https://linkedin.com/in/muhiredieu', label: 'LinkedIn' },
+    { Icon: FiGithub, href: 'https://github.com/MUHIRE-DIEUDONNE', label: 'GitHub' },
+    { Icon: FiLinkedin, href: 'https://www.linkedin.com/in/muhire-dieudonne-498845419/', label: 'LinkedIn' },
     { Icon: FiTwitter, href: 'https://twitter.com/muhiredieu', label: 'Twitter' },
-    { Icon: FiInstagram, href: 'https://instagram.com/muhiredieu', label: 'Instagram' },
+    { Icon: FiInstagram, href: 'https://www.instagram.com/muhiredieu7/', label: 'Instagram' },
     { Icon: FaWhatsapp, href: 'https://wa.me/250798728379', label: 'WhatsApp' },
     { Icon: FaDev, href: 'https://dev.to/muhiredieu', label: 'Dev.to' },
   ]
