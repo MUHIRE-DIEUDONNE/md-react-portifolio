@@ -215,27 +215,63 @@ const Navbar = () => {
 
   // 💡 ENHANCED SCROLL ENGINE FOR MOBILE ACCURACY
   const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId)
-    if (element) {
-      // FIX: use topBarRef (fixed-height row) instead of navRef (whole nav).
-      // navRef includes the expanded mobile menu grid while it's open, which
-      // inflates offsetHeight and pushes offsetPosition negative — the browser
-      // then clamps the scroll to 0, making taps look like they do nothing.
+    // FIX: previously we started window.scrollTo(...) and setIsOpen(false)
+    // at the same instant. setIsOpen(false) triggers the mobile menu's
+    // 0.3s collapse animation (height: 'auto' -> 0), which keeps shifting
+    // the page's layout height WHILE the smooth-scroll animation is also
+    // running. The two animations fought each other, and the net visual
+    // result was that taps looked like they did nothing.
+    //
+    // Now: close the menu first, wait for its collapse animation to
+    // actually finish, THEN measure the target position and scroll —
+    // so nothing is shifting layout underneath the scroll animation.
+    const wasOpen = isOpen
+
+    setIsOpen(false)
+    window.dispatchEvent(new CustomEvent('nav-menu-toggle', { detail: false }))
+    playClick()
+
+    const runScroll = () => {
+      const element = document.getElementById(sectionId)
+      if (!element) return
+
+      // topBarRef (fixed-height row) instead of navRef (whole nav, which
+      // would include the now-closed mobile menu anyway, but this stays
+      // safe regardless of open/closed state).
       const navHeight = topBarRef.current?.offsetHeight || 80
 
       // Calculate real absolute coordinates, ignoring parent offsets or overlay height drops
       const elementPosition = element.getBoundingClientRect().top + window.scrollY
       const offsetPosition = elementPosition - navHeight
 
+      // DEFENSIVE FIX: if any global CSS sets scroll-snap-type on html/body
+      // (common in "snap section" style templates), it can silently fight
+      // or ignore a JS-driven smooth scroll, making it look like nothing
+      // happened. Temporarily disable it for this scroll, then restore.
+      const htmlEl = document.documentElement
+      const bodyEl = document.body
+      const prevHtmlSnap = htmlEl.style.scrollSnapType
+      const prevBodySnap = bodyEl.style.scrollSnapType
+      htmlEl.style.scrollSnapType = 'none'
+      bodyEl.style.scrollSnapType = 'none'
+
       window.scrollTo({
         top: offsetPosition,
         behavior: prefersReducedMotion ? 'auto' : 'smooth'
       })
 
-      // Gracefully close layout wrappers
-      setIsOpen(false)
-      window.dispatchEvent(new CustomEvent('nav-menu-toggle', { detail: false }))
-      playClick()
+      window.setTimeout(() => {
+        htmlEl.style.scrollSnapType = prevHtmlSnap
+        bodyEl.style.scrollSnapType = prevBodySnap
+      }, 900)
+    }
+
+    if (wasOpen) {
+      // Match the mobile menu's collapse transition duration (0.3s) with a
+      // small safety margin, so layout has fully settled before we scroll.
+      setTimeout(runScroll, 340)
+    } else {
+      runScroll()
     }
   }
 
