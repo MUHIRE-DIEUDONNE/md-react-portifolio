@@ -2,27 +2,8 @@ import { useEffect, useRef } from "react";
 
 /**
  * ParticleBackground
- * Uduce twera (white dots) tugenda buhoro buhoro muri background.
- *
- * Uko wayikoresha (usage):
- *   1. Shyira iyi file muri src/components/ParticleBackground.jsx
- *   2. Muri App.jsx, yishyire hejuru ya content yose, isanzwe (position: fixed):
- *
- *      import ParticleBackground from "./components/ParticleBackground";
- *
- *      function App() {
- *        return (
- *          <>
- *            <ParticleBackground />
- *            <div className="app-content">
- *              ... paji zawe zose (Home, About, Projects, ...) ...
- *            </div>
- *          </>
- *        );
- *      }
- *
- *   Kubera ko iyi component ikoresha position: fixed, izagaragara
- *   kuri paji zose zikurikira, nta kongera kuyishyiraho buri paji.
+ * Uduce twera (white dots) tugenda kuva ibumoso ujya iburyo,
+ * bikagaragara inyuma ya content (background layer).
  */
 export default function ParticleBackground({
   particleCount = 80,
@@ -44,29 +25,28 @@ export default function ParticleBackground({
       canvas.height = window.innerHeight;
     };
 
+    const spawnParticle = (randomX = false) => ({
+      x: randomX ? Math.random() * canvas.width : -10,
+      y: Math.random() * canvas.height,
+      size: Math.random() * (maxSize - minSize) + minSize,
+      speedX: speed * (0.5 + Math.random()),
+      opacity: Math.random() * 0.5 + 0.3,
+    });
+
     const createParticles = () => {
-      particles = Array.from({ length: particleCount }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random() * (maxSize - minSize) + minSize,
-        speedX: (Math.random() - 0.5) * speed,
-        speedY: (Math.random() - 0.5) * speed,
-        opacity: Math.random() * 0.5 + 0.3,
-      }));
+      particles = Array.from({ length: particleCount }, () => spawnParticle(true));
     };
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach((p) => {
+      particles.forEach((p, i) => {
         p.x += p.speedX;
-        p.y += p.speedY;
 
-        // Iyo ugeze ku mpera y'ecran, usubira indi ruhande (wrap around)
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
+        if (p.x > canvas.width + 10) {
+          particles[i] = spawnParticle(false);
+          return;
+        }
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -102,7 +82,7 @@ export default function ParticleBackground({
         width: "100vw",
         height: "100vh",
         pointerEvents: "none",
-        zIndex: 30,
+        zIndex: -1,
       }}
     />
   );
