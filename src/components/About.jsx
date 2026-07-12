@@ -591,7 +591,7 @@ const About = () => {
                       {SKILLS.map(s => <span key={s} className="about-badge">{s}</span>)}
                     </div>
 <a
-  href="/files/Muhire_Dieudonne_CV.pdf"
+  href="/files/MUHIRE_DIEUDONNE_CV.pdf"
   target="_blank"
   rel="noopener noreferrer"
   className="about-btn-primary"
