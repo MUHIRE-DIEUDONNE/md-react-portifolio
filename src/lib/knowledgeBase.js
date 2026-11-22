@@ -79,6 +79,7 @@ export const SECTION_IDS = {
   education: "education",
   contact: "contact",
   testimonials: "testimonials",
+  services: "services",
   home: "home",
 }
 
@@ -128,10 +129,20 @@ export function downloadCV() {
 
 /** Scroll to a named section of the host page, if present. */
 export function scrollToSection(sectionKey) {
-  const id = SECTION_IDS[sectionKey]
-  if (!id) return false
-  const el = document.getElementById(id)
-  if (!el) return false
-  el.scrollIntoView({ behavior: "smooth", block: "start" })
+  const routes = {
+    home: "/",
+    about: "/about",
+    skills: "/skills",
+    projects: "/projects",
+    experience: "/experience",
+    education: "/education",
+    services: "/services",
+    testimonials: "/testimonials",
+    contact: "/contact",
+  }
+  const route = routes[sectionKey]
+  if (!route) return false
+  window.history.pushState({}, "", route)
+  window.dispatchEvent(new PopStateEvent("popstate"))
   return true
 }

@@ -1,8 +1,14 @@
 // src/components/Navbar.jsx
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useMagneticEffect } from '../hooks/useMagneticEffect'
-import { FiHome, FiUser, FiZap, FiBriefcase, FiTrendingUp, FiMail, FiSun, FiMoon, FiX } from 'react-icons/fi'
+import { FiHome, FiUser, FiZap, FiBriefcase, FiTrendingUp, FiMail, FiSun, FiMoon, FiX,
+FiLayers, FiAward, FiBookOpen } from 'react-icons/fi'
+import {
+  House, UserRound, Zap, BriefcaseBusiness, TrendingUp, Mail,
+  Layers3, GraduationCap, Award, Newspaper, Sun, Moon, Menu, X
+} from 'lucide-react'
 import profilePhoto from '../images/Muhire_dieudonne.JPG'
 
 /* ─────────────────────────────────────────────
@@ -48,6 +54,280 @@ const PREMIUM_STYLES = `
   .nv-root ::-webkit-scrollbar { width: 3px; }
   .nv-root ::-webkit-scrollbar-track { background: transparent; }
   .nv-root ::-webkit-scrollbar-thumb { background: var(--nv-border-hi); border-radius: 4px; }
+
+  .premium-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 40;
+    height: 72px;
+    background: rgba(12,11,9,.82);
+    border-bottom: 1px solid rgba(255,245,220,.08);
+    box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    backdrop-filter: blur(18px);
+  }
+  html.light-mode .premium-header {
+    background: rgba(255,255,255,.88);
+    border-bottom-color: rgba(15,23,42,.08);
+  }
+  .premium-header-inner {
+    width: min(1440px, calc(100% - 32px));
+    height: 72px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .premium-brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 190px;
+    border: none;
+    background: transparent;
+    color: var(--nv-cream);
+    cursor: pointer;
+    text-align: left;
+  }
+  .premium-brand-photo {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(212,175,85,.42);
+  }
+  .premium-brand-copy {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+  }
+  .premium-brand-copy strong {
+    font-family: var(--nv-display);
+    font-size: 14px;
+  }
+  .premium-brand-copy span {
+    margin-top: 4px;
+    color: var(--nv-muted);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .premium-desktop-nav {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+  .premium-nav-link {
+    position: relative;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--nv-muted);
+    font-family: var(--nv-body);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color .2s, background .2s;
+  }
+  .premium-nav-link:hover {
+    color: var(--nv-cream);
+    background: rgba(212,175,85,.07);
+  }
+  .premium-nav-link.active {
+    color: var(--nv-gold);
+    background: var(--nv-gold-dim);
+  }
+  .premium-nav-link.active::after {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: -16px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--nv-gold);
+  }
+  .premium-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .premium-theme,
+  .premium-menu {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--nv-border);
+    border-radius: 10px;
+    background: var(--nv-card);
+    color: var(--nv-cream);
+    cursor: pointer;
+  }
+  .premium-hire {
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 15px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--nv-gold);
+    color: #0c0b09;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .premium-mobile-panel {
+    position: fixed;
+    top: 72px;
+    left: 0;
+    right: 0;
+    z-index: 39;
+    max-height: calc(100dvh - 72px);
+    overflow-y: auto;
+    background: rgba(12,11,9,.98);
+    border-bottom: 1px solid var(--nv-border);
+    box-shadow: 0 24px 50px rgba(0,0,0,.35);
+  }
+  html.light-mode .premium-mobile-panel {
+    background: rgba(255,255,255,.98);
+  }
+  .premium-mobile-inner {
+    width: min(640px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 14px 0 18px;
+  }
+  .premium-mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 8px;
+  }
+  .premium-mobile-link {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--nv-border);
+    border-radius: 12px;
+    padding: 0 12px;
+    background: transparent;
+    color: var(--nv-muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .premium-mobile-link.active {
+    color: var(--nv-gold);
+    border-color: var(--nv-border-hi);
+    background: var(--nv-gold-dim);
+  }
+  .premium-mobile-hire {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 10px;
+  }
+  .premium-mobile-actions {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .premium-mobile-actions .premium-theme {
+    display: inline-flex;
+  }
+  .premium-mobile-actions .premium-hire {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .premium-menu { display: none; }
+  }
+  @media (max-width: 1023px) {
+    .premium-desktop-nav,
+    .premium-actions .premium-hire,
+    .premium-actions .premium-theme {
+      display: none;
+    }
+  }
+  @media (min-width: 1024px) and (max-width: 1180px) {
+    .premium-nav-link { padding-inline: 5px; gap: 4px; font-size: 10px; }
+    .premium-nav-link svg { width: 14px; height: 14px; }
+    .premium-brand { min-width: 175px; }
+  }
+  @media (max-width: 640px) {
+    .premium-header,
+    .premium-header-inner { height: 64px; }
+    .premium-header-inner { width: calc(100% - 24px); gap: 8px; }
+    .premium-brand { min-width: 0; flex: 1; }
+    .premium-brand-photo { width: 38px; height: 38px; flex-basis: 38px; }
+    .premium-brand-copy strong { font-size: 13px; }
+    .premium-mobile-panel { top: 64px; max-height: calc(100dvh - 64px); }
+  }
+  @media (max-width: 380px) {
+    .premium-brand-copy span { display: none; }
+    .premium-mobile-inner { width: calc(100% - 24px); }
+  }
+
+  .nv-compact {
+    width: max-content;
+    max-width: calc(100vw - 24px);
+  }
+
+  .nv-compact-row {
+    display: grid;
+    grid-template-columns: repeat(10, 36px);
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nv-compact-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  @media (max-width: 480px) {
+    .nv-compact-row {
+      grid-template-columns: repeat(5, minmax(0, 38px));
+      gap: 4px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .nv-compact {
+      max-width: calc(100vw - 16px);
+      padding: 7px 8px;
+    }
+    .nv-compact-row {
+      grid-template-columns: repeat(5, minmax(0, 38px));
+      width: 100%;
+      gap: 4px;
+    }
+  }
+
+  @media (max-width: 320px) {
+    .nv-compact-row {
+      grid-template-columns: repeat(6, minmax(0, 38px));
+    }
+  }
 `
 
 // ─── 3D Floating Elements ──────────────────────────────────────────────
@@ -122,6 +402,8 @@ const useSound = (enabled) => {
 
 // ─── Navbar ───────────────────────────────────────────────────────────
 const Navbar = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [isOpen, setIsOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
   const [scrolled, setScrolled] = useState(false)
@@ -147,12 +429,16 @@ const Navbar = () => {
   const navBlur = useTransform(scrollYProgress, [0, 0.1], [0, 10])
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: <FiHome /> },
-    { id: 'about', label: 'About', icon: <FiUser /> },
-    { id: 'skills', label: 'Skills', icon: <FiZap /> },
-    { id: 'projects', label: 'Projects', icon: <FiBriefcase /> },
-    { id: 'experience', label: 'Experience', icon: <FiTrendingUp /> },
-    { id: 'contact', label: 'Contact', icon: <FiMail /> },
+    { id: 'home', label: 'Home', icon: <House size={16} strokeWidth={1.8} /> },
+    { id: 'about', label: 'About', icon: <UserRound size={16} strokeWidth={1.8} /> },
+    { id: 'skills', label: 'Skills', icon: <Zap size={16} strokeWidth={1.8} /> },
+    { id: 'projects', label: 'Projects', icon: <BriefcaseBusiness size={16} strokeWidth={1.8} /> },
+    { id: 'services', label: 'Services', icon: <Layers3 size={16} strokeWidth={1.8} /> },
+    { id: 'experience', label: 'Experience', icon: <TrendingUp size={16} strokeWidth={1.8} /> },
+    { id: 'education', label: 'Education', icon: <GraduationCap size={16} strokeWidth={1.8} /> },
+    { id: 'certificates', label: 'Certificates', icon: <Award size={16} strokeWidth={1.8} /> },
+    { id: 'blog', label: 'Blog', icon: <Newspaper size={16} strokeWidth={1.8} /> },
+    { id: 'contact', label: 'Contact', icon: <Mail size={16} strokeWidth={1.8} /> },
   ]
 
   useEffect(() => {
@@ -164,6 +450,13 @@ const Navbar = () => {
   }, [])
 
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+    if (isOpen) document.body.style.overflow = 'hidden'
+    else document.body.style.overflow = previousOverflow
+    return () => { document.body.style.overflow = previousOverflow }
+  }, [isOpen])
+
+  useEffect(() => {
     const saved = localStorage.getItem('theme') || 'dark'
     const isDark = saved === 'dark'
     setIsDarkMode(isDark)
@@ -173,7 +466,7 @@ const Navbar = () => {
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth)
-      if (window.innerWidth >= 768 && isOpen) setIsOpen(false)
+      if (window.innerWidth >= 1024 && isOpen) setIsOpen(false)
     }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
@@ -213,6 +506,11 @@ const Navbar = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    const path = location.pathname === '/' ? 'home' : location.pathname.slice(1)
+    setActiveSection(path)
+  }, [location.pathname])
+
   // 💡 ENHANCED SCROLL ENGINE FOR MOBILE ACCURACY
   const scrollToSection = (sectionId) => {
     // FIX: previously we started window.scrollTo(...) and setIsOpen(false)
@@ -230,6 +528,23 @@ const Navbar = () => {
     setIsOpen(false)
     window.dispatchEvent(new CustomEvent('nav-menu-toggle', { detail: false }))
     playClick()
+
+    const routeMap = {
+      home: '/',
+      about: '/about',
+      skills: '/skills',
+      projects: '/projects',
+      services: '/services',
+      experience: '/experience',
+      education: '/education',
+      certificates: '/certificates',
+      blog: '/blog',
+      contact: '/contact',
+    }
+
+    if (routeMap[sectionId]) {
+      navigate(routeMap[sectionId])
+    }
 
     const runScroll = () => {
       const element = document.getElementById(sectionId)
@@ -330,175 +645,74 @@ const Navbar = () => {
       {/* Main Navbar */}
       <motion.nav
         ref={navRef}
-        style={{ opacity: navOpacity, backdropFilter: `blur(${navBlur}px)` }}
+        className="premium-header"
+        style={{ opacity: navOpacity }}
         initial={{ y: -100 }}
-        animate={{
-          y: isVisible ? 0 : -100,
-          backgroundColor: scrolled
-            ? isDarkMode ? 'rgba(15,23,42,0.8)' : 'rgba(255,255,255,0.8)'
-            : 'transparent',
-        }}
+        animate={{ y: isVisible ? 0 : -100 }}
         transition={{ duration: prefersReducedMotion ? 0 : 0.5, type: 'spring', stiffness: 100 }}
-        className="fixed w-full z-40 transition-all duration-300 shadow-lg shadow-primary/5"
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div ref={topBarRef} className="flex justify-between items-center py-3 sm:py-4">
+        <div ref={topBarRef} className="premium-header-inner">
+          <motion.button
+            type="button"
+            className="premium-brand"
+            onClick={() => scrollToSection('home')}
+            aria-label="Go to home page"
+            whileTap={{ scale: 0.98 }}
+          >
+            <img className="premium-brand-photo" src={profilePhoto} alt="Muhire Dieudonne" />
+            <span className="premium-brand-copy">
+              <strong>Muhire Dieudonne</strong>
+              <span>Dev Portfolio</span>
+            </span>
+          </motion.button>
 
-            {/* ── Logo ── */}
-            <Card3D delay={0.2} className="cursor-pointer" onClick={() => scrollToSection('home')} onMouseEnter={playHover}>
-              <motion.div
-                ref={magneticLogo}
-                whileHover={!prefersReducedMotion ? { scale: 1.05, rotateZ: 5 } : {}}
-                whileTap={{ scale: 0.95, rotateZ: -5 }}
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden"
-                style={{ transformStyle: 'preserve-3d', boxShadow: '0 0 20px rgba(99,102,241,0.5)' }}
-              >
-                <motion.img
-                  src={profilePhoto}
-                  alt="Muhire Dieudonne"
-                  className="w-full h-full object-cover"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ transform: 'translateZ(10px)' }}
-                />
-              </motion.div>
-            </Card3D>
-
-            {/* ── Desktop Menu ── */}
-            <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
-              {navItems.map((item, index) => (
-                <div key={item.id} className="relative">
-                  <Card3D delay={0.3 + index * 0.1} className="cursor-pointer">
-                    <motion.button
-                      ref={(el) => (linkRefs.current[index] = el)}
-                      onClick={() => scrollToSection(item.id)}
-                      onMouseMove={(e) => handleLinkMouseMove(e, index)}
-                      onMouseLeave={handleLinkMouseLeave}
-                      className={`relative px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium uppercase tracking-wider rounded-lg group transition-colors ${
-                        activeSection === item.id ? 'text-primary' : 'text-light/70 hover:text-light'
-                      }`}
-                      whileHover={!prefersReducedMotion ? { scale: 1.05, rotateX: 10, rotateY: 5, translateZ: 20 } : {}}
-                      whileTap={{ scale: 0.95, rotateX: -5 }}
-                      style={{ transformStyle: 'preserve-3d', transform: 'translateZ(10px)' }}
-                    >
-                      <span className="relative z-10 flex items-center gap-1 lg:gap-2" style={{ transform: 'translateZ(15px)' }}>
-                        <motion.span className="text-base lg:text-lg" whileHover={{ rotateZ: 360 }} transition={{ duration: 0.6 }}>
-                          {item.icon}
-                        </motion.span>
-                        <span className="hidden lg:inline">{item.label}</span>
-                      </span>
-                      {activeSection === item.id && (
-                        <motion.div
-                          layoutId="activeSection"
-                          className="absolute inset-0 bg-primary/10 rounded-lg"
-                          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                          transition={{ duration: 0.3 }}
-                          style={{ transform: 'translateZ(-5px)' }}
-                        />
-                      )}
-                      <motion.div className="absolute inset-0 bg-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" style={{ transform: 'translateZ(-10px)' }} />
-                    </motion.button>
-                  </Card3D>
-
-                  {showUnderline && mousePos.activeIndex === index && (
-                    <motion.div
-                      className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-primary to-secondary"
-                      initial={{ x: 0, width: 0 }}
-                      animate={{ x: mousePos.x - 20, width: 40 }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                </div>
-              ))}
-
-              {/* Theme toggle */}
-              <Card3D delay={1.0}>
-                <motion.button
-                  ref={magneticTheme}
-                  onClick={toggleTheme}
-                  onMouseEnter={playHover}
-                  className="ml-2 p-2 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
-                  aria-label="Toggle theme"
-                  whileHover={{ scale: 1.1, rotateZ: -15, translateZ: 10 }}
-                  whileTap={{ scale: 0.9, rotateZ: 15 }}
-                  style={{ transformStyle: 'preserve-3d', boxShadow: '0 4px 15px rgba(139,92,246,0.3)' }}
-                >
-                  <motion.span animate={{ rotate: 360 }} transition={{ duration: 0.6 }} style={{ transform: 'translateZ(5px)', display: 'flex' }}>
-                    {isDarkMode ? <FiMoon className="w-4 h-4 lg:w-5 lg:h-5 text-light" /> : <FiSun className="w-4 h-4 lg:w-5 lg:h-5 text-light" />}
-                  </motion.span>
-                </motion.button>
-              </Card3D>
-            </div>
-
-            {/* ── Mobile UI Controls ── */}
-            <div className="flex items-center gap-2 md:hidden">
-              {/* Theme */}
-              <Card3D delay={1.0}>
-                <motion.button
-                  onClick={toggleTheme}
-                  className="p-2 bg-primary/10 rounded-full"
-                  aria-label="Toggle theme"
-                  whileHover={{ scale: 1.1, rotateZ: -15 }} whileTap={{ scale: 0.9 }}
-                  style={{ transformStyle: 'preserve-3d' }}
-                >
-                  <span style={{ display: 'flex' }}>
-                    {isDarkMode ? <FiMoon className="w-4 h-4 text-light" /> : <FiSun className="w-4 h-4 text-light" />}
-                  </span>
-                </motion.button>
-              </Card3D>
-
-              {/* Hamburger Toggle */}
+          <nav className="premium-desktop-nav" aria-label="Primary navigation">
+            {navItems.map((item) => (
               <motion.button
-                onClick={handleHamburgerClick}
+                key={item.id}
+                type="button"
+                ref={(el) => (linkRefs.current[navItems.indexOf(item)] = el)}
+                className={`premium-nav-link ${activeSection === item.id ? 'active' : ''}`}
+                onClick={() => scrollToSection(item.id)}
                 onMouseEnter={playHover}
-                aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
-                aria-expanded={isOpen}
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  border: 'none',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: isOpen ? 'rgba(212,175,85,0.18)' : 'rgba(255,255,255,0.06)',
-                  boxShadow: isOpen ? '0 0 0 1.5px rgba(212,175,85,0.5), 0 4px 16px rgba(212,175,85,0.2)' : '0 0 0 1px rgba(255,255,255,0.1)',
-                  transition: 'background 0.25s, box-shadow 0.25s',
-                }}
+                aria-current={activeSection === item.id ? 'page' : undefined}
+                whileTap={{ scale: 0.96 }}
               >
-                <AnimatePresence mode="wait" initial={false}>
-                  {isOpen ? (
-                    <motion.span
-                      key="close"
-                      initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
-                      animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                      exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
-                      transition={{ duration: 0.2 }}
-                      style={{ display: 'flex' }}
-                    >
-                      <FiX size={20} color="#d4af55" strokeWidth={2.5} />
-                    </motion.span>
-                  ) : (
-                    <motion.span
-                      key="open"
-                      initial={{ scale: 0.6, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.6, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}
-                    >
-                      <span style={{ display: 'block', width: 20, height: 3, borderRadius: 4, background: '#f5eed8' }} />
-                      <span style={{ display: 'block', width: 20, height: 3, borderRadius: 4, background: '#f5eed8' }} />
-                      <span style={{ display: 'block', width: 20, height: 3, borderRadius: 4, background: '#f5eed8' }} />
-                    </motion.span>
-                  )}
-                </AnimatePresence>
+                {item.icon}
+                <span>{item.label}</span>
               </motion.button>
-            </div>
+            ))}
+          </nav>
+
+          <div className="premium-actions">
+            <button
+              type="button"
+              className="premium-theme"
+              onClick={toggleTheme}
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDarkMode ? <Sun size={17} strokeWidth={1.8} /> : <Moon size={17} strokeWidth={1.8} />}
+            </button>
+            <motion.button
+              type="button"
+              className="premium-hire"
+              onClick={() => scrollToSection('contact')}
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.96 }}
+            >
+              Hire Me
+            </motion.button>
+            <motion.button
+              type="button"
+              className="premium-menu"
+              onClick={handleHamburgerClick}
+              aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
+              aria-expanded={isOpen}
+              aria-controls="mobile-navigation"
+              whileTap={{ scale: 0.94 }}
+            >
+              {isOpen ? <X size={20} strokeWidth={1.8} /> : <Menu size={20} strokeWidth={1.8} />}
+            </motion.button>
           </div>
         </div>
 
@@ -506,102 +720,51 @@ const Navbar = () => {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+              id="mobile-navigation"
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
-              className={`md:hidden backdrop-blur-lg border-t border-primary/20 ${isDarkMode ? 'bg-dark/95' : 'bg-white/95'}`}
+              className="premium-mobile-panel"
             >
-              <div className="container mx-auto px-4 py-4">
-                <div className="grid grid-cols-2 gap-2">
-                  {navItems.map((item, index) => (
-                    /* 💡 Touch-Safe Mobile Card Wrapper */
-                    <Card3D 
-                      key={item.id} 
-                      delay={0.1 + index * 0.05} 
-                      disableMobile3D={true} // Bypasses translateZ touch-breaking offsets on phone displays
-                      onClick={() => scrollToSection(item.id)} // Captures absolute container taps immediately
-                      className="cursor-pointer"
+              <div className="premium-mobile-inner">
+                <div className="premium-mobile-grid">
+                  {navItems.map((item) => (
+                    <motion.button
+                      type="button"
+                      key={item.id}
+                      className={`premium-mobile-link ${activeSection === item.id ? 'active' : ''}`}
+                      onClick={() => scrollToSection(item.id)}
+                      aria-current={activeSection === item.id ? 'page' : undefined}
+                      whileTap={{ scale: 0.98 }}
                     >
-                      <motion.div
-                        initial={{ x: -20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: index * 0.05, duration: 0.4 }}
-                        className={`flex flex-col items-center p-4 rounded-xl transition-all ${
-                          activeSection === item.id
-                            ? 'bg-primary/20 text-primary'
-                            : 'bg-dark/50 text-light/70 hover:bg-primary/10'
-                        }`}
-                        style={{
-                          boxShadow: activeSection === item.id
-                            ? '0 8px 25px rgba(99,102,241,0.4)'
-                            : '0 4px 15px rgba(0,0,0,0.2)',
-                        }}
-                      >
-                        <span className="text-2xl mb-1">{item.icon}</span>
-                        <span className="text-xs font-medium">{item.label}</span>
-                      </motion.div>
-                    </Card3D>
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </motion.button>
                   ))}
+                </div>
+                <div className="premium-mobile-actions">
+                  <button
+                    type="button"
+                    className="premium-theme"
+                    onClick={toggleTheme}
+                    aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                  >
+                    {isDarkMode ? <Sun size={17} strokeWidth={1.8} /> : <Moon size={17} strokeWidth={1.8} />}
+                  </button>
+                  <button
+                    type="button"
+                    className="premium-hire"
+                    onClick={() => scrollToSection('contact')}
+                  >
+                    Hire Me
+                  </button>
                 </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Scroll Progress Bar — desktop only */}
-        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary/20 hidden md:block">
-          <motion.div
-            className="h-full bg-gradient-to-r from-primary to-secondary"
-            style={{ width: `${scrollPercent}%` }}
-          />
-        </div>
-
-        <div className="absolute bottom-1 right-4 text-xs text-primary font-mono hidden md:block">
-          {Math.round(scrollPercent)}%
-        </div>
       </motion.nav>
-
-      {/* Mini Floating Compact Navbar */}
-      <AnimatePresence>
-        {compact && !isOpen && (
-          <motion.div
-            initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -100, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-dark/90 backdrop-blur-lg rounded-full px-4 py-2 shadow-lg border border-primary/30"
-          >
-            <div className="flex space-x-2">
-              {navItems.map((item, index) => (
-                <Card3D key={item.id} delay={0.1 + index * 0.05} disableMobile3D={true}>
-                  <motion.button
-                    onClick={() => scrollToSection(item.id)}
-                    onMouseEnter={playHover}
-                    whileHover={{ scale: 1.1, rotateZ: 15 }}
-                    whileTap={{ scale: 0.9, rotateZ: -15 }}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                      activeSection === item.id
-                        ? 'bg-primary text-white'
-                        : isDarkMode
-                          ? 'bg-primary/10 hover:bg-primary/30 text-light/80'
-                          : 'bg-primary/10 hover:bg-primary/30 text-dark/80'
-                    }`}
-                    title={item.label}
-                    style={{
-                      boxShadow: activeSection === item.id
-                        ? '0 6px 20px rgba(99,102,241,0.5)'
-                        : '0 3px 10px rgba(0,0,0,0.3)',
-                    }}
-                  >
-                    <span className="text-sm">{item.icon}</span>
-                  </motion.button>
-                </Card3D>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   )
 }

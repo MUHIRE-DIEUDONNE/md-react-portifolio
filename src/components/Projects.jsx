@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiExternalLink, FiGithub } from 'react-icons/fi'
+import { Link } from 'react-router-dom'
 
 const Projects = () => {
   const [selectedProject, setSelectedProject] = useState(null)
@@ -378,6 +379,13 @@ const Projects = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-2.5">
+                  <Link
+                    to={`/projects/${selectedProject.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
+                    onClick={() => setSelectedProject(null)}
+                    className="btn-ghost text-xs py-2.5 px-6"
+                  >
+                    View Details
+                  </Link>
                   <a
                     href={selectedProject.live}
                     target="_blank"

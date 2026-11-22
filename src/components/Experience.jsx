@@ -207,8 +207,79 @@ const STYLES = `
     mix-blend-mode: screen;
   }
 
+  .exp-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .exp-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .exp-controls {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    z-index: 30;
+    display: flex;
+    gap: 12px;
+  }
+
   @media (max-width: 640px) {
+    .exp-root {
+      padding: 72px 0 92px;
+    }
+    .exp-container {
+      padding-inline: 16px;
+    }
+    .exp-stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .exp-stat {
+      min-width: 0;
+      padding: 16px 8px;
+    }
+    .exp-card {
+      padding: 18px !important;
+      border-radius: 16px;
+    }
+    .exp-card-header {
+      gap: 10px;
+    }
+    .exp-card-header > div:first-child {
+      padding-top: 4px !important;
+    }
     .exp-index { font-size: 80px; right: 8px; }
+    .exp-pill {
+      flex: 1 1 96px;
+      text-align: center;
+      padding-inline: 10px;
+    }
+    .exp-controls {
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px;
+    }
+    .exp-controls button {
+      flex: 1;
+      justify-content: center;
+      min-height: 38px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .exp-card-header {
+      display: block;
+    }
+    .exp-card-header > div:first-child {
+      display: none;
+    }
   }
 `
 
@@ -367,7 +438,7 @@ const Experience = () => {
           <div className="exp-index">{String(index + 1).padStart(2, '0')}</div>
 
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+            <div className="exp-card-header">
               <div style={{ flexShrink: 0, paddingTop: 6 }}>
                 <div style={{
                   width: 14,
@@ -755,10 +826,8 @@ const Experience = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
+          className="exp-stats-grid"
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-            gap: 12,
             marginBottom: 'clamp(36px, 5vw, 56px)',
           }}
         >
@@ -832,13 +901,7 @@ const Experience = () => {
       </div>
 
       {/* Controls */}
-      <div style={{
-        position: 'absolute',
-        bottom: '24px',
-        right: '24px',
-        zIndex: 30,
-        display: 'flex',
-        gap: '12px',
+      <div className="exp-controls" style={{
         background: 'rgba(12,11,9,0.7)',
         backdropFilter: 'blur(12px)',
         padding: '8px 20px',

@@ -1,10 +1,11 @@
 // src/components/Footer.jsx
 import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import {
-  FiGithub, FiLinkedin, FiTwitter, FiInstagram, FiHome, FiUser,
+  FiGithub, FiLinkedin, FiInstagram, FiHome, FiUser,
   FiCode, FiFolder, FiBriefcase, FiMail, FiBookOpen, FiGift,
-  FiChevronUp, FiCheck, FiHeart, FiArrowRight
+  FiChevronUp, FiHeart, FiArrowRight, FiAward
 } from 'react-icons/fi'
 import { FaReact } from 'react-icons/fa'
 import { SiThreedotjs } from 'react-icons/si'
@@ -22,7 +23,7 @@ const STYLES = `
     --footer-gold-dim: rgba(212,175,85,0.18);
     --footer-cream: #f5eed8;
     --footer-muted: rgba(245,238,216,0.5);
-    --footer-dim: rgba(245,238,216,0.2);
+    --footer-dim: rgba(245,238,216,0.4);
     --footer-display: 'Playfair Display', serif;
     --footer-body: 'Instrument Sans', sans-serif;
   }
@@ -83,51 +84,8 @@ const STYLES = `
     transform: scale(1.08);
   }
 
-  .footer-card {
-    border: 1px solid var(--footer-border);
-    background: var(--footer-card);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    padding: clamp(20px, 4vw, 24px) clamp(20px, 4vw, 24px) clamp(22px, 4vw, 26px);
-    transition: border-color 0.3s, box-shadow 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-  .footer-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--footer-gold-dim), transparent);
-    opacity: 0; transition: opacity 0.3s;
-  }
-  .footer-card:hover {
-    border-color: var(--footer-border-hi);
-    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
-  }
-  .footer-card:hover::before { opacity: 1; }
-
-  .footer-input {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--footer-border);
-    border-radius: 14px;
-    padding: 13px 16px;
-    font-size: 13px;
-    color: var(--footer-cream);
-    outline: none;
-    transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
-    font-family: var(--footer-body);
-  }
-  .footer-input::placeholder {
-    color: var(--footer-dim);
-  }
-  .footer-input:focus {
-    border-color: var(--footer-border-hi);
-    box-shadow: 0 0 0 3px rgba(212,175,85,0.12);
-    background: rgba(255,255,255,0.07);
-  }
-
   .footer-btn-primary {
-    width: 100%;
+    width: auto;
     padding: 13px 20px;
     border-radius: 14px;
     border: none;
@@ -159,11 +117,6 @@ const STYLES = `
     transform: translateY(0) scale(0.98);
   }
 
-  .footer-btn-success {
-    background: #10b981;
-    box-shadow: 0 4px 20px rgba(16,185,129,0.35);
-  }
-
   .footer-rule {
     height: 1px;
     background: linear-gradient(90deg, var(--footer-gold) 0%, rgba(212,175,85,0.15) 60%, transparent 100%);
@@ -176,41 +129,6 @@ const STYLES = `
     pointer-events: none;
     mix-blend-mode: screen;
   }
-
-  .footer-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
-    border-radius: 999px;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--footer-gold);
-    background: var(--footer-gold-dim);
-    border: 1px solid var(--footer-border-hi);
-    margin-bottom: 12px;
-  }
-  .footer-badge span.dot {
-    width: 6px; height: 6px;
-    background: var(--footer-gold);
-    border-radius: 50%;
-    animation: footer-pulse-dot 1.6s ease-in-out infinite;
-  }
-  @keyframes footer-pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.7); }
-  }
-
-  .footer-perk {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 10px;
-    color: var(--footer-dim);
-  }
-  .footer-perk svg { color: var(--footer-gold); flex-shrink: 0; }
 
   .footer-social-link {
     width: 36px;
@@ -232,6 +150,13 @@ const STYLES = `
     background: var(--footer-gold-dim);
   }
   .footer-social-link:active { transform: scale(0.92); }
+  .footer-social-link:focus-visible,
+  .footer-quicklink:focus-visible,
+  .footer-btn-primary:focus-visible,
+  .footer-scrolltop:focus-visible {
+    outline: 2px solid var(--footer-gold);
+    outline-offset: 3px;
+  }
 
   .footer-quicklink {
     display: flex;
@@ -243,6 +168,64 @@ const STYLES = `
     transition: color 0.2s;
   }
   .footer-quicklink:hover { color: var(--footer-cream); }
+  .footer-column-title {
+    margin-bottom: 16px;
+    color: var(--footer-gold);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .footer-cta-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    margin-bottom: clamp(40px, 6vw, 64px);
+    padding: clamp(24px, 4vw, 36px);
+    border: 1px solid var(--footer-border-hi);
+    border-radius: 24px;
+    background: linear-gradient(115deg, rgba(212,175,85,.1), rgba(22,20,16,.72) 58%, rgba(46,204,154,.04));
+    box-shadow: 0 24px 72px rgba(0,0,0,.2);
+  }
+  .footer-cta-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    color: var(--footer-gold);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .footer-cta-kicker::before {
+    content: '';
+    width: 18px;
+    height: 1px;
+    background: currentColor;
+  }
+  .footer-cta-title {
+    margin-bottom: 7px;
+    color: var(--footer-cream);
+    font-family: var(--footer-display);
+    font-size: clamp(23px, 3vw, 34px);
+    line-height: 1.15;
+  }
+  .footer-cta-copy {
+    max-width: 560px;
+    color: var(--footer-muted);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .footer-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(140px, .75fr) minmax(140px, .75fr);
+    gap: clamp(28px, 5vw, 64px);
+    margin-bottom: clamp(40px, 5vw, 64px);
+  }
+  .footer-brand-column { max-width: 380px; }
 
   .footer-bottom-row {
     display: flex;
@@ -277,13 +260,15 @@ const STYLES = `
   .footer-scrolltop:active { transform: scale(0.93); }
 
   @media (max-width: 640px) {
-    .footer-input { font-size: 16px; } /* prevents iOS Safari auto-zoom on focus */
     .footer-scrolltop {
       width: 44px;
       height: 44px;
       left: max(14px, env(safe-area-inset-left));
       bottom: max(14px, env(safe-area-inset-bottom));
     }
+    .footer-main-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .footer-brand-column { grid-column: 1 / -1; max-width: none; }
+    .footer-cta-banner { align-items: flex-start; }
   }
 
   @media (max-width: 480px) {
@@ -293,26 +278,21 @@ const STYLES = `
       text-align: center;
       gap: 14px;
     }
+    .footer-container {
+      padding-inline: 16px;
+    }
+    .footer-main-grid { grid-template-columns: 1fr; gap: 28px; }
+    .footer-brand-column { grid-column: auto; }
+    .footer-cta-banner { flex-direction: column; border-radius: 18px; }
+    .footer-cta-banner .footer-btn-primary { width: 100%; }
+    .footer-avatar {
+      margin-inline: auto;
+    }
   }
 `
 
 const Footer = () => {
-  const [email, setEmail] = useState('')
-  const [subscribed, setSubscribed] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
-  const [inputFocused, setInputFocused] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(true)
-
-  useEffect(() => {
-    const checkTheme = () => {
-      const html = document.documentElement
-      setIsDarkMode(!html.classList.contains('light-mode'))
-    }
-    checkTheme()
-    const observer = new MutationObserver(checkTheme)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    return () => observer.disconnect()
-  }, [])
 
   useEffect(() => {
     const updateScrollProgress = () => {
@@ -324,44 +304,34 @@ const Footer = () => {
     return () => window.removeEventListener('scroll', updateScrollProgress)
   }, [])
 
-  const handleSubscribe = (e) => {
-    e.preventDefault()
-    if (email) {
-      setSubscribed(true)
-      setEmail('')
-      setTimeout(() => setSubscribed(false), 3500)
-    }
-  }
-
   const quickLinks = [
-    { name: 'Home', href: '#home', icon: FiHome },
-    { name: 'About', href: '#about', icon: FiUser },
-    { name: 'Skills', href: '#skills', icon: FiCode },
-    { name: 'Projects', href: '#projects', icon: FiFolder },
-    { name: 'Experience', href: '#experience', icon: FiBriefcase },
-    { name: 'Contact', href: '#contact', icon: FiMail }
+    { name: 'Home', href: '/', icon: FiHome },
+    { name: 'About', href: '/about', icon: FiUser },
+    { name: 'Skills', href: '/skills', icon: FiCode },
+    { name: 'Projects', href: '/projects', icon: FiFolder },
+    { name: 'Experience', href: '/experience', icon: FiBriefcase },
+    { name: 'Contact', href: '/contact', icon: FiMail }
   ]
 
   const resources = [
-    { name: 'Blog', href: '#', icon: FiBookOpen },
-    { name: 'Free Resources', href: '#', icon: FiGift },
+    { name: 'Education', href: '/education', icon: FiBookOpen },
+    { name: 'Services', href: '/services', icon: FiGift },
+    { name: 'Certificates', href: '/certificates', icon: FiAward },
+    { name: 'Blog', href: '/blog', icon: FiHeart },
     { name: 'GitHub', href: 'https://github.com/MUHIRE-DIEUDONNE', icon: FiGithub }
   ]
 
   const legal = [
-    { name: 'Privacy Policy', href: '#' },
-    { name: 'Terms of Use', href: '#' },
-    { name: 'Cookie Policy', href: '#' }
+    { name: 'Privacy Policy', href: '/privacy' },
+    { name: 'Terms of Use', href: '/terms' },
+    { name: 'Cookie Policy', href: '/privacy' }
   ]
 
   const socialLinks = [
     { icon: FiGithub, href: 'https://github.com/MUHIRE-DIEUDONNE', name: 'GitHub' },
     { icon: FiLinkedin, href: 'https://www.linkedin.com/in/muhire-dieudonne-498845419/', name: 'LinkedIn' },
-    { icon: FiTwitter, href: '#', name: 'Twitter' },
     { icon: FiInstagram, href: 'https://www.instagram.com/muhiredieu7/', name: 'Instagram' }
   ]
-
-  const perks = ['Weekly insights', 'No spam, ever', 'Unsubscribe anytime']
 
   const lightModeStyles = `
     html.light-mode .footer-root {
@@ -374,10 +344,13 @@ const Footer = () => {
       --footer-gold-dim: rgba(99, 102, 241, 0.1);
       --footer-cream: #0f172a;
       --footer-muted: rgba(15, 23, 42, 0.5);
-      --footer-dim: rgba(15, 23, 42, 0.2);
+      --footer-dim: rgba(15, 23, 42, 0.45);
     }
     html.light-mode .footer-root::before {
       opacity: 0.1;
+    }
+    html.light-mode .footer-cta-banner {
+      background: linear-gradient(115deg, rgba(99,102,241,.08), rgba(255,255,255,.96) 58%, rgba(16,185,129,.04));
     }
   `
 
@@ -399,14 +372,23 @@ const Footer = () => {
       }} />
 
       <div className="footer-container">
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 'clamp(32px, 4vw, 56px)',
-          marginBottom: 'clamp(40px, 5vw, 64px)',
-        }}>
+        <div className="footer-cta-banner">
+          <div>
+            <span className="footer-cta-kicker">Available for projects and collaboration</span>
+            <h2 className="footer-cta-title">Have an idea? Let's build it well.</h2>
+            <p className="footer-cta-copy">
+              Share what you are working on, the problem you want to solve, and how I can help.
+            </p>
+          </div>
+          <Link to="/contact" className="footer-btn-primary" style={{ textDecoration: 'none' }}>
+            Start a conversation <FiArrowRight size={14} />
+          </Link>
+        </div>
+
+        <div className="footer-main-grid">
           {/* Brand */}
           <motion.div
+            className="footer-brand-column"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -434,6 +416,8 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="footer-social-link"
+                  aria-label={social.name}
+                  title={social.name}
                   whileHover={{ y: -3, scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -450,23 +434,16 @@ const Footer = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <p style={{
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'var(--footer-gold)',
-              marginBottom: 16,
-            }}>
+            <h2 className="footer-column-title">
               Quick Links
-            </p>
+            </h2>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {quickLinks.map((link) => (
                 <motion.li key={link.name} whileHover={{ x: 4 }}>
-                  <a href={link.href} className="footer-quicklink">
+                  <Link to={link.href} className="footer-quicklink">
                     <link.icon size={11} style={{ color: 'var(--footer-dim)' }} />
                     {link.name}
-                  </a>
+                  </Link>
                 </motion.li>
               ))}
             </ul>
@@ -479,123 +456,33 @@ const Footer = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <p style={{
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'var(--footer-gold)',
-              marginBottom: 16,
-            }}>
+            <h2 className="footer-column-title">
               Resources
-            </p>
+            </h2>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {resources.map((link) => (
                 <motion.li key={link.name} whileHover={{ x: 4 }}>
-                  <a
-                    href={link.href}
-                    className="footer-quicklink"
-                    target={link.href.startsWith('http') ? '_blank' : undefined}
-                    rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  >
-                    <link.icon size={11} style={{ color: 'var(--footer-dim)' }} />
-                    {link.name}
-                  </a>
+                  {link.href.startsWith('http') ? (
+                    <a
+                      href={link.href}
+                      className="footer-quicklink"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <link.icon size={11} style={{ color: 'var(--footer-dim)' }} />
+                      {link.name}
+                    </a>
+                  ) : (
+                    <Link to={link.href} className="footer-quicklink">
+                      <link.icon size={11} style={{ color: 'var(--footer-dim)' }} />
+                      {link.name}
+                    </Link>
+                  )}
                 </motion.li>
               ))}
             </ul>
           </motion.div>
 
-          {/* Newsletter */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <div className="footer-card">
-              <div className="footer-badge">
-                <span className="dot" />
-                Newsletter
-              </div>
-              <p style={{
-                fontSize: 18,
-                fontWeight: 700,
-                color: 'var(--footer-cream)',
-                marginBottom: 4,
-                lineHeight: 1.3,
-                fontFamily: 'var(--footer-display)',
-              }}>
-                Stay in the loop ✦
-              </p>
-              <p style={{
-                fontSize: 12,
-                lineHeight: 1.7,
-                marginBottom: 18,
-                color: 'var(--footer-muted)',
-              }}>
-                Get weekly insights on web dev, design trends, and exclusive tutorials.
-              </p>
-
-              <form onSubmit={handleSubscribe}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <motion.input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    placeholder="your@email.com"
-                    className="footer-input"
-                    required
-                    animate={inputFocused ? { scale: 1.005 } : { scale: 1 }}
-                    transition={{ duration: 0.15 }}
-                  />
-                  <motion.button
-                    type="submit"
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`footer-btn-primary ${subscribed ? 'footer-btn-success' : ''}`}
-                  >
-                    <AnimatePresence mode="wait">
-                      {subscribed ? (
-                        <motion.span
-                          key="done"
-                          initial={{ opacity: 0, scale: 0.7 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0 }}
-                          style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-                        >
-                          <FiCheck size={14} />
-                          You're in!
-                        </motion.span>
-                      ) : (
-                        <motion.span
-                          key="sub"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-                        >
-                          <FiArrowRight size={13} />
-                          Subscribe
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </motion.button>
-                </div>
-              </form>
-
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
-                {perks.map((perk) => (
-                  <span key={perk} className="footer-perk">
-                    <FiCheck size={9} />
-                    {perk}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </motion.div>
         </div>
 
         <div className="footer-rule" style={{ marginBottom: 'clamp(28px, 4vw, 40px)' }} />
@@ -606,9 +493,9 @@ const Footer = () => {
           </p>
           <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
             {legal.map((link) => (
-              <a
+              <Link
                 key={link.name}
-                href={link.href}
+                to={link.href}
                 style={{
                   fontSize: 10,
                   color: 'var(--footer-dim)',
@@ -619,7 +506,7 @@ const Footer = () => {
                 onMouseLeave={(e) => e.currentTarget.style.color = 'var(--footer-dim)'}
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
           </div>
           <p style={{

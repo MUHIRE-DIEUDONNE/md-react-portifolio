@@ -1,12 +1,13 @@
 // src/components/VoiceAssistant.jsx
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { KB_CONTEXT_TEXT, PROFILE, PROJECTS, TECH_SKILLS } from '../lib/knowledgeBase'
 import {
   FiVolume2, FiVolumeX,
   FiTrash2, FiX, FiMinimize2, FiMaximize2,
   FiChevronDown
 } from 'react-icons/fi'
-import { FaStop, FaPaperPlane, FaMicrophone } from 'react-icons/fa'
+import { FaStop, FaPaperPlane, FaMicrophone, FaWhatsapp } from 'react-icons/fa'
 
 /* ─────────────────────────────────────────────
    DESIGN TOKENS — aurora-glass palette
@@ -287,7 +288,7 @@ const KB = {
    ENHANCED RESPONSE GENERATOR
 ───────────────────────────────────────────── */
 function generateResponse(input) {
-  const s = input.toLowerCase().trim()
+  const s = input.toLowerCase().trim().replace(/[?.!,]/g, '').replace(/\s+/g, ' ')
 
   // ── Greetings and casual conversation ──
   if (s === 'hi' || s === 'hello' || s === 'hey') {
@@ -420,6 +421,14 @@ function generateResponse(input) {
     return KB.availability.all
   }
 
+  // ── Services and client feedback ──
+  if (s.includes('services') || s.includes('what can muhire build') || s.includes('what does he offer')) {
+    return "Muhire offers end-to-end web development: responsive React applications, Node.js or Laravel backends, REST APIs, database design, and interactive Three.js experiences. Tell me whether you need a website, dashboard, API, or 3-D experience."
+  }
+  if (s.includes('testimonial') || s.includes('client feedback') || s.includes('reviews') || s.includes('references')) {
+    return "Muhire's clients value reliable delivery, thoughtful communication, strong visual execution, and practical technical solutions. You can open the Testimonials page for the full overview."
+  }
+
   // ── About Nova ──
   if (s.includes('who are you') && !s.includes('muhire'))
     return "I'm Nova ✨, an AI-powered assistant built for Muhire Dieudonne's portfolio. I can talk with you by voice or text about his skills, projects, and experience. I'm based in this site but originally from Kigali, Rwanda 🇷🇼 — just like Muhire!"
@@ -441,10 +450,56 @@ function generateResponse(input) {
     return "In Kigali, Rwanda 🇷🇼, it's usually pleasant with moderate temperatures year-round. But I'm not a weather bot — I'm here to talk about Muhire's amazing work! ☀️"
 
   // ── Navigation help ──
-  if (s.includes('open projects') || s.includes('go to skills') || s.includes('show contact') || 
-      s.includes('scroll to about') || s.includes('open services') || s.includes('show testimonials') ||
-      s.includes('open github') || s.includes('navigate') || s.includes('show me'))
-    return "I can guide you there 📍 — use the navigation menu at the top of the portfolio, and I'll be right here if you have questions along the way. You can also scroll down to explore each section!"
+  if (s.includes('open projects') || s.includes('go to projects') || s.includes('show projects')) {
+    window.history.pushState({}, '', '/projects')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    return "Opening Muhire's project portfolio now."
+  }
+  if (s.includes('open skills') || s.includes('go to skills') || s.includes('show skills')) {
+    window.history.pushState({}, '', '/skills')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    return "Opening the skills and technology page."
+  }
+  if (s.includes('open about') || s.includes('go to about') || s.includes('show about')) {
+    window.history.pushState({}, '', '/about')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    return "Opening Muhire's profile and biography."
+  }
+  if (s.includes('open experience') || s.includes('go to experience') || s.includes('show experience')) {
+    window.history.pushState({}, '', '/experience')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    return "Opening the professional experience page."
+  }
+  if (s.includes('open education') || s.includes('go to education') || s.includes('show education')) {
+    window.history.pushState({}, '', '/education')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    return "Opening Muhire's education page."
+  }
+  if (s.includes('open services') || s.includes('go to services') || s.includes('show services')) {
+    window.history.pushState({}, '', '/services')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    return "Opening the services page."
+  }
+  if (s.includes('open testimonials') || s.includes('go to testimonials') || s.includes('show testimonials')) {
+    window.history.pushState({}, '', '/testimonials')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    return "Opening client feedback."
+  }
+  if (s.includes('open certificates') || s.includes('go to certificates') || s.includes('show certificates')) {
+    window.history.pushState({}, '', '/certificates')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    return "Opening Muhire's certificate page."
+  }
+  if (s.includes('open blog') || s.includes('go to blog') || s.includes('show articles')) {
+    window.history.pushState({}, '', '/blog')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    return "Opening the developer blog."
+  }
+  if (s.includes('open contact') || s.includes('go to contact') || s.includes('show contact')) {
+    window.history.pushState({}, '', '/contact')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    return "Opening the contact page."
+  }
 
   // ── Default ──
   return "I'm Nova ✨, Muhire Dieudonne's AI assistant from Kigali, Rwanda 🇷🇼. I can tell you about his skills, projects, experience, education, or how to contact him. What interests you most? Just ask or type your question!"
@@ -656,6 +711,29 @@ const VoiceAssistant = () => {
   return (
     <div className="sig-wrap">
       <style>{style}</style>
+
+      {/* ── WHATSAPP QUICK ACTION ── */}
+      <motion.a
+        href="https://wa.me/250798728379?text=Hello%20Muhire%2C%20I%20found%20your%20portfolio."
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Contact Muhire on WhatsApp"
+        title="WhatsApp: 0798728379"
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.94 }}
+        className="fixed z-[9999] w-14 h-14 rounded-2xl flex items-center justify-center"
+        style={{
+          bottom: isNavOpen ? 'calc(max(1rem, env(safe-area-inset-bottom)) + 140px)' : 'calc(max(1rem, env(safe-area-inset-bottom)) + 76px)',
+          right: 'max(1rem, env(safe-area-inset-right))',
+          background: '#25D366',
+          color: '#ffffff',
+          border: '1px solid rgba(255,255,255,0.28)',
+          boxShadow: '0 12px 30px rgba(2,3,10,0.55), 0 0 24px rgba(37,211,102,0.22)',
+          transition: 'bottom 0.3s ease',
+        }}
+      >
+        <FaWhatsapp size={25} />
+      </motion.a>
 
       {/* ── FAB ── */}
       <motion.button

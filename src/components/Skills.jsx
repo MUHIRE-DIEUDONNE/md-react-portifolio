@@ -222,9 +222,39 @@ const PREMIUM_STYLES = `
   }
 
   @media (max-width: 420px) {
+    .skills-globe-root .globe-stage {
+      top: 20%;
+      bottom: 22%;
+      left: 0;
+      right: 0;
+      border-radius: 20px;
+    }
+    .skills-globe-root .globe-title {
+      top: max(4%, calc(env(safe-area-inset-top) + 12px));
+    }
+    .skills-globe-root .globe-title h2 {
+      font-size: clamp(1.55rem, 8vw, 2.1rem);
+    }
+    .skills-globe-root .globe-title p {
+      max-width: 260px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+    .skills-globe-root .filter-overlay {
+      width: calc(100vw - 32px);
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      bottom: max(3%, calc(env(safe-area-inset-bottom) + 12px));
+    }
     .skills-globe-root .filter-overlay button {
-      padding: 0.55rem 1rem;
+      width: 100%;
+      min-height: 44px;
+      padding: 0.55rem 0.75rem;
       font-size: 0.7rem;
+    }
+    .skills-globe-root .filter-count {
+      transform: translate(-50%, calc(-100% - 96px));
     }
   }
 `

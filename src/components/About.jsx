@@ -245,8 +245,65 @@ const STYLES = `
     mix-blend-mode: screen;
   }
 
+  .about-body-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: clamp(28px, 4vw, 56px);
+    align-items: start;
+  }
+
+  .about-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .about-interests-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  @media (max-width: 768px) {
+    .about-body-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+  }
+
   @media (max-width: 640px) {
+    .about-root {
+      padding: 72px 0;
+    }
+    .about-container {
+      padding-inline: 16px;
+    }
+    .about-body-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .about-stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .about-stat {
+      min-width: 0;
+      padding: 16px 8px;
+    }
+    .about-imgframe {
+      height: min(390px, 110vw) !important;
+    }
+    .about-card {
+      padding: 20px !important;
+    }
+    .about-interests-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
     .about-tab { padding: 7px 14px; }
+    .about-btn-primary {
+      width: 100%;
+      justify-content: center;
+      min-width: 0;
+    }
   }
 `
 
@@ -410,10 +467,8 @@ const About = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
+          className="about-stats-grid"
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-            gap: 12,
             marginBottom: 'clamp(36px, 5vw, 56px)',
           }}
         >
@@ -445,12 +500,7 @@ const About = () => {
         <div className="about-rule" style={{ marginBottom: 'clamp(28px, 4vw, 40px)' }} />
 
         {/* Two Column Body */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)',
-          gap: 'clamp(28px, 4vw, 56px)',
-          alignItems: 'start',
-        }}>
+        <div className="about-body-grid">
           {/* Left – Image */}
           <motion.div
             style={{ perspective: 900, rotateX: rx, rotateY: ry }}
@@ -686,11 +736,7 @@ const About = () => {
                   exit={{ opacity: 0, y: -12 }}
                   transition={{ duration: 0.28 }}
                 >
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: 10,
-                  }}>
+                  <div className="about-interests-grid">
                     {INTERESTS.map((item, i) => (
                       <motion.div
                         key={i}

@@ -136,7 +136,7 @@ function Earth() {
   })
 
   return (
-    <group>
+    <group rotation={[0, Math.PI / 2, 0]}>
       <mesh ref={meshRef} castShadow>
         <sphereGeometry args={[2.0, 128, 128]} />
         <meshPhongMaterial map={earthTex} specularMap={specTex} specular={new THREE.Color(0x224466)} shininess={28} />
@@ -264,11 +264,11 @@ function Scene({ mousePosition, orbitSpeed = 1, ringColor = '#d4af55', accentCol
 }
 
 // ─── ThreeHero Component ─────────────────────────
-const ThreeHero = ({ mousePosition, orbitSpeed = 1, ringColor = '#d4af55', accentColor = '#2ecc9a', techStack = [] }) => (
+const ThreeHero = ({ mousePosition, orbitSpeed = 1, ringColor = '#d4af55', accentColor = '#2ecc9a', techStack = [], cameraPosition = [0, 1.0, 6.5] }) => (
   <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
     <Canvas
       dpr={[1, 2]}
-      camera={{ position: [0, 1.0, 6.5], fov: 55, near: 0.1, far: 200 }}
+      camera={{ position: cameraPosition, fov: 55, near: 0.1, far: 200 }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       style={{ background: 'transparent' }}
     >

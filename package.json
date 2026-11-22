@@ -11,14 +11,17 @@
   "dependencies": {
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.17.10",
+    "@supabase/supabase-js": "^2.119.2",
     "framer-motion": "^10.18.0",
     "gsap": "^3.12.5",
     "locomotive-scroll": "^4.1.4",
+    "lucide-react": "^1.77.0",
     "react": "^18.2.0",
     "react-countup": "^6.5.3",
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
     "react-intersection-observer": "^9.16.0",
+    "react-router-dom": "^7.18.6",
     "three": "^0.170.0"
   },
   "devDependencies": {

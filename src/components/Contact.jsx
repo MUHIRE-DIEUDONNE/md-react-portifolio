@@ -1,5 +1,5 @@
 // src/components/Contact.jsx
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   FiMail, FiPhone, FiMapPin, FiSend, FiCheck,
@@ -8,24 +8,27 @@ import {
   FiAtSign, FiArrowUpRight
 } from 'react-icons/fi'
 import { FaWhatsapp, FaDev } from 'react-icons/fa'
+import { isSupabaseConfigured, supabase } from '../lib/supabase'
 
 const Contact = () => {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [errors, setErrors] = useState({})
-  const [submitted, setSubmitted] = useState(false)
-  const [globalErr, setGlobalErr] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [notice, setNotice] = useState(null)
   const [activeFaq, setActiveFaq] = useState(null)
+  const [honeypot, setHoneypot] = useState('')
+  const submissionLock = useRef(false)
 
   const validateField = (name, value) => {
     switch (name) {
       case 'name':
-        return value.length >= 2 ? '' : 'At least 2 characters'
+        return value.trim().length >= 2 ? '' : 'At least 2 characters'
       case 'email':
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? '' : 'Invalid email address'
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) ? '' : 'Invalid email address'
       case 'subject':
-        return value.length >= 3 ? '' : 'At least 3 characters'
+        return value.trim().length >= 3 ? '' : 'At least 3 characters'
       case 'message':
-        return value.length >= 10 ? '' : 'At least 10 characters'
+        return value.trim().length >= 10 ? '' : 'At least 10 characters'
       default:
         return ''
     }
@@ -36,7 +39,7 @@ const Contact = () => {
     setForm(prev => ({ ...prev, [name]: value }))
     const error = validateField(name, value)
     setErrors(prev => ({ ...prev, [name]: error }))
-    if (globalErr) setGlobalErr('')
+    setNotice(null)
   }
 
   const validateForm = () => {
@@ -48,25 +51,47 @@ const Contact = () => {
     return newErrors
   }
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
+    if (honeypot) return
+    if (submissionLock.current) return
+
     const newErrors = validateForm()
-    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
-      setGlobalErr('Please fix the errors above.')
+      setNotice({ type: 'error', message: 'Please fix the errors above.' })
       return
     }
-    
-    setSubmitted(true)
-    // Simulate API call
-    setTimeout(() => {
-      setSubmitted(false)
+
+    if (!isSupabaseConfigured || !supabase) {
+      setNotice({ type: 'error', message: 'Message service is not configured. Please contact me by email instead.' })
+      return
+    }
+
+    submissionLock.current = true
+    setIsSubmitting(true)
+    setNotice(null)
+
+    try {
+      const { error } = await supabase.from('contact_messages').insert({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        subject: form.subject.trim(),
+        message: form.message.trim(),
+      })
+
+      if (error) throw error
+
       setForm({ name: '', email: '', subject: '', message: '' })
       setErrors({})
-      setGlobalErr('')
-      alert('Message sent successfully! I will get back to you soon.')
-    }, 2000)
+      setNotice({ type: 'success', message: 'Your message was sent successfully. Thank you for reaching out.' })
+    } catch (error) {
+      console.error('Contact message submission failed:', error)
+      setNotice({ type: 'error', message: 'Your message could not be sent. Please try again or contact me by email.' })
+    } finally {
+      submissionLock.current = false
+      setIsSubmitting(false)
+    }
   }
 
   // Data
@@ -75,6 +100,8 @@ const Contact = () => {
     { Icon: FiPhone, label: 'Phone', value: '+250 798 728 379', href: 'tel:+250798728379', color: '#2ecc9a' },
     { Icon: FiMapPin, label: 'Location', value: 'Kigali, Rwanda', href: 'https://maps.google.com/?q=Kigali+Rwanda', color: '#e07070' },
   ]
+  const mapEmbedUrl = 'https://www.openstreetmap.org/export/embed.html?bbox=30.002%2C-1.985%2C30.122%2C-1.903&layer=mapnik&marker=-1.9441%2C30.0619'
+  const mapPageUrl = 'https://www.openstreetmap.org/?mlat=-1.9441&mlon=30.0619#map=13/-1.9441/30.0619'
 
   const SOCIALS = [
     { Icon: FiGithub, href: 'https://github.com/MUHIRE-DIEUDONNE', label: 'GitHub' },
@@ -163,7 +190,17 @@ const Contact = () => {
                 Send a Message
               </h3>
               
-              <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <form onSubmit={onSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <input
+                  type="text"
+                  name="website"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  style={{ position: 'absolute', left: '-10000px', width: 1, height: 1 }}
+                />
                 {/* Name Field */}
                 <div>
                   <div style={{ position: 'relative' }}>
@@ -172,6 +209,9 @@ const Contact = () => {
                       name="name"
                       value={form.name}
                       onChange={onChange}
+                      required
+                      aria-label="Your name"
+                      aria-invalid={Boolean(errors.name)}
                       placeholder="Your Name *"
                       style={{
                         width: '100%',
@@ -198,6 +238,9 @@ const Contact = () => {
                       name="email"
                       value={form.email}
                       onChange={onChange}
+                      required
+                      aria-label="Your email"
+                      aria-invalid={Boolean(errors.email)}
                       placeholder="Your Email *"
                       style={{
                         width: '100%',
@@ -223,6 +266,9 @@ const Contact = () => {
                       name="subject"
                       value={form.subject}
                       onChange={onChange}
+                      required
+                      aria-label="Message subject"
+                      aria-invalid={Boolean(errors.subject)}
                       placeholder="Subject *"
                       style={{
                         width: '100%',
@@ -247,6 +293,9 @@ const Contact = () => {
                       name="message"
                       value={form.message}
                       onChange={onChange}
+                      required
+                      aria-label="Your message"
+                      aria-invalid={Boolean(errors.message)}
                       placeholder="Your Message *"
                       rows={5}
                       style={{
@@ -267,16 +316,25 @@ const Contact = () => {
                   {errors.message && <p style={{ fontSize: 11, color: '#e07070', marginTop: 6, marginLeft: 4 }}>{errors.message}</p>}
                 </div>
 
-                {/* Global Error */}
+                {/* Submission status */}
                 <AnimatePresence>
-                  {globalErr && (
+                  {notice && (
                     <motion.p
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      style={{ fontSize: 12, color: '#e07070', padding: '8px 12px', background: 'rgba(224,112,112,0.1)', borderRadius: 8, border: '1px solid rgba(224,112,112,0.3)' }}
+                      role={notice.type === 'error' ? 'alert' : 'status'}
+                      aria-live="polite"
+                      style={{
+                        fontSize: 12,
+                        color: notice.type === 'success' ? '#2ecc9a' : '#e07070',
+                        padding: '10px 12px',
+                        background: notice.type === 'success' ? 'rgba(46,204,154,0.1)' : 'rgba(224,112,112,0.1)',
+                        borderRadius: 8,
+                        border: `1px solid ${notice.type === 'success' ? 'rgba(46,204,154,0.3)' : 'rgba(224,112,112,0.3)'}`,
+                      }}
                     >
-                      {globalErr}
+                      {notice.message}
                     </motion.p>
                   )}
                 </AnimatePresence>
@@ -284,7 +342,7 @@ const Contact = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={submitted}
+                  disabled={isSubmitting}
                   style={{
                     width: '100%',
                     padding: '16px 24px',
@@ -296,16 +354,16 @@ const Contact = () => {
                     fontWeight: 700,
                     letterSpacing: '0.08em',
                     textTransform: 'uppercase',
-                    cursor: submitted ? 'not-allowed' : 'pointer',
+                    cursor: isSubmitting ? 'wait' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 10,
                     transition: 'all 0.2s',
-                    opacity: submitted ? 0.7 : 1
+                    opacity: isSubmitting ? 0.7 : 1
                   }}
                   onMouseEnter={(e) => {
-                    if (!submitted) {
+                    if (!isSubmitting) {
                       e.currentTarget.style.transform = 'translateY(-2px)'
                       e.currentTarget.style.boxShadow = '0 10px 30px rgba(212,175,85,0.4)'
                     }
@@ -315,8 +373,8 @@ const Contact = () => {
                     e.currentTarget.style.boxShadow = 'none'
                   }}
                 >
-                  {submitted ? (
-                    <><FiCheck size={16} /> Message Sent!</>
+                  {isSubmitting ? (
+                    <><motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}><FiSend size={14} /></motion.span> Sending message…</>
                   ) : (
                     <><FiSend size={14} /> Send Message <FiArrowUpRight size={14} /></>
                   )}
@@ -411,6 +469,37 @@ const Contact = () => {
                   </a>
                 ))}
               </div>
+            </div>
+
+            {/* Kigali Map */}
+            <div style={{
+              border: '1px solid rgba(255,245,220,0.1)',
+              borderRadius: 20,
+              padding: 20,
+              background: 'rgba(22, 20, 16, 0.8)',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
+                <h4 style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#d4af55' }}>
+                  Find Me in Kigali
+                </h4>
+                <FiMapPin aria-hidden="true" color="#d4af55" size={16} />
+              </div>
+              <iframe
+                title="Map showing Kigali, Rwanda"
+                src={mapEmbedUrl}
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                style={{ display: 'block', width: '100%', height: 220, border: '1px solid rgba(212,175,85,0.2)', borderRadius: 14, background: '#131210' }}
+              />
+              <a
+                href={mapPageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: 13, color: '#d4af55', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}
+              >
+                Open interactive map <FiArrowUpRight size={14} />
+              </a>
             </div>
 
             {/* Social Links */}
