@@ -485,12 +485,16 @@ const Contact = () => {
                 </h4>
                 <FiMapPin aria-hidden="true" color="#d4af55" size={16} />
               </div>
+              <p style={{ color: 'rgba(245,238,216,0.55)', fontSize: 12, marginBottom: 12 }}>
+                Kigali, Rwanda
+              </p>
               <iframe
                 title="Map showing Kigali, Rwanda"
                 src={mapEmbedUrl}
                 loading="lazy"
                 referrerPolicy="strict-origin-when-cross-origin"
-                style={{ display: 'block', width: '100%', height: 220, border: '1px solid rgba(212,175,85,0.2)', borderRadius: 14, background: '#131210' }}
+                allowFullScreen
+                style={{ display: 'block', width: '100%', height: 260, border: '1px solid rgba(212,175,85,0.2)', borderRadius: 14, background: '#131210' }}
               />
               <a
                 href={mapPageUrl}
