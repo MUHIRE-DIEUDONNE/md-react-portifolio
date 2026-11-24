@@ -123,7 +123,7 @@ const pageData = {
     title: 'Education',
     intro: "A strong software-development foundation combining computer science principles, modern engineering, and continuous hands-on learning.",
     cards: [
-      { icon: FiBookOpen, title: "Bachelor's Degree", text: 'Bachelor of Science in Software Development from the University of Rwanda.', items: ['Software engineering', 'Database systems', 'Web application development'] },
+      { icon: FiBookOpen, title: 'Bachelor in Technology of Information Technology', text: 'Bachelor in Technology of Information Technology from RP Tumba College in Kigali, Rwanda.', items: ['RP Tumba College', 'Information Technology', 'Kigali, Rwanda'] },
       { icon: FiAward, title: 'Professional Learning', text: 'Focused learning in React, 3-D web experiences, backend architecture, and product delivery.', items: ['React and TypeScript', 'Three.js and WebGL', 'Full-stack development'] },
       { icon: FiShield, title: 'Working Principles', text: 'Clean architecture, accessibility, security awareness, testing, and maintainable code.', items: ['Responsive interfaces', 'Secure data handling', 'Continuous improvement'] },
     ],

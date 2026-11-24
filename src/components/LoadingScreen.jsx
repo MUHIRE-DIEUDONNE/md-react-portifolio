@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiCode, FiCpu, FiGlobe, FiZap } from 'react-icons/fi'
+import profilePhoto from '../images/Muhire_dieudonne.JPG'
 
 /* ─────────────────────────────────────────────
    PREMIUM DARK THEME STYLES
@@ -201,7 +202,7 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
                 {/* Profile Image Container */}
                 <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-primary/50 shadow-2xl mx-auto">
                   <img
-                    src="/images/muhire-dieudonne.jpg"
+                    src={profilePhoto}
                     alt="Muhire Dieudonne"
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -259,7 +260,7 @@ const LoadingScreen = ({ isLoading, onLoadingComplete }) => {
             >
               <h1 className="text-2xl sm:text-3xl font-bold text-light mb-4 flex items-center justify-center gap-3">
                 <img
-                  src="/images/muhire-dieudonne.jpg"
+                  src={profilePhoto}
                   alt="Muhire Dieudonne"
                   className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-primary/50"
                   onError={(e) => {

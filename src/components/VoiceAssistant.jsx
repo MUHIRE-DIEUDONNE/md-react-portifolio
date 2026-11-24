@@ -1,7 +1,10 @@
 // src/components/VoiceAssistant.jsx
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { KB_CONTEXT_TEXT, PROFILE, PROJECTS, TECH_SKILLS } from '../lib/knowledgeBase'
+import { Link } from 'react-router-dom'
+import { PROFILE, PROJECTS, TECH_SKILLS, PORTFOLIO_PAGES } from '../lib/knowledgeBase'
+import { downloadCV, scrollToSection } from '../lib/knowledgeBase'
 import {
   FiVolume2, FiVolumeX,
   FiTrash2, FiX, FiMinimize2, FiMaximize2,
@@ -17,8 +20,8 @@ const style = `
 
   :root {
     --sig-bg: #05060d;
-    --sig-surface: rgba(10,11,20,0.85);
-    --sig-panel: rgba(12,13,24,0.85);
+    --sig-surface: rgba(10,11,20,0.97);
+    --sig-panel: rgba(12,13,24,0.98);
     --sig-glass: rgba(255,255,255,0.055);
     --sig-line: rgba(255,255,255,0.13);
     --sig-line-bright: rgba(167,139,250,0.45);
@@ -177,6 +180,27 @@ const AuroraBackdrop = () => (
   </div>
 )
 
+const AssistantText = ({ text, linksEnabled }) => {
+  if (!linksEnabled) return text
+  const parts = String(text).split(/(\[[^\]]+\]\([^)]+\)|https?:\/\/[^\s]+)/g)
+  return parts.map((part, index) => {
+    const markdownLink = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
+    if (markdownLink) {
+      const [, label, href] = markdownLink
+      return href.startsWith('/')
+        ? <Link key={index} to={href} style={{ color: 'var(--sig-teal)', textDecoration: 'underline' }}>{label}</Link>
+        : <a key={index} href={href}
+            target={/^https?:/.test(href) ? '_blank' : undefined}
+            rel={/^https?:/.test(href) ? 'noopener noreferrer' : undefined}
+            style={{ color: 'var(--sig-teal)', textDecoration: 'underline', overflowWrap: 'anywhere' }}>{label}</a>
+    }
+    return /^https?:\/\//.test(part)
+      ? <a key={index} href={part} target="_blank" rel="noopener noreferrer"
+          style={{ color: 'var(--sig-teal)', textDecoration: 'underline', overflowWrap: 'anywhere' }}>{part}</a>
+      : <React.Fragment key={index}>{part}</React.Fragment>
+  })
+}
+
 /* ─────────────────────────────────────────────
    PERSONAS
 ───────────────────────────────────────────── */
@@ -206,72 +230,72 @@ const PERSONAS = [
 ───────────────────────────────────────────── */
 const KB = {
   introduction: {
-    name: "My name is Muhire Dieudonne, a passionate Fullstack Developer from Kigali, Rwanda.",
-    role: "I am a Fullstack Developer specializing in React, Next.js, Node.js, and modern web technologies.",
-    location: "I'm based in Kigali, Rwanda — the heart of Africa's tech innovation.",
-    all: "I'm Muhire Dieudonne, a Fullstack Developer from Kigali, Rwanda. I build amazing web applications with cutting-edge technologies."
+    name: `My name is ${PROFILE.name}, a ${PROFILE.title} from ${PROFILE.location}.`,
+    role: `I am a ${PROFILE.title}.`,
+    location: `I am based in ${PROFILE.location}.`,
+    all: `${PROFILE.name} is a ${PROFILE.title} from ${PROFILE.location}.`
   },
   skills: {
-    frontend: "I specialise in React, Next.js, and TypeScript with 95% proficiency in React and 98% in JavaScript.",
-    backend: "For back-end I work with Node.js, GraphQL, and Python — building RESTful APIs and GraphQL servers.",
-    styling: "Expert in Tailwind CSS, SCSS, and Styled Components. I create responsive, beautiful designs.",
-    animation: "I use Framer Motion, GSAP, and Three.js for stunning 3-D animations and interactive experiences.",
-    threejs: "88% proficiency in Three.js — 3-D product showcases, interactive planets, procedural terrain generation.",
-    fullstack: "As a Fullstack Developer, I handle both frontend and backend seamlessly — from database design to UI/UX implementation.",
-    laravel: "Yes, I work with Laravel too — building clean, well-structured PHP backends and APIs.",
-    php: "I know PHP well, including modern Laravel-based development for server-side applications.",
-    node: "Definitely — Node.js is one of my core backend tools for building fast, scalable APIs and services.",
-    firebase: "I use Firebase for authentication, real-time databases, and quick backend prototyping.",
-    mysql: "Yes, I work with MySQL for structured, relational data storage in many of my projects.",
-    mongodb: "I use MongoDB frequently for flexible, document-based data storage in full-stack apps.",
-    apis: "Absolutely — I design and build RESTful and GraphQL APIs that are secure, documented, and easy to consume.",
-    all: "React 95 · JavaScript 98 · TypeScript 88 · Next.js 85 · Three.js 88 · Framer Motion 92 · GSAP 90 · Tailwind 96 · Node.js 85 · GraphQL 75 · Laravel · PHP · Firebase · MySQL · MongoDB."
+    frontend: "The Skills page lists HTML5, CSS3, JavaScript, React, and Tailwind CSS for frontend development.",
+    backend: "The listed backend skills include Node.js, Express.js, PHP, and REST APIs.",
+    styling: "The portfolio lists CSS3, Tailwind CSS, and responsive web design.",
+    animation: "The portfolio uses Framer Motion and Three.js in interactive project and site experiences.",
+    threejs: "Three.js is used for 3-D visuals in the interactive portfolio project.",
+    fullstack: `The portfolio lists frontend skills (${TECH_SKILLS.slice(0, 5).join(', ')}), backend skills (Node.js, Express.js, PHP, REST APIs), and database/tools skills (MySQL, SQL, Git, and Postman).`,
+    laravel: "Laravel is not listed on the current Skills page.",
+    php: "PHP is listed on the Skills page.",
+    node: "Node.js and Express.js are listed on the Skills page.",
+    firebase: "Firebase is not listed on the current Skills page.",
+    mysql: "MySQL and SQL are listed on the Skills page.",
+    mongodb: "MongoDB is not listed on the current Skills page.",
+    apis: "REST APIs are listed on the Skills page.",
+    all: TECH_SKILLS.join(", ") + "."
   },
   projects: {
-    ecommerce: "Full-stack e-commerce platform with React, Node.js, and MongoDB — real-time inventory, payments, admin dashboard.",
-    metaverse: "A 3-D metaverse in Three.js where users explore virtual spaces, interact with objects, and chat in real time.",
-    portfolio: "This 3-D portfolio! Interactive 3-D elements, smooth animations, fully responsive design.",
-    game: "Multiplayer browser-based 3-D game using Three.js and WebSocket with real-time physics and particle effects.",
-    cooperative: "Yes — I've built a cooperative management system to help groups track members, savings, and shared resources digitally.",
-    school: "I've built school management systems covering student records, grading, attendance, and admin dashboards.",
-    latest: "My latest project builds on everything I've learned — combining clean full-stack architecture with polished, interactive UI.",
-    all: "Top projects: 3-D Interactive Portfolio · E-commerce Platform · Real-time Collaboration Tool · Metaverse · Multiplayer 3-D Game · Procedural Terrain Generator · Cooperative Management System · School Management System."
+    ecommerce: "An e-commerce project is not listed in the portfolio.",
+    metaverse: "A metaverse project is not listed in the portfolio.",
+    portfolio: "The 3-D Interactive Portfolio uses React, Three.js, Framer Motion, and WebGL.",
+    game: "The listed games are Snake Game and Jump Game in Vue. See the Projects page for details and links.",
+    cooperative: "A cooperative management project is not listed in the portfolio.",
+    school: "A school management project is not listed in the portfolio.",
+    latest: "The portfolio does not identify a latest project. Browse the Projects page to see the listed work.",
+    all: PROJECTS.map(project => project.title).join(" · ") + "."
   },
   experience: {
-    company1: "Lead Frontend Developer at Creative Agency (2022–Present), leading a team of 5 and delivering 25+ projects.",
-    company2: "Senior React Developer at Tech Startup (2020–2022), cutting bundle size 35% and shipping real-time features.",
-    company3: "3-D Graphics Developer at Procedural Worlds Lab (2021–Present), building terrain-gen systems and interactive worlds.",
-    years: "I have 5+ years of hands-on experience building web applications across different industries.",
-    companies: "Yes, I've worked with agencies, startups, and independent clients on a range of full-stack and 3-D projects.",
-    freelance: "Yes, I take on freelance work alongside my ongoing roles — I enjoy the variety it brings.",
-    industries: "I've worked across tech startups, creative agencies, e-commerce, education, and cooperative/community platforms.",
-    all: "5+ years across global companies — 50+ projects delivered, 30+ happy clients worldwide."
+    company1: "Muhire's portfolio presents academic, independent, and continuous-development experience; it does not claim formal employment.",
+    company2: "Muhire develops independent web projects and studies modern engineering practices.",
+    company3: "Muhire does not list formal 3-D graphics employment in the verified portfolio information.",
+    years: "No formal years-of-experience figure is provided in Muhire's verified portfolio information.",
+    companies: "No formal employers or company engagements are listed.",
+    freelance: "No freelance engagement history is verified in the portfolio.",
+    industries: "Muhire focuses on web development, databases, and practical application projects.",
+    all: "The Experience page covers academic projects, independent web projects, and continuous professional development."
   },
   contact: {
-    email: "Reach me at muhiredieu7@gmail.com — I reply within 24 hours.",
+    email: `Email Muhire at ${PROFILE.email}.`,
     phone: "+250 798 728 379 — call or WhatsApp any time.",
-    whatsapp: "Yes, WhatsApp works too — just message +250 798 728 379.",
-    location: "Based in Kigali, Rwanda — available for remote work worldwide.",
-    all: "muhiredieu7@gmail.com · +250 798 728 379 · Kigali, Rwanda · remote-friendly globally."
+    whatsapp: `The portfolio lists ${PROFILE.phone} as Muhire's contact number.`,
+    location: `Based in ${PROFILE.location}.`,
+    all: `${PROFILE.email} · ${PROFILE.phone} · ${PROFILE.location}.`
   },
   social: {
-    github: "You can check out my code and open-source work on GitHub — just ask and I'll point you there.",
-    linkedin: "I'm on LinkedIn too, where I share my professional journey and connect with other developers.",
-    portfolio: "You're already exploring it — this 3-D interactive site is my portfolio!",
-    cv: "I have an up-to-date CV/resume available — just let me know and I can point you to the download link.",
+    github: `Muhire's GitHub profile is ${PROFILE.github}.`,
+    linkedin: `Muhire's LinkedIn profile is ${PROFILE.linkedin}.`,
+    portfolio: `You are viewing Muhire's portfolio: ${PROFILE.portfolio}`,
+    cv: `Muhire's CV can be downloaded from the About page: ${PROFILE.cvUrl}.`,
   },
   education: {
-    degree: "BSc Computer Science, focus on Web Development and 3-D Graphics.",
-    certifications: "Certified in React Advanced Patterns, Three.js Journey, and Full-Stack Development.",
-    qualification: "I hold a BSc in Computer Science along with several specialized certifications in web and 3-D development.",
-    all: "CS degree plus ongoing certifications in React, Three.js, and full-stack development."
+    degree: "Muhire holds a Bachelor in Technology of Information Technology.",
+    certifications: "No additional certifications are verified in the portfolio.",
+    qualification: "Muhire has a Bachelor in Technology of Information Technology.",
+    all: "Muhire studied at RP Tumba College in Kigali, Rwanda and earned a Bachelor in Technology of Information Technology."
   },
   availability: {
-    status: "Currently available for freelance and full-time opportunities — 24-hour response time.",
-    hours: "Flexible hours, comfortable with any time zone. Most active UTC+2 business hours (Kigali time).",
-    remote: "Yes, I work remotely with clients and teams around the world.",
-    rate: "My rates depend on project scope — reach out with your project details and I'll get you a clear estimate.",
-    all: "Open to freelance, full-time, or consultation — let's talk about your project!"
+    status: "Availability is not specified in the portfolio. Please use the Contact page to ask Muhire directly.",
+    hours: "Working hours are not specified in the portfolio. Please use the Contact page to ask Muhire directly.",
+    remote: "Remote-work availability is not specified in the portfolio. Please use the Contact page to ask Muhire directly.",
+    rate: "Rates are not specified in the portfolio. Please use the Contact page to discuss a project.",
+    all: "Availability details are not specified in the portfolio. Please use the Contact page to reach Muhire."
   },
   technical: {
     react: "React is a JavaScript library for building user interfaces from reusable components — it's one of my core tools.",
@@ -280,15 +304,143 @@ const KB = {
     node: "Node.js lets you run JavaScript on the server, making it great for building fast, scalable backend APIs.",
     restapi: "A REST API is a way for applications to communicate over HTTP using standard methods like GET, POST, PUT, and DELETE.",
     mongodb: "MongoDB is a NoSQL, document-based database that stores data in flexible, JSON-like structures.",
-    mysqlVsMongo: "MySQL is a relational database using structured tables, while MongoDB is document-based and schema-flexible — I use both depending on the project's needs.",
+    mysqlVsMongo: "MySQL is a relational database that organizes data in tables. MongoDB is a document database that stores data in flexible documents.",
   }
+}
+
+const getRequestedPage = (input) => {
+  const match = input.match(/\b(?:open|go to|visit|navigate to|take me to|show me)\s+(?:the\s+)?(home(?:page)?|about(?:\s+page)?|skills?(?:\s+page)?|projects?(?:\s+page)?|services?(?:\s+page)?|experience(?:\s+page)?|education(?:\s+page)?|testimonials?(?:\s+page)?|certificates?(?:\s+page)?|blog(?:\s+page)?|contact(?:\s+page)?|privacy(?:\s+policy)?|terms(?:\s+of\s+use)?)\b/i)
+  if (!match) return null
+  const requested = match[1].toLowerCase()
+  const aliases = {
+    home: 'Home', homepage: 'Home', about: 'About', skill: 'Skills', skills: 'Skills',
+    project: 'Projects', projects: 'Projects', service: 'Services', services: 'Services',
+    experience: 'Experience', education: 'Education', testimonial: 'Testimonials',
+    testimonials: 'Testimonials', certificate: 'Certificates', certificates: 'Certificates',
+    blog: 'Blog', contact: 'Contact', privacy: 'Privacy Policy',
+    'privacy policy': 'Privacy Policy', terms: 'Terms of Use', 'terms of use': 'Terms of Use',
+  }
+  const normalized = requested.replace(/\s+page$/, '')
+  return PORTFOLIO_PAGES.find(page => page.title === aliases[normalized]) || null
+}
+
+function answerFromPortfolio(input) {
+  const s = input.toLowerCase().replace(/[’']/g, '').replace(/[?.!,]/g, ' ').replace(/\s+/g, ' ').trim()
+  const pageAction = getRequestedPage(input)
+  if (pageAction) return `Opening the ${pageAction.title} page. [Open ${pageAction.title}](${pageAction.route})`
+
+  if (/\b(cv|resume)\b/.test(s) && /\b(download|get|where|how|find|send|available)\b/.test(s)) {
+    return `Muhire's CV is on the [About page](/about). Choose Download My CV beneath the education details, or [download the PDF directly](${PROFILE.cvUrl}).`
+  }
+  if (/\b(where|location|located|live|based)\b/.test(s)) {
+    return "Muhire Dieudonne is located in Kigali, Rwanda."
+  }
+  if (/\b(education|degree|qualification|college|studied|study|graduated|rp tumba)\b/.test(s)) {
+    return "Muhire has a Bachelor in Technology of Information Technology from RP Tumba College in Kigali, Rwanda. See the [Education page](/education)."
+  }
+  if (/\b(github|linkedin|instagram|twitter|social media|social accounts)\b/.test(s)) {
+    if (s.includes('github')) return `Muhire's GitHub: [View GitHub](${PROFILE.github})`
+    if (s.includes('linkedin')) return `Muhire's LinkedIn: [View LinkedIn](${PROFILE.linkedin})`
+    if (s.includes('instagram')) return `Muhire's Instagram: [View Instagram](${PROFILE.instagram})`
+    if (s.includes('twitter')) return `Muhire's Twitter: [View Twitter](${PROFILE.twitter})`
+    return `Connect with Muhire: [GitHub](${PROFILE.github}), [LinkedIn](${PROFILE.linkedin}), [Instagram](${PROFILE.instagram}), and [Twitter](${PROFILE.twitter}).`
+  }
+  if (s.includes('facebook')) {
+    return `A Facebook profile is not listed in this portfolio. You can connect with Muhire through [GitHub](${PROFILE.github}) or [LinkedIn](${PROFILE.linkedin}).`
+  }
+  if (/\b(contact|email|phone|call|whatsapp|reach)\b/.test(s)) {
+    return `You can email Muhire at [${PROFILE.email}](mailto:${PROFILE.email}) or call him at [${PROFILE.phone}](tel:${PROFILE.phone.replace(/\s/g, '')}). You can also use the [Contact page](/contact).`
+  }
+  if (/\b(who is muhire|who is he|tell me about muhire|introduce muhire|what does muhire do|what does he do|what is his job|what is your job|profession|occupation)\b/.test(s)) {
+    return `${PROFILE.name} is a ${PROFILE.title} based in ${PROFILE.location}. ${PROFILE.summary}`
+  }
+
+  const project = PROJECTS.find(item => {
+    const name = item.title.toLowerCase().replace(/[–-]/g, ' ')
+    return s.includes(name) || (item.id === '3d-interactive-portfolio' && /\b(3d|three js|portfolio project)\b/.test(s))
+  })
+  if (project) {
+    return `${project.title}: ${project.description} Technologies: ${project.tags.join(', ')}. [Project details](${project.route}) · [GitHub](${project.github}) · [Live demo](${project.live}).`
+  }
+  if (/\b(project|projects|portfolio work|showcase)\b/.test(s)) {
+    return `Projects shown on the [Projects page](/projects):\n${PROJECTS.map(item => `• [${item.title}](${item.route}) — ${item.description} [GitHub](${item.github}) [Live demo](${item.live})`).join('\n')}`
+  }
+
+  const mentionedSkill = TECH_SKILLS.find(item => s.includes(item.toLowerCase()))
+  if (mentionedSkill && /\b(use|uses|know|work with|skill|technology|proficient|expert|is|about)\b/.test(s)) {
+    return `${mentionedSkill} is listed among Muhire's skills. The [Skills page](/skills) describes its practical uses and project examples.`
+  }
+  if (/\b(skill|skills|technology|technologies|tech stack|programming language|framework|frameworks|tools)\b/.test(s)) {
+    const skill = TECH_SKILLS.find(item => s.includes(item.toLowerCase()))
+    if (skill) return `${skill} is listed on Muhire's [Skills page](/skills). The page describes its practical uses and project examples.`
+    return `The portfolio lists these technologies and tools: ${TECH_SKILLS.join(', ')}. Explore the [Skills page](/skills) for descriptions and examples.`
+  }
+  if (/\b(service|services|offer|build for me|what can muhire build|what does he offer)\b/.test(s)) {
+    const services = PORTFOLIO_PAGES.find(page => page.title === 'Services')
+    return `${services.summary} See the [Services page](/services) or [contact Muhire](/contact) to discuss a project.`
+  }
+  if (/\b(experience|career|employer|employment|company|companies)\b/.test(s)) {
+    return `The portfolio describes academic projects, independent web projects, and ongoing professional development. It does not list formal employers or claim a specific number of years. See the [Experience page](/experience).`
+  }
+  if (/\b(available|availability|hire|freelance|rate|price|cost)\b/.test(s)) {
+    return `Availability and rates are not specified on the portfolio. Please [contact Muhire](/contact) to discuss an opportunity or project.`
+  }
+  if (/\b(testimonial|testimonials|client review|reviews)\b/.test(s)) {
+    return `The [Testimonials page](/testimonials) describes collaboration principles. It currently does not list verified client quotations.`
+  }
+  if (/\b(certificate|certification|certificates)\b/.test(s)) {
+    return `No verified certificates are currently listed. The [Certificates page](/certificates) will display them when details are available.`
+  }
+  if (/\b(blog|article|articles)\b/.test(s)) {
+    return `The [Blog page](/blog) contains sample articles about React, databases, full-stack planning, JavaScript, responsive design, APIs, PHP, and SQL.`
+  }
+  const mentionedPage = PORTFOLIO_PAGES.find(page => s.includes(page.title.toLowerCase()))
+  if (mentionedPage) {
+    return `${mentionedPage.summary} Visit the [${mentionedPage.title} page](${mentionedPage.route}).`
+  }
+  if (/\b(page|pages|section|sections|navigate|website)\b/.test(s)) {
+    return `You can explore the portfolio pages: ${PORTFOLIO_PAGES.map(page => `[${page.title}](${page.route})`).join(' · ')}.`
+  }
+  return null
 }
 
 /* ─────────────────────────────────────────────
    ENHANCED RESPONSE GENERATOR
 ───────────────────────────────────────────── */
 function generateResponse(input) {
+  const portfolioAnswer = answerFromPortfolio(input)
+  if (portfolioAnswer) return portfolioAnswer
+
   const s = input.toLowerCase().trim().replace(/[?.!,]/g, '').replace(/\s+/g, ' ')
+
+  if (s.includes('download') && (s.includes('cv') || s.includes('resume')) ||
+      s.includes('where is') && (s.includes('cv') || s.includes('resume'))) {
+    return "You can download Muhire's CV by visiting the About page and clicking the Download My CV button. The PDF will download to your device."
+  }
+  if ((s.includes('muhire') || s.includes('he')) && (s.includes('location') || s.includes('where is') || s.includes('located') || s.includes('live'))) {
+    return "Muhire Dieudonne is located in Kigali, Rwanda."
+  }
+  if (s.includes('education') || s.includes('study') || s.includes('qualification') || s.includes('college') || s.includes('rp tumba')) {
+    return "Muhire Dieudonne has a Bachelor in Technology of Information Technology from RP Tumba College in Kigali, Rwanda."
+  }
+  if (s.includes('github')) {
+    return `Muhire's GitHub: ${PROFILE.github}`
+  }
+  if (s.includes('linkedin')) {
+    return `Muhire's LinkedIn profile: ${PROFILE.linkedin}`
+  }
+  if (s.includes('instagram')) {
+    return `Muhire's Instagram: ${PROFILE.instagram}`
+  }
+  if (s.includes('twitter') || s.includes('x account')) {
+    return `Muhire's Twitter/X profile: ${PROFILE.twitter}`
+  }
+  if (s.includes('social media') || s.includes('social accounts') || s.includes('connect with')) {
+    return `GitHub: ${PROFILE.github}\nLinkedIn: ${PROFILE.linkedin}\nInstagram: ${PROFILE.instagram}\nTwitter/X: ${PROFILE.twitter}`
+  }
+  if (s.includes('contact') || s.includes('email') || s.includes('phone') || s.includes('reach') || s.includes('whatsapp')) {
+    return `You can email Muhire at ${PROFILE.email}, call or WhatsApp him at ${PROFILE.phone}, or visit the Contact page: /contact`
+  }
 
   // ── Greetings and casual conversation ──
   if (s === 'hi' || s === 'hello' || s === 'hey') {
@@ -333,7 +485,7 @@ function generateResponse(input) {
   if (s.includes('who is muhire') || s.includes('introduce muhire') || 
       s.includes('tell me about muhire') || s.includes('introduce') || 
       s.includes('tell me about yourself') || s.includes('about muhire')) {
-    return "I'm Muhire Dieudonne, a Fullstack Developer from Kigali, Rwanda 🇷🇼. I specialize in building modern web applications with React, Next.js, Node.js, and Three.js. I'm passionate about creating immersive digital experiences that combine beautiful design with powerful functionality. I have 5+ years of experience and work with clients worldwide."
+    return "I'm Muhire Dieudonne, a Full Stack Developer from Kigali, Rwanda. I build responsive web interfaces and complete application workflows across frontend, backend, and database technologies."
   }
   if (s.includes('what does muhire do') || s.includes('what do you do') || s.includes('what is your job')) {
     return "As a Fullstack Developer, I work on both frontend and backend development. I create complete web applications from database design to UI implementation. My tech stack includes React, Next.js, Node.js, TypeScript, and various modern frameworks. I'm based in Kigali, Rwanda 🇷🇼 and work with clients globally."
@@ -502,7 +654,7 @@ function generateResponse(input) {
   }
 
   // ── Default ──
-  return "I'm Nova ✨, Muhire Dieudonne's AI assistant from Kigali, Rwanda 🇷🇼. I can tell you about his skills, projects, experience, education, or how to contact him. What interests you most? Just ask or type your question!"
+  return "I'm sorry, I didn't fully understand your question. I'm Muhire's portfolio assistant, and I'm here to help you explore his portfolio. You can ask me about his education, skills, projects, services, CV, social media, or contact information."
 }
 
 /* ─────────────────────────────────────────────
@@ -630,7 +782,11 @@ const VoiceAssistant = () => {
   const speak = useCallback((text) => {
     if (!synthRef.current || isMuted) return
     synthRef.current.cancel()
-    const u = new SpeechSynthesisUtterance(text.replace(/[*•·]/g, ''))
+    const speechText = text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/https?:\/\/\S+/g, '')
+      .replace(/[*•·]/g, '')
+    const u = new SpeechSynthesisUtterance(speechText)
     u.rate = voiceSpeed; u.pitch = voicePitch; u.volume = 1
     u.onstart = () => setIsSpeaking(true)
     u.onend = () => setIsSpeaking(false)
@@ -639,6 +795,13 @@ const VoiceAssistant = () => {
   }, [isMuted, voiceSpeed, voicePitch])
 
   const addAssistantMessage = useCallback((text) => {
+    if (/\[[^\]]+\]\([^)]+\)|https?:\/\//.test(text)) {
+      setConversation(prev => [...prev, {
+        type: 'assistant', text,
+        timestamp: new Date(), isTyping: false
+      }])
+      return
+    }
     setConversation(prev => [...prev, {
       type: 'assistant', text: '',
       timestamp: new Date(), isTyping: true, fullText: text
@@ -671,6 +834,16 @@ const VoiceAssistant = () => {
       const res = generateResponse(input)
       setIsTypingInd(false)
       addAssistantMessage(res)
+      const lower = input.toLowerCase()
+      if (/\b(download|get|send me)\b/.test(lower) &&
+          (lower.includes('cv') || lower.includes('resume'))) {
+        downloadCV()
+      }
+      const requestedPage = getRequestedPage(input)
+      if (requestedPage) {
+        const pageKey = requestedPage.route === '/' ? 'home' : requestedPage.route.slice(1)
+        scrollToSection(pageKey)
+      }
       if (!isMuted && autoVoice) speak(res)
     }, 600)
   }, [isMuted, autoVoice, speak, addAssistantMessage])
@@ -688,6 +861,11 @@ const VoiceAssistant = () => {
     const msg = "Conversation cleared! I'm Muhire Dieudonne, Fullstack Developer from Kigali, Rwanda 🇷🇼. Ask me anything about my work!"
     setConversation([{ type: 'assistant', text: msg, timestamp: new Date(), isTyping: false }])
     if (!isMuted && autoVoice) speak(msg)
+  }
+
+  const repeatAnswer = () => {
+    const lastAssistant = [...conversation].reverse().find(message => message.type === 'assistant')
+    if (lastAssistant) speak(lastAssistant.fullText || lastAssistant.text)
   }
 
   const toggleMute = () => {
@@ -708,11 +886,12 @@ const VoiceAssistant = () => {
     if (!isMuted && autoVoice) speak(next.welcome)
   }
 
-  return (
+  return createPortal(
     <div className="sig-wrap">
       <style>{style}</style>
 
       {/* ── WHATSAPP QUICK ACTION ── */}
+      {!isOpen && (
       <motion.a
         href="https://wa.me/250798728379?text=Hello%20Muhire%2C%20I%20found%20your%20portfolio."
         target="_blank"
@@ -734,6 +913,7 @@ const VoiceAssistant = () => {
       >
         <FaWhatsapp size={25} />
       </motion.a>
+      )}
 
       {/* ── FAB ── */}
       <motion.button
@@ -741,8 +921,11 @@ const VoiceAssistant = () => {
         whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.94 }}
         onClick={() => setIsOpen(o => !o)}
+        aria-label={isOpen ? 'Close portfolio assistant' : 'Open portfolio assistant'}
+        aria-expanded={isOpen}
         className="fixed z-[9999] w-14 h-14 rounded-2xl border-none cursor-pointer flex items-center justify-center"
         style={{
+          zIndex: 10030,
           bottom: isNavOpen ? 'calc(max(1rem, env(safe-area-inset-bottom)) + 80px)' : 'max(1rem, env(safe-area-inset-bottom))',
           right: 'max(1rem, env(safe-area-inset-right))',
           background: 'var(--sig-panel)',
@@ -776,15 +959,24 @@ const VoiceAssistant = () => {
         {isOpen && (
           <motion.div
             key="window"
+            role="dialog"
+            aria-label="Muhire Dieudonne portfolio assistant"
+            aria-modal="false"
             initial={{ opacity: 0, scale: 0.92, y: 24, originX: 1, originY: 1 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 24 }}
             transition={{ type: 'spring', stiffness: 360, damping: 32 }}
             className="fixed z-[9998] w-[calc(100vw-1.5rem)] sm:w-[calc(100vw-2rem)] max-w-sm sm:max-w-md lg:max-w-lg flex flex-col"
             style={{
+              zIndex: 10020,
               bottom: 'calc(max(1rem, env(safe-area-inset-bottom)) + 4.25rem)',
               right: 'max(0.75rem, env(safe-area-inset-right))',
               maxHeight: 'min(680px, calc(100dvh - 6.5rem))',
+              background: 'rgba(9,10,18,0.98)',
+              border: '1px solid var(--sig-line)',
+              borderRadius: 24,
+              boxShadow: 'var(--sig-shadow)',
+              overflow: 'hidden',
             }}
           >
             <AuroraBackdrop />
@@ -856,6 +1048,8 @@ const VoiceAssistant = () => {
                       <span style={{ color: 'var(--sig-pink)' }}>recording_input…</span>
                     ) : isSpeaking ? (
                       <span style={{ color: 'var(--sig-teal)' }}>speaking_output…</span>
+                    ) : isTypingIndicator ? (
+                      <span style={{ color: 'var(--sig-purple)' }}>preparing_response…</span>
                     ) : (
                       <span style={{ color: 'rgba(94,234,212,0.9)' }}>online 🇷🇼 {activePersona.mode}</span>
                     )}
@@ -959,7 +1153,9 @@ const VoiceAssistant = () => {
                               }}
                             >
                               <p style={{ color: msg.type === 'user' ? '#fff' : 'var(--sig-ink)', fontSize: 12.5, lineHeight: 1.5, margin: 0, whiteSpace: 'pre-wrap' }}>
-                                {msg.text}
+                                {msg.type === 'assistant'
+                                  ? <AssistantText text={msg.text} linksEnabled={!msg.isTyping} />
+                                  : msg.text}
                                 {msg.isTyping && (
                                   <span className="sig-dot inline-block w-1 h-3 ml-1 align-middle" style={{ background: 'var(--sig-teal)' }} />
                                 )}
@@ -1083,6 +1279,14 @@ const VoiceAssistant = () => {
                             accent: autoVoice,
                           },
                           {
+                            label: isSpeaking ? 'Stop speech' : 'Repeat',
+                            icon: isSpeaking ? FiX : FiVolume2,
+                            onClick: () => isSpeaking
+                              ? (synthRef.current?.cancel(), setIsSpeaking(false))
+                              : repeatAnswer(),
+                            accent: false,
+                          },
+                          {
                             label: 'Clear',
                             icon: FiTrash2,
                             onClick: clearConversation,
@@ -1167,7 +1371,7 @@ const VoiceAssistant = () => {
         )}
       </AnimatePresence>
     </div>
-  )
+  , document.body)
 }
 
 export default VoiceAssistant

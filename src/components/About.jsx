@@ -7,6 +7,7 @@ import {
   FiHeadphones, FiMapPin, FiCamera, FiDownload,
   FiArrowUpRight, FiZap, FiBriefcase
 } from 'react-icons/fi'
+import profilePhoto from '../images/Muhire_dieudonne.JPG'
 
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Instrument+Sans:wght@300;400;500;600&display=swap');
@@ -535,7 +536,7 @@ const About = () => {
                 zIndex: 1,
               }}>
                 <img
-                  src="/images/muhire-dieudonne.jpg"
+                  src={profilePhoto}
                   alt="Muhire Dieudonne"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
@@ -633,7 +634,7 @@ const About = () => {
                       lineHeight: 1.8,
                       marginBottom: 14,
                     }}>
-                      A passionate creative developer with 5+ years of experience building immersive web experiences. I specialise in React, Three.js, and advanced animations to craft sites that don't just look stunning — they feel alive.
+                      Muhire Dieudonne is a Full Stack Developer based in Kigali, Rwanda. He builds responsive web interfaces and complete application workflows across frontend, backend, and database technologies.
                     </p>
                     <p style={{
                       fontSize: 13,
@@ -641,15 +642,14 @@ const About = () => {
                       lineHeight: 1.8,
                       marginBottom: 22,
                     }}>
-                      My journey started with curiosity for visual effects and has evolved into a career pushing the boundaries of what's possible on the web — one frame at a time.
+                      He holds a Bachelor in Technology of Information Technology from RP Tumba College in Kigali, Rwanda.
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 24 }}>
                       {SKILLS.map(s => <span key={s} className="about-badge">{s}</span>)}
                     </div>
 <a
-  href="/files/MUHIRE_DIEUDONNE_CV.pdf"
-  target="_blank"
-  rel="noopener noreferrer"
+  href="/MUHIRE_DIEUDONNE_CV.pdf"
+  download="Muhire_Dieudonne_CV.pdf"
   className="about-btn-primary"
 >
   <FiDownload size={14} />

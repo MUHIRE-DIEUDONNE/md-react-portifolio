@@ -9,6 +9,7 @@ import {
 } from 'react-icons/fi'
 import { FaReact } from 'react-icons/fa'
 import { SiThreedotjs } from 'react-icons/si'
+import profilePhoto from '../images/Muhire_dieudonne.JPG'
 
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Instrument+Sans:wght@300;400;500;600&display=swap');
@@ -85,7 +86,10 @@ const STYLES = `
   }
 
   .footer-btn-primary {
+    flex: 0 0 auto;
     width: auto;
+    min-width: 208px;
+    max-width: 100%;
     padding: 13px 20px;
     border-radius: 14px;
     border: none;
@@ -107,6 +111,12 @@ const STYLES = `
     min-height: 48px;
     white-space: nowrap;
     touch-action: manipulation;
+  }
+  .footer-btn-primary span {
+    flex: 0 0 auto;
+  }
+  .footer-btn-primary svg {
+    flex: 0 0 auto;
   }
   .footer-btn-primary:hover {
     transform: translateY(-2px);
@@ -284,7 +294,7 @@ const STYLES = `
     .footer-main-grid { grid-template-columns: 1fr; gap: 28px; }
     .footer-brand-column { grid-column: auto; }
     .footer-cta-banner { flex-direction: column; border-radius: 18px; }
-    .footer-cta-banner .footer-btn-primary { width: 100%; }
+    .footer-cta-banner .footer-btn-primary { width: 100%; min-width: 0; }
     .footer-avatar {
       margin-inline: auto;
     }
@@ -381,7 +391,7 @@ const Footer = () => {
             </p>
           </div>
           <Link to="/contact" className="footer-btn-primary" style={{ textDecoration: 'none' }}>
-            Start a conversation <FiArrowRight size={14} />
+            <span>Start a conversation</span> <FiArrowRight size={14} />
           </Link>
         </div>
 
@@ -396,7 +406,7 @@ const Footer = () => {
           >
             <div className="footer-avatar">
               <div className="footer-avatar-inner">
-                <img src="/images/muhire-dieudonne.jpg" alt="Muhire Dieudonne" />
+                <img src={profilePhoto} alt="Muhire Dieudonne" />
               </div>
             </div>
             <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--footer-cream)', marginBottom: 2 }}>

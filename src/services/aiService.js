@@ -183,9 +183,9 @@ export const portfolioResponses = {
     "Welcome! I'm your guide to Muhire's portfolio. Feel free to ask about his expertise in web development, 3D graphics, and more!"
   ],
   about: [
-    "Muhire Dieudonne is a passionate creative developer with 5+ years of experience in building immersive web experiences. He specializes in React, Three.js, and advanced animations.",
-    "Muhire is a skilled developer focused on creating stunning digital experiences. His expertise includes frontend development, 3D graphics, and procedural generation.",
-    "Let me tell you about Muhire! He's an experienced developer who loves pushing the boundaries of web technology with creative solutions."
+    "Muhire Dieudonne is a Full Stack Developer based in Kigali, Rwanda.",
+    "Muhire holds a Bachelor in Technology of Information Technology from RP Tumba College.",
+    "Muhire builds responsive web interfaces and application workflows using frontend, backend, and database technologies."
   ],
   skills: [
     "Muhire has expertise in React, JavaScript, TypeScript, Three.js, WebGL, and procedural generation. He's also skilled in GSAP, Framer Motion, and modern CSS frameworks.",

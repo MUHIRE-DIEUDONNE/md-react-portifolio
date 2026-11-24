@@ -5,32 +5,34 @@
 
 export const PROFILE = {
   name: "Muhire Dieudonne",
-  title: "Software Developer",
+  title: "Full Stack Developer",
   phone: "+250 798 728 379",
   email: "muhiredieu7@gmail.com",
-  location: "Mahama, Kirehe District, Eastern Province, Rwanda",
+  location: "Kigali, Rwanda",
   github: "https://github.com/MUHIRE-DIEUDONNE",
-  linkedin: "https://www.linkedin.com/feed/",
+  linkedin: "https://www.linkedin.com/in/muhire-dieudonne-498845419/",
+  instagram: "https://www.instagram.com/muhiredieu7/",
+  twitter: "https://twitter.com/muhiredieu",
   portfolio: "https://md-react-portifolio.onrender.com/",
-  cvUrl: "/Muhire_Dieudonne_CV.pdf", // place the exported CV PDF in /public with this name
+  cvUrl: "/MUHIRE_DIEUDONNE_CV.pdf",
   summary:
-    "A passionate and dedicated Software Developer with a Bachelor's Degree in Software Development from the University of Rwanda. Strong knowledge of full-stack web development, building responsive, secure, user-friendly applications, skilled in modern web technologies, database design, and software engineering principles. Committed to continuous learning and delivering innovative digital solutions.",
+    "A Full Stack Developer from Kigali, Rwanda, with a Bachelor in Technology of Information Technology from RP Tumba College.",
   careerObjective:
-    "To obtain a Software Developer position where I can apply my technical knowledge, creativity, and problem-solving abilities to build high-quality software solutions while continuously improving my skills and contributing to the growth and success of the organization.",
+    "To build and maintain useful, responsive, and reliable software solutions while continuing to improve as a full-stack developer.",
 }
 
 export const EDUCATION = [
   {
-    degree: "Bachelor's Degree in Software Development",
-    school: "University of Rwanda",
-    location: "Kirehe District, Eastern Province, Rwanda",
+    degree: "Bachelor in Technology of Information Technology",
+    school: "RP Tumba College",
+    location: "Kigali, Rwanda",
   },
 ]
 
 export const TECH_SKILLS = [
-  "HTML5", "CSS3", "JavaScript (ES6+)", "React.js", "PHP", "Laravel",
-  "Node.js", "MySQL", "MongoDB", "Firebase", "RESTful APIs", "Git & GitHub",
-  "Tailwind CSS", "Bootstrap", "Responsive Web Design", "Microsoft Office",
+  "HTML5", "CSS3", "JavaScript", "React", "Tailwind CSS", "Node.js",
+  "Express.js", "PHP", "REST APIs", "MySQL", "Python", "Git & GitHub",
+  "SQL", "VS Code", "Postman", "npm",
 ]
 
 export const PERSONAL_SKILLS = [
@@ -46,26 +48,71 @@ export const LANGUAGES = [
 
 export const PROJECTS = [
   {
-    id: "cooperative",
-    title: "Cooperative Management System",
+    id: "snake-game",
+    title: "Snake Game",
     description:
-      "A web-based cooperative management system with member registration, savings, loan management, repayments, reporting, and an administrator dashboard.",
-    tags: ["React", "Node.js", "MySQL"],
+      "A browser game with keyboard controls, score tracking, and progressive difficulty.",
+    tags: ["JavaScript", "HTML5", "CSS3", "Canvas API"],
+    route: "/projects/snake-game",
+    github: "https://github.com/muhire-dieudonne/snake_game",
+    live: "https://muhire-dieudonne.github.io/snake_game/",
   },
   {
-    id: "school",
-    title: "School Management System",
+    id: "jump-game-in-vue",
+    title: "Jump Game in Vue",
     description:
-      "A complete school management platform for managing students, teachers, attendance, grading, and administration.",
-    tags: ["PHP", "Laravel", "MySQL"],
+      "An endless runner with obstacle handling, score logic, and animation.",
+    tags: ["Vue.js", "JavaScript", "CSS3", "HTML5"],
+    route: "/projects/jump-game-in-vue",
+    github: "https://github.com/muhire-dieudonne/jump_game_in_vue",
+    live: "https://muhire-dieudonne.github.io/jump_game_in_vue/",
   },
   {
-    id: "ai-portfolio",
-    title: "AI Portfolio Website",
+    id: "language-translator",
+    title: "Language Translator",
     description:
-      "A modern portfolio website featuring an AI-powered voice assistant, interactive UI, responsive design, and a project showcase — the very site this assistant lives on.",
-    tags: ["React", "Voice AI", "Tailwind CSS"],
+      "A browser-based translation interface that sends text to a language API.",
+    tags: ["JavaScript", "API Integration", "HTML5", "CSS3"],
+    route: "/projects/language-translator",
+    github: "https://github.com/muhire-dieudonne/language_translator",
+    live: "https://muhire-dieudonne.github.io/language_translator/",
   },
+  {
+    id: "money-converter",
+    title: "Money Converter",
+    description:
+      "A currency conversion interface using exchange-rate API data.",
+    tags: ["JavaScript", "API Integration", "Chart.js", "Responsive Design"],
+    route: "/projects/money-converter",
+    github: "https://github.com/muhire-dieudonne/money_converter",
+    live: "https://muhire-dieudonne.github.io/money_converter/",
+  },
+  {
+    id: "3d-interactive-portfolio",
+    title: "3-D Interactive Portfolio",
+    description:
+      "A React portfolio featuring 3-D visuals, motion, and responsive navigation.",
+    tags: ["React", "Three.js", "Framer Motion", "WebGL"],
+    route: "/projects/3d-interactive-portfolio",
+    github: "https://github.com/muhire-dieudonne/3d-portfolio",
+    live: "https://muhire-dieudonne.github.io/portfolio/",
+  },
+]
+
+export const PORTFOLIO_PAGES = [
+  { title: "Home", route: "/", summary: "Introduction to Muhire and links to his work, skills, services, About, and Contact pages." },
+  { title: "About", route: "/about", summary: "Biography, education, professional interests, and the downloadable CV." },
+  { title: "Skills", route: "/skills", summary: `Technical skill descriptions covering ${TECH_SKILLS.join(", ")}.` },
+  { title: "Projects", route: "/projects", summary: "Project cards with descriptions, technologies, source repositories, and live demos when available." },
+  { title: "Experience", route: "/experience", summary: "Academic projects, independent web projects, and ongoing professional development; no formal employers are claimed." },
+  { title: "Education", route: "/education", summary: "Bachelor in Technology of Information Technology from RP Tumba College in Kigali, Rwanda." },
+  { title: "Services", route: "/services", summary: "Frontend and full-stack development, React applications, backend APIs, database solutions, responsive websites, maintenance, and consultation." },
+  { title: "Testimonials", route: "/testimonials", summary: "Explains collaboration principles; no verified client testimonials are currently listed." },
+  { title: "Certificates", route: "/certificates", summary: "Reserved for verified certificates; none are currently listed." },
+  { title: "Blog", route: "/blog", summary: "Sample articles about React, databases, full-stack planning, JavaScript, responsive design, APIs, PHP, and SQL." },
+  { title: "Contact", route: "/contact", summary: `Contact form and contact details: ${PROFILE.email}, ${PROFILE.phone}.` },
+  { title: "Privacy Policy", route: "/privacy", summary: "Information about contact data, local preferences, and external links." },
+  { title: "Terms of Use", route: "/terms", summary: "Terms covering the portfolio’s informational content and project descriptions." },
 ]
 
 // Section ids the portfolio page is expected to expose, e.g.
@@ -99,6 +146,8 @@ Email: ${PROFILE.email}
 Phone: ${PROFILE.phone}
 GitHub: ${PROFILE.github}
 LinkedIn: ${PROFILE.linkedin}
+Instagram: ${PROFILE.instagram}
+Twitter: ${PROFILE.twitter}
 Portfolio: ${PROFILE.portfolio}
 
 EDUCATION
@@ -114,7 +163,10 @@ LANGUAGES
 ${LANGUAGES.map(l => `- ${l.name}: ${l.level}`).join("\n")}
 
 PROJECTS
-${PROJECTS.map(p => `- ${p.title} [${p.tags.join(", ")}]: ${p.description}`).join("\n")}
+${PROJECTS.map(p => `- ${p.title} [${p.tags.join(", ")}]: ${p.description} Details: ${p.route}; GitHub: ${p.github}; Live: ${p.live}`).join("\n")}
+
+PORTFOLIO PAGES
+${PORTFOLIO_PAGES.map(page => `- ${page.title} (${page.route}): ${page.summary}`).join("\n")}
 `.trim()
 
 /** Trigger a CV download using an anchor click (no page navigation). */
@@ -139,6 +191,10 @@ export function scrollToSection(sectionKey) {
     services: "/services",
     testimonials: "/testimonials",
     contact: "/contact",
+    certificates: "/certificates",
+    blog: "/blog",
+    privacy: "/privacy",
+    terms: "/terms",
   }
   const route = routes[sectionKey]
   if (!route) return false

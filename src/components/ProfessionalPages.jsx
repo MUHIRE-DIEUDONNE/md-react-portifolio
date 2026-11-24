@@ -6,6 +6,7 @@ import {
   FiCode, FiDatabase, FiDownload, FiGithub, FiLayers, FiLinkedin, FiMail,
   FiMonitor, FiTarget, FiTool, FiZap
 } from 'react-icons/fi'
+import profilePhoto from '../images/Muhire_dieudonne.JPG'
 
 const ThreeHero = lazy(() => import('./ThreeHero'))
 
@@ -39,6 +40,9 @@ const styles = `
   @media(max-width:840px){.pro-grid,.pro-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}}
   .pro-project-image{width:100%;height:160px;object-fit:cover;border-radius:12px;margin-bottom:16px}
   .pro-project-image-placeholder{height:160px;border-radius:12px;margin-bottom:16px;padding:20px;display:grid;place-items:center;text-align:center;background:linear-gradient(135deg,rgba(212,175,85,.12),rgba(46,204,154,.06));border:1px solid rgba(212,175,85,.14);color:#d4af55;font-family:'Playfair Display',Georgia,serif;font-size:23px}
+  .pro-about-profile{display:grid;grid-template-columns:minmax(220px,.7fr) minmax(0,1.3fr);align-items:start;gap:32px;margin-top:38px}
+  .pro-about-photo{display:block;width:100%;max-width:380px;aspect-ratio:4/5;object-fit:cover;border-radius:20px;border:1px solid rgba(212,175,85,.2)}
+  .pro-about-download{justify-content:center}
   .pro-home-visual{position:relative;width:100%;height:clamp(340px,42vw,500px);overflow:hidden;isolation:isolate;border:1px solid rgba(212,175,85,.2);border-radius:28px;background:radial-gradient(circle at 50% 45%,rgba(20,54,78,.52),rgba(12,11,9,.96) 68%);box-shadow:0 28px 80px rgba(0,0,0,.24)}
   .pro-home-canvas{position:absolute;inset:0}
   .pro-home-canvas-fallback{position:absolute;inset:0;display:grid;place-items:center;color:rgba(245,238,216,.6);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
@@ -48,7 +52,7 @@ const styles = `
   .pro-home-profile strong,.pro-home-profile small{display:block}
   .pro-home-profile strong{color:#f5eed8;font-size:12px}
   .pro-home-profile small{margin-top:4px;color:rgba(245,238,216,.55);font-size:10px}
-  @media(max-width:760px){.pro-home-hero{grid-template-columns:1fr!important;gap:32px!important;min-height:0!important}.pro-home-visual{max-width:480px;height:clamp(320px,78vw,420px);margin:0 auto}.pro-about-intro{grid-template-columns:1fr!important}}
+  @media(max-width:760px){.pro-home-hero{grid-template-columns:1fr!important;gap:32px!important;min-height:0!important}.pro-home-visual{max-width:480px;height:clamp(320px,78vw,420px);margin:0 auto}.pro-about-profile{grid-template-columns:minmax(0,1fr);gap:24px}.pro-about-photo{width:min(100%,380px);margin:0 auto}}
   @media(max-width:560px){.pro-page{padding:88px 16px 72px}.pro-grid,.pro-grid.two{grid-template-columns:1fr}.pro-card{padding:20px}.pro-actions{display:grid}.pro-button{width:100%}}
 `
 
@@ -97,7 +101,7 @@ export function ProfessionalHome() {
               <Link className="pro-button primary" to="/projects">Explore My Work <FiArrowRight /></Link>
               <Link className="pro-button" to="/about">About Me</Link>
               <Link className="pro-button" to="/contact">Hire Me</Link>
-              <a className="pro-button" href="/files/MUHIRE_DIEUDONNE_CV.pdf" download><FiDownload />Download CV</a>
+              <a className="pro-button" href="/MUHIRE_DIEUDONNE_CV.pdf" download="Muhire_Dieudonne_CV.pdf"><FiDownload />Download CV</a>
             </div>
             <div style={{ display: 'flex', gap: 18, marginTop: 24, flexWrap: 'wrap' }}>
               <a href="https://github.com/MUHIRE-DIEUDONNE" target="_blank" rel="noreferrer" style={{ color: '#d4af55' }} aria-label="GitHub"><FiGithub size={18} /></a>
@@ -117,7 +121,7 @@ export function ProfessionalHome() {
             </div>
             <span className="pro-home-visual-caption">Interactive Three.js experience</span>
             <div className="pro-home-profile">
-              <img src="/images/muhire-dieudonne.jpg" alt="" />
+              <img src={profilePhoto} alt="" />
               <span><strong>Muhire Dieudonne</strong><small>Full-Stack Developer · Rwanda</small></span>
             </div>
           </motion.div>
@@ -226,7 +230,7 @@ export function ProfessionalHome() {
 
 export function ProfessionalEducation() {
   const cards = [
-    ["Bachelor's Degree in Software Development","Confirmed education: Bachelor's Degree in Software Development from the University of Rwanda. Studies in this field provide a foundation in application development, software engineering, databases, and programming concepts.",['University of Rwanda','Software development','Database and system concepts']],
+    ["Bachelor in Technology of Information Technology","Muhire studied at RP Tumba College in Kigali, Rwanda.",['RP Tumba College','Information Technology','Kigali, Rwanda']],
     ['Technical Practice','Hands-on development through personal and academic projects across frontend, backend, and data workflows.',['HTML, CSS, JavaScript','React and PHP','MySQL and REST APIs']],
     ['Current Learning Interests','Ongoing study of modern web architecture, maintainable code, testing, security, deployment, and mobile development.',['Mobile applications','Software architecture','Emerging technologies']],
   ]
@@ -435,13 +439,23 @@ export function ProfessionalAbout() {
       <div className="pro-container">
         <p className="pro-kicker">Professional Biography</p>
         <h1 className="pro-title">About <em>Me</em></h1>
-        <div className="pro-grid two" style={{ gridTemplateColumns: 'minmax(220px,.7fr) minmax(0,1.3fr)', alignItems: 'start' }}>
-          <img src="/images/muhire-dieudonne.jpg" alt="Muhire Dieudonne" style={{ width: '100%', aspectRatio: '4/5', objectFit: 'cover', borderRadius: 20, border: '1px solid rgba(212,175,85,.2)' }} />
+        <div className="pro-about-profile">
+          <img className="pro-about-photo" src={profilePhoto} alt="Muhire Dieudonne" />
           <article>
             <h2 className="pro-section-title">Who I Am</h2>
-            <p className="pro-lead">My name is Muhire Dieudonne. I am a Full Stack Developer from Rwanda with a passion for creating modern, useful, and reliable software solutions. I enjoy turning ideas into structured applications that people can understand, use, and maintain.</p>
+            <p className="pro-lead">My name is Muhire Dieudonne. I am a Full Stack Developer located in Kigali, Rwanda, with a passion for creating modern, useful, and reliable software solutions. I enjoy turning ideas into structured applications that people can understand, use, and maintain.</p>
             <p className="pro-lead" style={{ marginTop: 18 }}>My development interests cover the complete software lifecycle: user-focused interfaces, server-side logic, database design, debugging, deployment, and continuous improvement.</p>
           </article>
+        </div>
+
+        <div className="pro-hr" />
+        <article className="pro-card">
+          <p className="pro-kicker">Education</p>
+          <h2 className="pro-section-title" style={{ marginTop: 12 }}>Bachelor in Technology of Information Technology</h2>
+          <p><strong>RP Tumba College</strong><br />Kigali, Rwanda</p>
+        </article>
+        <div className="pro-actions pro-about-download">
+          <a className="pro-button primary" href="/MUHIRE_DIEUDONNE_CV.pdf" download="Muhire_Dieudonne_CV.pdf"><FiDownload />Download My CV</a>
         </div>
 
         <div className="pro-hr" />
