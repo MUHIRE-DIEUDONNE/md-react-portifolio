@@ -8,13 +8,48 @@ import {
   FiAtSign, FiArrowUpRight
 } from 'react-icons/fi'
 import { FaWhatsapp, FaDev } from 'react-icons/fa'
-import { isSupabaseConfigured, supabase } from '../lib/supabase'
+import { isSupabaseConfigured, supabase, supabaseConfigError } from '../lib/supabase'
+
+const getSubmissionErrorMessage = (error) => {
+  const code = String(error?.code || '')
+  const message = String(error?.message || '')
+  const status = Number(error?.status || error?.statusCode || 0)
+  const details = `${code} ${message}`.toLowerCase()
+
+  if (code === '42501' || status === 403 || details.includes('row-level security') || details.includes('permission denied')) {
+    return 'The database denied this message. Please try again later or contact me by email.'
+  }
+  if (status === 401 || details.includes('invalid api key') || details.includes('invalid jwt')) {
+    return 'The contact service credentials are invalid. Please contact me by email while this is fixed.'
+  }
+  if (
+    ['42P01', '42703', 'PGRST204', 'PGRST205'].includes(code)
+    || details.includes('could not find the table')
+    || details.includes('could not find the column')
+    || details.includes('does not exist')
+  ) {
+    return 'The contact form database table is not set up correctly. Please contact me by email.'
+  }
+  if (
+    error instanceof TypeError
+    || details.includes('failed to fetch')
+    || details.includes('network')
+    || details.includes('fetch failed')
+  ) {
+    return 'Could not connect to the message service. Check your connection and try again.'
+  }
+  return 'Your message could not be sent. Please try again or contact me by email.'
+}
 
 const Contact = () => {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [notice, setNotice] = useState(null)
+  const [notice, setNotice] = useState(
+    isSupabaseConfigured
+      ? null
+      : { type: 'error', message: 'The contact form is not configured correctly. Please contact me by email.' }
+  )
   const [activeFaq, setActiveFaq] = useState(null)
   const [honeypot, setHoneypot] = useState('')
   const submissionLock = useRef(false)
@@ -22,11 +57,11 @@ const Contact = () => {
   const validateField = (name, value) => {
     switch (name) {
       case 'name':
-        return value.trim().length >= 2 ? '' : 'At least 2 characters'
+        return value.trim().length > 0 ? '' : 'Name is required'
       case 'email':
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) ? '' : 'Invalid email address'
       case 'subject':
-        return value.trim().length >= 3 ? '' : 'At least 3 characters'
+        return value.trim().length > 0 ? '' : 'Subject is required'
       case 'message':
         return value.trim().length >= 10 ? '' : 'At least 10 characters'
       default:
@@ -43,12 +78,15 @@ const Contact = () => {
   }
 
   const validateForm = () => {
+    const trimmedForm = Object.fromEntries(
+      Object.entries(form).map(([key, value]) => [key, value.trim()])
+    )
     const newErrors = {}
-    Object.keys(form).forEach(key => {
-      const error = validateField(key, form[key])
+    Object.keys(trimmedForm).forEach(key => {
+      const error = validateField(key, trimmedForm[key])
       if (error) newErrors[key] = error
     })
-    return newErrors
+    return { newErrors, trimmedForm }
   }
 
   const onSubmit = async (e) => {
@@ -56,15 +94,17 @@ const Contact = () => {
     if (honeypot) return
     if (submissionLock.current) return
 
-    const newErrors = validateForm()
+    const { newErrors, trimmedForm } = validateForm()
     if (Object.keys(newErrors).length > 0) {
+      console.error('Contact form validation failed for fields:', Object.keys(newErrors))
       setErrors(newErrors)
-      setNotice({ type: 'error', message: 'Please fix the errors above.' })
+      setNotice({ type: 'error', message: 'Please correct the highlighted fields.' })
       return
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      setNotice({ type: 'error', message: 'Message service is not configured. Please contact me by email instead.' })
+      console.error('Contact message submission blocked:', supabaseConfigError)
+      setNotice({ type: 'error', message: 'The contact form is not configured correctly. Please contact me by email.' })
       return
     }
 
@@ -74,20 +114,20 @@ const Contact = () => {
 
     try {
       const { error } = await supabase.from('contact_messages').insert({
-        name: form.name.trim(),
-        email: form.email.trim(),
-        subject: form.subject.trim(),
-        message: form.message.trim(),
+        name: trimmedForm.name,
+        email: trimmedForm.email,
+        subject: trimmedForm.subject,
+        message: trimmedForm.message,
       })
 
       if (error) throw error
 
       setForm({ name: '', email: '', subject: '', message: '' })
       setErrors({})
-      setNotice({ type: 'success', message: 'Your message was sent successfully. Thank you for reaching out.' })
+      setNotice({ type: 'success', message: 'Message sent!' })
     } catch (error) {
       console.error('Contact message submission failed:', error)
-      setNotice({ type: 'error', message: 'Your message could not be sent. Please try again or contact me by email.' })
+      setNotice({ type: 'error', message: getSubmissionErrorMessage(error) })
     } finally {
       submissionLock.current = false
       setIsSubmitting(false)
@@ -342,7 +382,7 @@ const Contact = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !isSupabaseConfigured}
                   style={{
                     width: '100%',
                     padding: '16px 24px',
@@ -354,16 +394,16 @@ const Contact = () => {
                     fontWeight: 700,
                     letterSpacing: '0.08em',
                     textTransform: 'uppercase',
-                    cursor: isSubmitting ? 'wait' : 'pointer',
+                    cursor: isSubmitting ? 'wait' : (!isSupabaseConfigured ? 'not-allowed' : 'pointer'),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 10,
                     transition: 'all 0.2s',
-                    opacity: isSubmitting ? 0.7 : 1
+                    opacity: isSubmitting || !isSupabaseConfigured ? 0.7 : 1
                   }}
                   onMouseEnter={(e) => {
-                    if (!isSubmitting) {
+                    if (!isSubmitting && isSupabaseConfigured) {
                       e.currentTarget.style.transform = 'translateY(-2px)'
                       e.currentTarget.style.boxShadow = '0 10px 30px rgba(212,175,85,0.4)'
                     }
@@ -374,7 +414,7 @@ const Contact = () => {
                   }}
                 >
                   {isSubmitting ? (
-                    <><motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}><FiSend size={14} /></motion.span> Sending message…</>
+                    <>SENDING...</>
                   ) : (
                     <><FiSend size={14} /> Send Message <FiArrowUpRight size={14} /></>
                   )}
